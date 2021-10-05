@@ -11,7 +11,7 @@ import (
 
 func New(
 	cliOutput clioutput.CliOutput,
-	inputs map[string]*model.Param,
+	inputs map[string]*model.ParamSpec,
 ) inputsrc.InputSrc {
 	return cliPromptInputSrc{
 		inputs:    inputs,
@@ -21,7 +21,7 @@ func New(
 
 // cliPromptInputSrc implements InputSrc interface by sourcing inputs from std in
 type cliPromptInputSrc struct {
-	inputs    map[string]*model.Param
+	inputs    map[string]*model.ParamSpec
 	cliOutput clioutput.CliOutput
 }
 

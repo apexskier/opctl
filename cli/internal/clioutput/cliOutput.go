@@ -169,7 +169,7 @@ func (this _cliOutput) outputPrefix(id, opRef string) string {
 	parts := []string{
 		fmt.Sprintf("%.8s", fmt.Sprintf("%-8s", id)),
 	}
-	opRef = this.opFormatter.FormatOpRef(opRef)
+	opRef = FormatOpRef(opRef)
 	if opRef != "" {
 		parts = append(parts, opRef)
 	}
@@ -239,17 +239,6 @@ func (this _cliOutput) opStarted(event *model.CallStarted) {
 			"%s%s\n",
 			this.outputPrefix(event.Call.ID, event.Call.Op.OpPath),
 			this.cliColorer.Info("started op"),
-		),
-	)
-}
-
-func (this _cliOutput) opPullProgress(event *model.OpPullProgress) {
-	io.WriteString(
-		this.stdWriter,
-		fmt.Sprintf(
-			"%s%s",
-			this.outputPrefix(event.ContainerID, event.OpRef),
-			event.Data,
 		),
 	)
 }

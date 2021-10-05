@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"errors"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -214,7 +216,7 @@ func (cr _runContainer) RunContainer(
 	case waitOk := <-waitOkChan:
 		exitCode = waitOk.StatusCode
 	case waitErr := <-waitErrChan:
-		err = errors.Wrap(waitErr, "error waiting on container")
+		err = fmt.Errorf("error waiting on container: %w", waitErr)
 	}
 
 	// ensure stdout, and stderr all read before returning

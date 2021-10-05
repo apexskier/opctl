@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,7 +15,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/opctl/opctl/sdks/go/internal/readchunks"
 	"github.com/opctl/opctl/sdks/go/model"
-	"github.com/pkg/errors"
 )
 
 // Pull pulls 'dataRef' to 'path'
@@ -33,7 +33,7 @@ func (gp *_git) pull(
 	url := fmt.Sprintf("https://%s", dataRef.Name)
 	creds, err := getCredentials(ctx, url)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid git ref: %w", err)
 	}
 	reader, writer := io.Pipe()
 	cloneOptions := &git.CloneOptions{

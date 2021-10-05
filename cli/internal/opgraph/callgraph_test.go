@@ -34,7 +34,6 @@ func TestCallGraph(t *testing.T) {
 	child3If := true
 
 	g.Expect(objectUnderTest.String(
-		noopOpFormatter{},
 		StaticLoadingSpinner{},
 		timestamp.Add(time.Second*60),
 		true,
@@ -376,7 +375,10 @@ func TestCallGraph(t *testing.T) {
 	/* assert */
 	// the newline is here just for better test code readability
 	collapsedStr := "\n" + objectUnderTest.String(
+<<<<<<< HEAD
 		noopOpFormatter{},
+=======
+>>>>>>> main
 		StaticLoadingSpinner{},
 		timestamp.Add(time.Second*60),
 		true,
@@ -404,7 +406,10 @@ func TestCallGraph(t *testing.T) {
 
 	// the newline is here just for better test code readability
 	expandedStr := "\n" + objectUnderTest.String(
+<<<<<<< HEAD
 		noopOpFormatter{},
+=======
+>>>>>>> main
 		StaticLoadingSpinner{},
 		timestamp.Add(time.Second*60),
 		false,

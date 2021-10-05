@@ -83,7 +83,7 @@ func (n *callGraphNode) countChildren() int {
 	return count
 }
 
-func (n callGraphNode) String(opFormatter clioutput.OpFormatter, loader LoadingSpinner, now time.Time, collapseCompleted bool) string {
+func (n callGraphNode) String(loader LoadingSpinner, now time.Time, collapseCompleted bool) string {
 	var str strings.Builder
 
 	// Graph node indicator
@@ -129,7 +129,7 @@ func (n callGraphNode) String(opFormatter clioutput.OpFormatter, loader LoadingS
 			desc += *call.Container.Image.Ref
 		}
 	} else if call.Op != nil {
-		desc = highlighted.Sprint(opFormatter.FormatOpRef(call.Op.OpPath))
+		desc = highlighted.Sprint(clioutput.FormatOpRef(call.Op.OpPath))
 	} else if call.Parallel != nil {
 		desc = "parallel"
 	} else if call.ParallelLoop != nil {
@@ -191,7 +191,7 @@ func (n callGraphNode) String(opFormatter clioutput.OpFormatter, loader LoadingS
 	// Children
 	childLen := len(n.children)
 	for i, child := range n.children {
-		childLines := strings.Split(child.String(opFormatter, loader, now, collapseCompleted), "\n")
+		childLines := strings.Split(child.String(loader, now, collapseCompleted), "\n")
 		for j, part := range childLines {
 			if j == 0 {
 				if i < childLen-1 {
@@ -211,12 +211,12 @@ func (n callGraphNode) String(opFormatter clioutput.OpFormatter, loader LoadingS
 }
 
 // String returns a visual representation of the current state of the call graph
-func (g CallGraph) String(opFormatter clioutput.OpFormatter, loader LoadingSpinner, now time.Time, collapseCompleted bool) string {
+func (g CallGraph) String(loader LoadingSpinner, now time.Time, collapseCompleted bool) string {
 	var str strings.Builder
 	if g.rootNode == nil {
 		return "Empty call graph"
 	}
-	str.WriteString(g.rootNode.String(opFormatter, loader, now, collapseCompleted))
+	str.WriteString(g.rootNode.String(loader, now, collapseCompleted))
 	for _, err := range g.errors {
 		str.WriteString("\n" + warning.Sprint("⚠️  ") + err.Error())
 	}

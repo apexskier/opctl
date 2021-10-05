@@ -6,8 +6,12 @@ accordance with
 
 ## [Unreleased]
 
+## 0.1.48 - 2021-08-13
+
 ### Added
 
+- When running an op via opctl run, display progress via a live call graph
+- When running an op via opctl run, prefix log lines emitted by workloads with their op id & ref
 - Basic support for sending local files and directories to remote nodes when using the API client
 - [Allow defining description on call graph nodes](https://github.com/opctl/opctl/issues/900)
 
@@ -18,8 +22,12 @@ accordance with
 - [Improved error output when op resolution fails. You'll now see a list of resolutions tried and why each failed.](https://github.com/opctl/opctl/pull/883)
 - [More consistent error messaging formats](https://github.com/opctl/opctl/pull/885)
 - [Detect invalid op output names](https://github.com/opctl/opctl/issues/798)
+- [Allow using type initializers in input/output defaults](https://github.com/opctl/opctl/issues/957)
+- [Deprecated absolute paths as file/dir input/output defaults](https://github.com/opctl/opctl/issues/957)
+- [Deprecated op output binding syntax; use same syntax as binding inputs](https://github.com/opctl/opctl/issues/721)
 - [Deprecated param.<datatype>.description; use param.description](https://github.com/opctl/opctl/issues/898)
 - [Docker images will only be pulled if using the `latest` tag (or untagged) or have not been pulled previously](https://github.com/opctl/opctl/issues/920)
+- Go SDK models now use DataRef rather than PkgRef
 
 ### Fixed
 
@@ -27,6 +35,7 @@ accordance with
 
 ### Removed
 
+- pkgs API endpoint; use data API endpoint
 - Windows build; use linux build via WSL 2 instead
 
 ## 0.1.47 - 2021-01-22

@@ -13,7 +13,7 @@ import (
 // Interpret applies defaults to & validates output args
 func Interpret(
 	outputArgs map[string]*model.Value,
-	outputParams map[string]*model.Param,
+	outputParams map[string]*model.ParamSpec,
 	callOutputs map[string]string,
 	opPath string,
 	opScratchDir string,
@@ -26,19 +26,17 @@ func Interpret(
 		return outputArgs, err
 	}
 
-	argsWithDefaults := params.ApplyDefaults(outputArgs, outputParams, opPath)
+	argsWithDefaults, err := params.ApplyDefaults(outputArgs, outputParams, opPath, opScratchDir)
+	if err != nil {
+		return nil, err
+	}
 
 	// ensure the called op supplies each output the callee is expecting
 	for callOutputParamName, callOutputParamBoundName := range callOutputs {
 		if _, ok := outputParams[callOutputParamName]; !ok {
 			// maybe the user has flipped the key and value?
 			if _, ok := outputParams[opspec.RefToName(callOutputParamBoundName)]; ok {
-				return nil, fmt.Errorf(
-					"unknown output '%s', did you mean to use `%s: %s`?",
-					callOutputParamName,
-					opspec.RefToName(callOutputParamBoundName),
-					opspec.NameToRef(callOutputParamName),
-				)
+				continue
 			}
 
 			// try to figure out what the user should have provided

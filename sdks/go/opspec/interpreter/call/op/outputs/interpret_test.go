@@ -17,8 +17,8 @@ var _ = Context("Interpret", func() {
 			stringParamName: {Array: &arrayValue},
 		}
 
-		providedParams := map[string]*model.Param{
-			stringParamName: {String: &model.StringParam{}},
+		providedParams := map[string]*model.ParamSpec{
+			stringParamName: {String: &model.StringParamSpec{}},
 		}
 
 		providedOpCallOutputs := map[string]string{}
@@ -45,31 +45,79 @@ var _ = Context("Interpret", func() {
 		Expect(actualOutputs).To(Equal(expectedOutputs))
 		Expect(actualErr).To(BeNil())
 	})
-	Describe("ensures expected outputs match actual outputs", func() {
-		It("detects inverted naming", func() {
+	Describe("params.ApplyDefaults errors", func() {
+		It("should return expected result", func() {
+			/* arrange */
+			providedParams := map[string]*model.ParamSpec{
+				"param0": {
+					String: &model.StringParamSpec{
+						Default: "$(nonExistent)",
+					},
+				},
+			}
+
 			/* act */
-			actualOutputs, actualErr := Interpret(
+			actualResult, actualErr := Interpret(
 				map[string]*model.Value{},
-				map[string]*model.Param{
-					"bar": {String: &model.StringParam{}},
-				},
-				map[string]string{
-					"foo": "$(bar)",
-				},
+				providedParams,
+				map[string]string{},
 				"opPath",
 				"opScratchDir",
 			)
 
 			/* assert */
-			Expect(actualOutputs).To(BeNil())
-			Expect(actualErr).To(MatchError("unknown output 'foo', did you mean to use `bar: $(foo)`?"))
+			Expect(actualErr).To(MatchError("unable to interpret $(nonExistent) to string: unable to interpret 'nonExistent' as reference: 'nonExistent' not in scope"))
+			Expect(actualResult).To(BeNil())
 		})
+	})
+	Describe("deprecated output binding syntax", func() {
+		It("should return expected result", func() {
+			/* arrange */
+			arrayValue := []interface{}{"item"}
+			stringParamName := "stringParamName"
+
+			providedArgs := map[string]*model.Value{
+				stringParamName: {Array: &arrayValue},
+			}
+
+			providedParams := map[string]*model.ParamSpec{
+				stringParamName: {String: &model.StringParamSpec{}},
+			}
+
+			providedOpCallOutputs := map[string]string{
+				"myVar": stringParamName,
+			}
+
+			arrayValueAsString, err := coerce.ToString(providedArgs[stringParamName])
+			if err != nil {
+				panic(err)
+			}
+
+			expectedOutputs := map[string]*model.Value{
+				stringParamName: arrayValueAsString,
+			}
+
+			/* act */
+			actualOutputs, actualErr := Interpret(
+				providedArgs,
+				providedParams,
+				providedOpCallOutputs,
+				"opPath",
+				"opScratchDir",
+			)
+
+			/* assert */
+			Expect(actualOutputs).To(Equal(expectedOutputs))
+			Expect(actualErr).To(BeNil())
+		})
+	})
+	Describe("ensures expected outputs match actual outputs", func() {
 		It("indicates what was expected when one output exists", func() {
 			/* act */
 			actualOutputs, actualErr := Interpret(
 				map[string]*model.Value{},
-				map[string]*model.Param{
-					"bar": {String: &model.StringParam{}},
+				map[string]*model.ParamSpec{
+					"bar": {String: &model.StringParamSpec{}},
 				},
 				map[string]string{
 					"foo": "",
@@ -86,10 +134,10 @@ var _ = Context("Interpret", func() {
 			/* act */
 			actualOutputs, actualErr := Interpret(
 				map[string]*model.Value{},
-				map[string]*model.Param{
-					"x": {String: &model.StringParam{}},
-					"y": {String: &model.StringParam{}},
-					"z": {String: &model.StringParam{}},
+				map[string]*model.ParamSpec{
+					"x": {String: &model.StringParamSpec{}},
+					"y": {String: &model.StringParamSpec{}},
+					"z": {String: &model.StringParamSpec{}},
 				},
 				map[string]string{
 					"x": "",
@@ -108,10 +156,10 @@ var _ = Context("Interpret", func() {
 			/* act */
 			actualOutputs, actualErr := Interpret(
 				map[string]*model.Value{},
-				map[string]*model.Param{
-					"x": {String: &model.StringParam{}},
-					"y": {String: &model.StringParam{}},
-					"z": {String: &model.StringParam{}},
+				map[string]*model.ParamSpec{
+					"x": {String: &model.StringParamSpec{}},
+					"y": {String: &model.StringParamSpec{}},
+					"z": {String: &model.StringParamSpec{}},
 				},
 				map[string]string{
 					"a": "",
@@ -128,10 +176,10 @@ var _ = Context("Interpret", func() {
 			/* act */
 			actualOutputs, actualErr := Interpret(
 				map[string]*model.Value{},
-				map[string]*model.Param{
-					"x": {String: &model.StringParam{}},
-					"y": {String: &model.StringParam{}},
-					"z": {String: &model.StringParam{}},
+				map[string]*model.ParamSpec{
+					"x": {String: &model.StringParamSpec{}},
+					"y": {String: &model.StringParamSpec{}},
+					"z": {String: &model.StringParamSpec{}},
 				},
 				map[string]string{
 					"x": "",
@@ -149,7 +197,7 @@ var _ = Context("Interpret", func() {
 			/* act */
 			actualOutputs, actualErr := Interpret(
 				map[string]*model.Value{},
-				map[string]*model.Param{},
+				map[string]*model.ParamSpec{},
 				map[string]string{
 					"a": "",
 				},

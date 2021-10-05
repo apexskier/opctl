@@ -102,7 +102,7 @@ func (value Value) Unbox() (interface{}, error) {
 			case Value:
 				nativeItem, err := typedItemValue.Unbox()
 				if err != nil {
-					return nil, errors.Wrap(err, fmt.Sprintf("unable to unbox item '%v' from array", itemKey))
+					return nil, fmt.Errorf("unable to unbox item '%v' from array: %w", itemKey, err)
 				}
 
 				nativeArray = append(nativeArray, nativeItem)
@@ -126,7 +126,7 @@ func (value Value) Unbox() (interface{}, error) {
 			case Value:
 				var err error
 				if nativeObject[propKey], err = typedPropValue.Unbox(); err != nil {
-					return nil, errors.Wrap(err, fmt.Sprintf("unable to unbox property '%v' from object", propKey))
+					return nil, fmt.Errorf("unable to unbox property '%v' from object: %w", propKey, err)
 				}
 			default:
 				nativeObject[propKey] = propValue

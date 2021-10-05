@@ -1,10 +1,10 @@
 description: uses the cli to run all test-suite scenarios. 
-name: test/system/opspec
+name: test/system
 run:
   container:
     image: { ref: 'docker:19.03-dind' }
     dirs:
-      /src: $(../../../../..)
+      /src: $(../../../..)
       /sharness:
     files:
       /cmd.sh:

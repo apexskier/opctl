@@ -17,7 +17,7 @@ func newHandle(
 	}
 }
 
-// handle allows interacting w/ data sourced from an opspec node
+// handle allows interacting w/ data sourced from an opctl node
 type handle struct {
 	node    node.Node
 	dataRef string

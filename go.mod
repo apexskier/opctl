@@ -35,8 +35,8 @@ require (
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.2.3
 	github.com/mjibson/esc v0.2.0
 	github.com/morikuni/aec v0.0.0-20170113033406-39771216ff4c // indirect
-	github.com/onsi/ginkgo v1.11.0
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/gomega v1.15.0
 	github.com/peterh/liner v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.6.0
@@ -46,11 +46,10 @@ require (
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/mod v0.3.0 // indirect
-	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
+	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf
-	golang.org/x/tools v0.0.0-20200528171350-af9456bb6365 // indirect
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools v2.2.0+incompatible // indirect
 	k8s.io/api v0.19.1
 	k8s.io/apimachinery v0.19.1

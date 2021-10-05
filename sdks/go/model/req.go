@@ -13,7 +13,6 @@ type GetDataReq struct {
 	PkgRef      string
 }
 
-// ListDescendantsReq deprecated
 type ListDescendantsReq struct {
 	PkgRef string `json:"pkgRef"`
 }
