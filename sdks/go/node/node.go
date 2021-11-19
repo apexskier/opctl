@@ -12,12 +12,6 @@ import (
 
 // Node is the main structure to run and interact with ops
 type Node interface {
-	// AddAuth records authentication within the core
-	AddAuth(
-		ctx context.Context,
-		req model.AddAuthReq,
-	) error
-
 	// StartOp starts an op and returns the root call ID
 	StartOp(
 		ctx context.Context,

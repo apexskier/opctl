@@ -118,33 +118,6 @@ func newCli(
 		return nil, err
 	}
 
-	cli.Command("auth", "Manage auth for OCI image registries", func(authCmd *mow.Cmd) {
-		authCmd.Command("add", "Add auth for an OCI image registry", func(addCmd *mow.Cmd) {
-			addCmd.Spec = "RESOURCES [ -u=<username> ] [ -p=<password> ]"
-
-			resources := addCmd.StringArg("RESOURCES", "", "Resources this auth applies to in the form of a host or host/path (e.g. docker.io)")
-			username := addCmd.StringOpt("u username", "", "Username")
-			password := addCmd.StringOpt("p password", "", "Password")
-
-			addCmd.Action = func() {
-				exitWith(
-					"",
-					auth(
-						ctx,
-						opNode,
-						model.AddAuthReq{
-							Resources: *resources,
-							Creds: model.Creds{
-								Username: *username,
-								Password: *password,
-							},
-						},
-					),
-				)
-			}
-		})
-	})
-
 	cli.Command("ls", "List operations", func(lsCmd *mow.Cmd) {
 		const dirRefArgName = "DIR_REF"
 		lsCmd.Spec = fmt.Sprintf("[%v]", dirRefArgName)
