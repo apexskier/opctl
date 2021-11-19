@@ -103,7 +103,7 @@ func newCli(
 
 	cli.After = func() {
 		cancel()
-		os.RemoveAll(*datadirPath)
+		os.RemoveAll(filepath.Join(*datadirPath, "dcg"))
 	}
 
 	var cr containerruntime.ContainerRuntime
