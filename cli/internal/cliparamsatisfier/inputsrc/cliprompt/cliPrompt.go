@@ -42,14 +42,17 @@ func (this cliPromptInputSrc) ReadString(
 			description = param.Array.Description
 			prompt = "array"
 		case param.Boolean != nil:
+			// @TODO remove after deprecation period
 			description = param.Boolean.Description
 			prompt = "boolean"
 		case param.Dir != nil:
 			isSecret = param.Dir.IsSecret
+			// @TODO remove after deprecation period
 			description = param.Dir.Description
 			prompt = "directory"
 		case param.File != nil:
 			isSecret = param.File.IsSecret
+			// @TODO remove after deprecation period
 			description = param.File.Description
 			prompt = "file"
 		case param.Number != nil:
@@ -59,10 +62,12 @@ func (this cliPromptInputSrc) ReadString(
 			prompt = "number"
 		case param.Object != nil:
 			isSecret = param.Object.IsSecret
+			// @TODO remove after deprecation period
 			description = param.Object.Description
 			prompt = "object"
 		case param.Socket != nil:
 			isSecret = param.Socket.IsSecret
+			// @TODO remove after deprecation period
 			description = param.Socket.Description
 			prompt = "socket"
 		case param.String != nil:
