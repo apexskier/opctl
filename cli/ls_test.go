@@ -9,7 +9,6 @@ import (
 
 	. "github.com/onsi/gomega"
 	cliparamsatisfierFakes "github.com/opctl/opctl/cli/internal/cliparamsatisfier/fakes"
-	nodeproviderFakes "github.com/opctl/opctl/cli/internal/nodeprovider/fakes"
 )
 
 const op1 = `
@@ -32,7 +31,6 @@ func TestLS(t *testing.T) {
 
 	/* arrange */
 	cliParamSatisfier := new(cliparamsatisfierFakes.FakeCLIParamSatisfier)
-	nodeProvider := new(nodeproviderFakes.FakeNodeProvider)
 	testDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		panic(err)
@@ -58,7 +56,7 @@ func TestLS(t *testing.T) {
 	}()
 
 	/* act */
-	ls(context.Background(), cliParamSatisfier, nodeProvider, testDir)
+	ls(context.Background(), cliParamSatisfier,  testDir)
 
 	outputFile.Close()
 
