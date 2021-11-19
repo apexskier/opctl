@@ -6,6 +6,7 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
+	"github.com/opctl/opctl/cli/internal/clioutput"
 	"github.com/opctl/opctl/sdks/go/model"
 )
 
@@ -35,6 +36,7 @@ func TestCallGraph(t *testing.T) {
 
 	g.Expect(objectUnderTest.String(
 		StaticLoadingSpinner{},
+		clioutput.SimpleOpFormatter{},
 		timestamp.Add(time.Second*60),
 		true,
 	)).To(Equal("Empty call graph"))

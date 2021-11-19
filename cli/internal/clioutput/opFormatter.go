@@ -5,6 +5,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
 // OpFormatter formats an op ref in some way
@@ -14,12 +16,15 @@ type OpFormatter interface {
 
 // CliOpFormatter formats an op ref in the context of a CLI run
 type CliOpFormatter struct {
-	datadirPath string
+	workingDirPath string
+	datadirPath    string
 }
 
+var localOpPrefix = "." + string(os.PathSeparator) + opspec.DotOpspecDirName + string(os.PathSeparator)
+
 // NewCliOpFormatter creates a new CliOpFormatter
-func NewCliOpFormatter(datadirPath string) CliOpFormatter {
-	return CliOpFormatter{datadirPath: datadirPath}
+func NewCliOpFormatter(workingDirPath, datadirPath string) CliOpFormatter {
+	return CliOpFormatter{workingDirPath, datadirPath}
 }
 
 // FormatOpRef gives a more appropriate description of an op's reference
@@ -27,20 +32,20 @@ func NewCliOpFormatter(datadirPath string) CliOpFormatter {
 // home directory, installed ops will be formatted as url-like op refs
 func (of CliOpFormatter) FormatOpRef(opRef string) string {
 	if path.IsAbs(opRef) {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return opRef
-		}
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return opRef
 		}
 		dataDirPath := of.datadirPath
 		if strings.HasPrefix(opRef, dataDirPath) {
-			return opRef[len(filepath.Join(dataDirPath, "ops")+string(os.PathListSeparator)):]
+			return opRef[len(filepath.Join(dataDirPath, "ops")+string(os.PathSeparator)):]
 		}
-		if strings.HasPrefix(opRef, cwd) {
-			return "." + opRef[len(cwd):]
+		if strings.HasPrefix(opRef, of.workingDirPath) {
+			opRef = "." + opRef[len(of.workingDirPath):]
+			if strings.HasPrefix(opRef, localOpPrefix) {
+				return opRef[len(localOpPrefix):]
+			}
+			return opRef
 		}
 		if strings.HasPrefix(opRef, home) {
 			return "~" + opRef[len(home):]

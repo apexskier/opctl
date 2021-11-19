@@ -50,7 +50,11 @@ func newCli(
 		},
 	)
 
-	opFormatter := clioutput.NewCliOpFormatter(*datadirPath)
+	cwd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	opFormatter := clioutput.NewCliOpFormatter(cwd, *datadirPath)
 
 	cliOutput, err := clioutput.New(clicolorer.New(), opFormatter, os.Stderr, os.Stdout)
 	if err != nil {
@@ -128,10 +132,16 @@ func newCli(
 	cli.Command("ls", "List operations", func(lsCmd *mow.Cmd) {
 		const dirRefArgName = "DIR_REF"
 		lsCmd.Spec = fmt.Sprintf("[%v]", dirRefArgName)
-		dirRef := lsCmd.StringArg(dirRefArgName, opspec.DotOpspecDirName, "Reference to dir ops will be listed from")
+		dirRef := lsCmd.StringArg(
+			dirRefArgName,
+			cwd,
+			"Reference to dir ops will be listed from",
+		)
+
+		opFormatter := clioutput.NewCliOpFormatter(*dirRef, *datadirPath)
 
 		lsCmd.Action = func() {
-			exitWith("", ls(ctx, cliParamSatisfier, opNode, *dirRef))
+			exitWith("", ls(ctx, opFormatter, cliParamSatisfier, opNode, *dirRef))
 		}
 	})
 
@@ -185,6 +195,7 @@ func newCli(
 				ctx,
 				cliOutput,
 				cliParamSatisfier,
+				opFormatter,
 				eventChannel,
 				opNode,
 				*opRef,

@@ -173,7 +173,7 @@ func (this _cliOutput) outputPrefix(id, opRef string) string {
 	parts := []string{
 		fmt.Sprintf("%.8s", fmt.Sprintf("%-8s", id)),
 	}
-	opRef = FormatOpRef(opRef)
+	opRef = this.opFormatter.FormatOpRef(opRef)
 	if opRef != "" {
 		parts = append(parts, opRef)
 	}

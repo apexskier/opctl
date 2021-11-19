@@ -11,6 +11,7 @@ import (
 	dataNode "github.com/opctl/opctl/sdks/go/data/node"
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/node"
+	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
 // DataResolver resolves packages
@@ -50,7 +51,7 @@ func (dtr _dataResolver) Resolve(
 	}
 
 	fsProvider := fs.New(
-		filepath.Join(cwd, ".opspec"),
+		filepath.Join(cwd, opspec.DotOpspecDirName),
 		cwd,
 	)
 

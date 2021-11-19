@@ -35,6 +35,7 @@ func run(
 	ctx context.Context,
 	cliOutput clioutput.CliOutput,
 	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
+	opFormatter clioutput.OpFormatter,
 	eventChannel chan model.Event,
 	node core.Core,
 	opRef string,
@@ -82,7 +83,7 @@ func run(
 	output := opgraph.NewOutputManager()
 
 	defer func() {
-		output.Print(state.String(loadingSpinner, time.Now(), false))
+		output.Print(state.String(loadingSpinner, opFormatter, time.Now(), false))
 		fmt.Println()
 	}()
 
@@ -94,7 +95,7 @@ func run(
 
 	displayGraph := func() {
 		if !disableGraph {
-			output.Print(state.String(loadingSpinner, time.Now(), true))
+			output.Print(state.String(loadingSpinner, opFormatter, time.Now(), true))
 		}
 	}
 
@@ -201,7 +202,7 @@ func run(
 			clearGraph()
 			// clear two more lines
 			fmt.Print("\033[1A\033[K\033[1A\033[K")
-			fmt.Println(state.String(opgraph.StaticLoadingSpinner{}, time.Now(), false))
+			fmt.Println(state.String(opgraph.StaticLoadingSpinner{}, opFormatter, time.Now(), false))
 			displayGraph()
 
 		case <-sigTermChannel:
