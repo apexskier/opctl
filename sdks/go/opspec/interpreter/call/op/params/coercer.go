@@ -35,7 +35,7 @@ paramLoop:
 		case paramValue.Boolean != nil:
 			coercedValues[paramName], err = coerce.ToBoolean(value)
 		case paramValue.Dir != nil:
-			coercedValues[paramName] = value
+			coercedValues[paramName], err = coerce.ToDir(value, opScratchDir)
 		case paramValue.File != nil:
 			coercedValues[paramName], err = coerce.ToFile(value, opScratchDir)
 		case paramValue.String != nil:
