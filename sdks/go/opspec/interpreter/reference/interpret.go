@@ -148,16 +148,13 @@ func getRootValue(
 	}
 
 	// scope ref
-	var identifier string
-	var refRemainder string
-	identifier, refRemainder = unbracketed.Parse(ref)
+	identifier, refRemainder := unbracketed.Parse(ref)
 
 	if value, ok := scope[identifier]; ok {
 		return value, refRemainder, nil
 	}
 
 	if opts != nil {
-
 		uuid, _ := uniquestring.Construct()
 		fsPath := filepath.Join(opts.ScratchDir, uuid)
 
