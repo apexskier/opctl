@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -31,7 +30,7 @@ var _ = Context("caller", func() {
 			It("should not throw", func() {
 				/* arrange */
 				fakeContainerCaller := new(FakeContainerCaller)
-				dataDir, err := ioutil.TempDir("", "")
+				dataDir, err := os.MkdirTemp("", "")
 				if err != nil {
 					panic(err)
 				}
@@ -91,7 +90,11 @@ var _ = Context("caller", func() {
 
 				fakeSerialCaller := new(FakeSerialCaller)
 
-				eventChannel := make(chan model.Event, 2)
+				dataDir, err := os.MkdirTemp("", "")
+				if err != nil {
+					panic(err)
+				}
+
 				objectUnderTest := _caller{
 					containerCaller: new(FakeContainerCaller),
 					dataDirPath:     dataDir,
@@ -159,7 +162,15 @@ var _ = Context("caller", func() {
 					},
 				}
 
-				eventChannel := make(chan model.Event, 2)
+				fakePubSub := new(FakePubSub)
+				// ensure eventChan closed so call exits
+				fakePubSub.SubscribeReturns(closedEventChan, nil)
+
+				dataDir, err := os.MkdirTemp("", "")
+				if err != nil {
+					panic(err)
+				}
+
 				objectUnderTest := _caller{
 					containerCaller: fakeContainerCaller,
 					dataDirPath:     dataDir,
@@ -223,7 +234,15 @@ var _ = Context("caller", func() {
 					},
 				}
 
-				eventChannel := make(chan model.Event, 2)
+				fakePubSub := new(FakePubSub)
+				// ensure eventChan closed so call exits
+				fakePubSub.SubscribeReturns(closedEventChan, nil)
+
+				dataDir, err := os.MkdirTemp("", "")
+				if err != nil {
+					panic(err)
+				}
+
 				objectUnderTest := _caller{
 					dataDirPath:  dataDir,
 					opCaller:     fakeOpCaller,

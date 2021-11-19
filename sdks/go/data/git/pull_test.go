@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +19,12 @@ var _ = Context("Pull", func() {
 			Context("err.Error() returns git.ErrRepositoryAlreadyExists", func() {
 				It("shouldn't error", func() {
 					/* arrange */
-					objectUnderTest := _git{}
+					providedPath, err := os.MkdirTemp("", "")
+					if err != nil {
+						panic(err)
+					}
+					// some small public repo
+					providedRef := "github.com/opspec-pkgs/_.op.create#3.2.0"
 
 					/* act */
 					firstErr := objectUnderTest.pull(
@@ -63,6 +69,13 @@ var _ = Context("Pull", func() {
 						http.DefaultTransport.(*http.Transport).TLSClientConfig = nil
 					}()
 
+					providedRef := fmt.Sprintf("%s#version", testServer.URL)
+
+					providedPath, err := os.MkdirTemp("", "")
+					if err != nil {
+						panic(err)
+					}
+
 					expectedError := model.ErrDataProviderAuthentication{}
 
 					/* act */
@@ -95,6 +108,13 @@ var _ = Context("Pull", func() {
 						http.DefaultTransport.(*http.Transport).TLSClientConfig = nil
 					}()
 
+					providedRef := fmt.Sprintf("%s#version", testServer.URL)
+
+					providedPath, err := os.MkdirTemp("", "")
+					if err != nil {
+						panic(err)
+					}
+
 					expectedError := model.ErrDataProviderAuthorization{}
 
 					/* act */
@@ -126,6 +146,13 @@ var _ = Context("Pull", func() {
 					defer func() {
 						http.DefaultTransport.(*http.Transport).TLSClientConfig = nil
 					}()
+
+					providedRef := fmt.Sprintf("%s#version", testServer.URL)
+
+					providedPath, err := os.MkdirTemp("", "")
+					if err != nil {
+						panic(err)
+					}
 
 					/* act */
 					actualError := objectUnderTest.pull(

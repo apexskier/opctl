@@ -3,6 +3,8 @@ package value
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"regexp"
 
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec"
@@ -48,7 +50,7 @@ func Interpret(
 			}
 
 			if propertyValue.File != nil {
-				fileBytes, err := ioutil.ReadFile(*propertyValue.File)
+				fileBytes, err := os.ReadFile(*propertyValue.File)
 				if err != nil {
 					return model.Value{}, fmt.Errorf("unable to interpret '%v: %v' as object initializer property: %w", propertyKeyExpression, propertyValueExpression, err)
 				}

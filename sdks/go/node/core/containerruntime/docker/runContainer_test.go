@@ -3,7 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -49,12 +49,15 @@ var _ = Context("RunContainer", func() {
 			context.Background(),
 			providedReq,
 			"rootCallID",
-			make(chan model.Event),
-			nopWriteCloser{ioutil.Discard},
-			nopWriteCloser{ioutil.Discard},
+			new(FakeEventPublisher),
+			nopWriteCloser{io.Discard},
+			nopWriteCloser{io.Discard},
 		)
 
 		/* assert */
+		_, actualContainerName, _ := fakeDockerClient.ContainerStopArgsForCall(0)
+		Expect(actualContainerName).To(Equal(fmt.Sprintf("opctl_%s", providedReq.ContainerID)))
+
 		_, actualContainerName, actualContainerRemoveOptions := fakeDockerClient.ContainerRemoveArgsForCall(0)
 		Expect(actualContainerName).To(Equal(fmt.Sprintf("opctl_%s", providedReq.ContainerID)))
 		Expect(actualContainerRemoveOptions).To(Equal(expectedContainerRemoveOptions))
@@ -83,9 +86,9 @@ var _ = Context("RunContainer", func() {
 					},
 				},
 				"rootCallID",
-				make(chan model.Event),
-				nopWriteCloser{ioutil.Discard},
-				nopWriteCloser{ioutil.Discard},
+				new(FakeEventPublisher),
+				nopWriteCloser{io.Discard},
+				nopWriteCloser{io.Discard},
 			)
 
 			/* assert */
@@ -140,9 +143,9 @@ var _ = Context("RunContainer", func() {
 				context.Background(),
 				providedReq,
 				"rootCallID",
-				make(chan model.Event),
-				nopWriteCloser{ioutil.Discard},
-				nopWriteCloser{ioutil.Discard},
+				new(FakeEventPublisher),
+				nopWriteCloser{io.Discard},
+				nopWriteCloser{io.Discard},
 			)
 
 			/* assert */
@@ -188,9 +191,9 @@ var _ = Context("RunContainer", func() {
 				providedCtx,
 				providedReq,
 				providedRootCallID,
-				providedEventChannel,
-				nopWriteCloser{ioutil.Discard},
-				nopWriteCloser{ioutil.Discard},
+				providedEventPublisher,
+				nopWriteCloser{io.Discard},
+				nopWriteCloser{io.Discard},
 			)
 
 			/* assert */
@@ -261,9 +264,9 @@ var _ = Context("RunContainer", func() {
 				providedCtx,
 				providedReq,
 				"rootCallID",
-				make(chan model.Event),
-				nopWriteCloser{ioutil.Discard},
-				nopWriteCloser{ioutil.Discard},
+				new(FakeEventPublisher),
+				nopWriteCloser{io.Discard},
+				nopWriteCloser{io.Discard},
 			)
 
 			/* assert */

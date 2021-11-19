@@ -3,9 +3,9 @@ package core
 import (
 	"context"
 	"io"
-	"io/ioutil"
+	"os"
 
-	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
@@ -51,7 +51,7 @@ var _ = Context("parallelLoopCaller", func() {
 
 			It("should return expected results", func() {
 				/* arrange */
-				dbDir, err := ioutil.TempDir("", "")
+				dbDir, err := os.MkdirTemp("", "")
 				if err != nil {
 					panic(err)
 				}
@@ -107,7 +107,7 @@ var _ = Context("parallelLoopCaller", func() {
 
 		It("should start each child as expected", func() {
 			/* arrange */
-			dbDir, err := ioutil.TempDir("", "")
+			dbDir, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}

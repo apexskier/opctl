@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/opctl/opctl/sdks/go/model"
 )
 

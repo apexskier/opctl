@@ -1,6 +1,9 @@
 name: build
 description: runs ops necessary to go from src to vetted artifact(s) and tests everything
 inputs:
+  dockerSocket:
+    socket:
+      description: docker socket to use as container runtime
   gitBranch:
     string:
       constraints: { minLength: 1 }
@@ -24,7 +27,7 @@ run:
     - op:
         ref: ../test
         inputs:
-          compile: false
+          dockerSocket:
           gitBranch:
           HOME:
           version:

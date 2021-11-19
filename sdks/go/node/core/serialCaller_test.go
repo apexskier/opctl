@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	uniquestringFakes "github.com/opctl/opctl/sdks/go/internal/uniquestring/fakes"
@@ -49,24 +49,11 @@ var _ = Context("serialCaller", func() {
 				},
 			}
 
-			fakeCaller := new(FakeCaller)
-
-			fakeUniqueStringFactory := new(uniquestringFakes.FakeUniqueStringFactory)
-			uniqueStringCallIndex := 0
-			fakeUniqueStringFactory.ConstructStub = func() (string, error) {
-				defer func() {
-					uniqueStringCallIndex++
-				}()
-				return fmt.Sprintf("%v", uniqueStringCallIndex), nil
-			}
-
-			objectUnderTest := _serialCaller{
-				caller:              fakeCaller,
-				uniqueStringFactory: fakeUniqueStringFactory,
-			}
-
-			Context("caller errors", func() {
-				if nil != err {
+		Context("caller errors", func() {
+			It("should return expected results", func() {
+				/* arrange */
+				dbDir, err := os.MkdirTemp("", "")
+				if err != nil {
 					panic(err)
 				}
 
@@ -116,7 +103,7 @@ var _ = Context("serialCaller", func() {
 		})
 		It("should start each child as expected", func() {
 			/* arrange */
-			dbDir, err := ioutil.TempDir("", "")
+			dbDir, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -40,7 +40,7 @@ func run(
 	opFormatter clioutput.OpFormatter,
 	opRef string,
 	opts *RunOpts,
-	displayLiveGraph bool,
+	disableGraph bool,
 ) (map[string]*model.Value, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"io"
-	"io/ioutil"
+	"os"
 
-	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
@@ -15,7 +15,7 @@ import (
 )
 
 var _ = Context("containerCaller", func() {
-	dbDir, err := ioutil.TempDir("", "")
+	dbDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		panic(err)
 	}
