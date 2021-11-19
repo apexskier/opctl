@@ -1,4 +1,0 @@
-{
-    "private": true,
-	"workspaces":  ["webapp", "sdks/js", "sdks/react"]
-}
