@@ -36,6 +36,14 @@ HTTP interface is gone. Streaming events with their associated data over a
 websocket connection is gone. Long term disk event storage is gone. Any internal
 state doesn't need to be written to disk.
 
+Now, someone on my local network can't read any file from my computer opctl has
+access to over the HTTP api.
+
+### credentials
+
+Credentials for git and docker use standard credential helper mechanisms,
+allowing for graceful re-authentication and more standardized methods of storage.
+
 ### line count
 
 This project is _huge_ and can be difficult to work in. This ~removes checked-in
