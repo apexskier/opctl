@@ -103,6 +103,7 @@ func newCli(
 
 	cli.After = func() {
 		cancel()
+		os.RemoveAll(*datadirPath)
 	}
 
 	var cr containerruntime.ContainerRuntime
