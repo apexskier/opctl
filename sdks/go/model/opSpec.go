@@ -2,10 +2,10 @@ package model
 
 // OpSpec is a spec for an op
 type OpSpec struct {
-	Description string            `json:"description"`
-	Inputs      map[string]*Param `json:"inputs,omitempty"`
-	Outputs     map[string]*Param `json:"outputs,omitempty"`
-	Run         *CallSpec         `json:"run,omitempty"`
+	Description string                `json:"description"`
+	Inputs      map[string]*ParamSpec `json:"inputs,omitempty"`
+	Outputs     map[string]*ParamSpec `json:"outputs,omitempty"`
+	Run         *CallSpec             `json:"run,omitempty"`
 }
 
 //CallSpec is a spec for a node of a call graph; see https://en.wikipedia.org/wiki/Call_graph
