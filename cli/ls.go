@@ -93,10 +93,9 @@ func ls(
 	for _, r := range sortableOps {
 		opDescription := opsByPath[r.path].Description
 		scanner := bufio.NewScanner(strings.NewReader(opDescription))
-		if scanner.Scan() {
-			// first line of description, add the op ref
-			fmt.Fprintf(tw, "%v\t%v", r.ref, scanner.Text())
-		}
+		scanner.Scan()
+		// first line of description, add the op ref
+		fmt.Fprintf(tw, "%v\t%v", r.ref, scanner.Text())
 		for scanner.Scan() {
 			// subsequent lines, don't add the op ref but let the description span multiple lines
 			fmt.Fprintf(tw, "\n\t%v", scanner.Text())
