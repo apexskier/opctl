@@ -3,8 +3,6 @@ package core
 import (
 	"context"
 
-	"path/filepath"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"

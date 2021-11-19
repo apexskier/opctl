@@ -1,14 +1,12 @@
 package main
 
 import (
+	"os/exec"
+	"path/filepath"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
-	"github.com/opctl/opctl/cli/internal/clicolorer"
-	"github.com/opctl/opctl/cli/internal/clioutput"
-	"os"
-	"os/exec"
-	"path/filepath"
 )
 
 var pathToOpctl string
@@ -296,6 +294,7 @@ var _ = Context("cli", func() {
 		})
 
 		Context("self-update", func() {
+
 			It("should not err", func() {
 				/* arrange */
 				command := exec.Command(pathToOpctl, "self-update")
@@ -307,6 +306,7 @@ var _ = Context("cli", func() {
 				Expect(actualErr).NotTo(HaveOccurred())
 				Eventually(session, 10).Should(gexec.Exit(1))
 			})
+
 		})
 
 		Context("ui", func() {
