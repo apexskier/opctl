@@ -36,12 +36,6 @@ func Interpret(
 		Ports:       containerCallSpec.Ports,
 	}
 
-	// construct dcg container path
-	scratchDirPath := filepath.Join(dataDirPath, "dcg", containerID, "fs")
-	if err := os.MkdirAll(scratchDirPath, 0700); err != nil {
-		return nil, err
-	}
-
 	// interpret cmd
 	var err error
 	containerCall.Cmd, err = cmd.Interpret(
@@ -53,6 +47,12 @@ func Interpret(
 	}
 
 	dataCachePath := filepath.Join(dataDirPath, "ops")
+
+	// construct dcg container path
+	scratchDirPath := filepath.Join(dataDirPath, "dcg", containerID, "fs")
+	if err := os.MkdirAll(scratchDirPath, 0700); err != nil {
+		return nil, err
+	}
 
 	// interpret dirs
 	containerCall.Dirs, err = dirs.Interpret(
