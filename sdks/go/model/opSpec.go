@@ -96,8 +96,15 @@ type SerialLoopCallSpec struct {
 	Vars  *LoopVarsSpec    `json:"vars,omitempty"`
 }
 
+type ReferenceType string
+
+const (
+	ReferenceTypeDir  ReferenceType = "Dir"
+	ReferenceTypeFile ReferenceType = "File"
+)
+
 type ReferenceOpts struct {
-	Type string
+	Type ReferenceType
 	// for creating dirs/files
 	ScratchDir string
 }

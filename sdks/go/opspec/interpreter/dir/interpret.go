@@ -29,7 +29,7 @@ func Interpret(
 			var opts *model.ReferenceOpts
 			if createIfNotExist {
 				opts = &model.ReferenceOpts{
-					Type:       "Dir",
+					Type:       model.ReferenceTypeDir,
 					ScratchDir: scratchDir,
 				}
 			}

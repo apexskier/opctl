@@ -162,10 +162,10 @@ func getRootValue(
 		fsPath := filepath.Join(opts.ScratchDir, uuid)
 
 		switch opts.Type {
-		case "Dir":
+		case model.ReferenceTypeDir:
 			os.MkdirAll(fsPath, 0700)
 			return &model.Value{Dir: &fsPath}, "", nil
-		case "File":
+		case model.ReferenceTypeFile:
 			os.MkdirAll(filepath.Dir(fsPath), 0700)
 			os.Create(fsPath)
 			return &model.Value{File: &fsPath}, "", nil
@@ -208,7 +208,7 @@ func rInterpret(
 
 		return rInterpret(ref, data, opts)
 	case '/':
-		var createType *string
+		var createType *model.ReferenceType
 		if opts != nil {
 			createType = &opts.Type
 		}

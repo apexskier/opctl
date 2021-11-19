@@ -31,7 +31,7 @@ func Interpret(
 		var opts *model.ReferenceOpts
 		if createIfNotExist {
 			opts = &model.ReferenceOpts{
-				Type:       "File",
+				Type:       model.ReferenceTypeFile,
 				ScratchDir: scratchDir,
 			}
 		}

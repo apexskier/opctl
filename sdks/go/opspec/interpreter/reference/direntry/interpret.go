@@ -15,7 +15,7 @@ import (
 func Interpret(
 	ref string,
 	data *model.Value,
-	opts *string,
+	opts *model.ReferenceType,
 ) (string, *model.Value, error) {
 
 	if !strings.HasPrefix(ref, "/") {
@@ -33,7 +33,7 @@ func Interpret(
 		return "", &model.Value{File: &valuePath}, nil
 	} else if opts != nil && os.IsNotExist(err) {
 
-		if *opts == "Dir" {
+		if *opts == model.ReferenceTypeDir {
 			err := os.MkdirAll(valuePath, 0700)
 			if err != nil {
 				return "", nil, fmt.Errorf("unable to interpret '%v' as dir entry ref: %w", ref, err)
