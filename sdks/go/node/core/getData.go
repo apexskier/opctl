@@ -16,8 +16,8 @@ func (c core) GetData(
 	model.ReadSeekCloser,
 	error,
 ) {
-	if req.DataRef == "" {
-		return nil, fmt.Errorf(`"" not a valid data ref`)
+	if req.PkgRef == "" || req.ContentPath == "" {
+		return nil, fmt.Errorf("invalid ref: %s%s", req.PkgRef, req.ContentPath)
 	}
 
 	dataHandle, err := c.ResolveData(ctx, eventChannel, callID, req.PkgRef)
