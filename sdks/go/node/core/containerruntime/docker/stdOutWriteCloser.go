@@ -30,7 +30,6 @@ func NewStdOutWriteCloser(
 						Data:        b,
 						OpRef:       containerCall.OpPath,
 						ContainerID: containerCall.ContainerID,
-						RootCallID:  rootCallID,
 					},
 				}
 			}

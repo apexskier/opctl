@@ -20,7 +20,7 @@ type callGraphNode struct {
 	call      *model.Call
 	startTime *time.Time
 	endTime   *time.Time
-	state     string
+	state     model.OpOutcome
 	children  []*callGraphNode
 }
 
@@ -36,7 +36,7 @@ var errNotFoundInGraph = errors.New("not found in graph")
 
 const skippedState = "skipped"
 
-func (n *callGraphNode) insert(call *model.Call, startTime time.Time, initialState string) error {
+func (n *callGraphNode) insert(call *model.Call, startTime time.Time, initialState model.OpOutcome) error {
 	if call.ParentID == nil {
 		return fmt.Errorf("missing parent ID for %s", call.ID)
 	}
@@ -109,7 +109,7 @@ func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFor
 			str.WriteString(" " + loader.String())
 		}
 	default:
-		str.WriteString(n.state)
+		str.WriteString(n.state.String())
 	}
 
 	call := *n.call

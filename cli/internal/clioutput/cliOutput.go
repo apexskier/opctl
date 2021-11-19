@@ -145,7 +145,7 @@ func (this _cliOutput) containerExited(event *model.Event) {
 		writer,
 		fmt.Sprintf(
 			"%s%s\n",
-			this.outputPrefix(event.CallEnded.Call.ID, event.CallEnded.Ref),
+			this.outputPrefix(event.CallEnded),
 			message,
 		),
 	)
@@ -163,17 +163,17 @@ func (this _cliOutput) containerStarted(event *model.Event) {
 		this.stdWriter,
 		fmt.Sprintf(
 			"%s%s\n",
-			this.outputPrefix(event.CallStarted.Call.ID, event.CallStarted.Ref),
+			this.outputPrefix(event.CallStarted),
 			this.cliColorer.Info(message),
 		),
 	)
 }
 
-func (this _cliOutput) outputPrefix(id, opRef string) string {
+func (this _cliOutput) outputPrefix(event model.OpEvent) string {
 	parts := []string{
-		fmt.Sprintf("%.8s", fmt.Sprintf("%-8s", id)),
+		fmt.Sprintf("%.8s", fmt.Sprintf("%-8s", event.Id())),
 	}
-	opRef = this.opFormatter.FormatOpRef(opRef)
+	opRef := this.opFormatter.FormatOpRef(event.Ref())
 	if opRef != "" {
 		parts = append(parts, opRef)
 	}
@@ -185,7 +185,7 @@ func (this _cliOutput) containerStdErrWrittenTo(event *model.ContainerStdErrWrit
 		this.errWriter,
 		fmt.Sprintf(
 			"%s%s",
-			this.outputPrefix(event.ContainerID, event.OpRef),
+			this.outputPrefix(event),
 			event.Data,
 		),
 	)
@@ -196,7 +196,7 @@ func (this _cliOutput) containerStdOutWrittenTo(event *model.ContainerStdOutWrit
 		this.stdWriter,
 		fmt.Sprintf(
 			"%s%s",
-			this.outputPrefix(event.ContainerID, event.OpRef),
+			this.outputPrefix(event),
 			event.Data,
 		),
 	)
@@ -230,7 +230,7 @@ func (this _cliOutput) opEnded(event *model.Event) {
 		writer,
 		fmt.Sprintf(
 			"%s%s\n",
-			this.outputPrefix(event.CallEnded.Call.ID, event.CallEnded.Call.Op.OpPath),
+			this.outputPrefix(event.CallEnded),
 			message,
 		),
 	)
@@ -241,7 +241,7 @@ func (this _cliOutput) opStarted(event *model.CallStarted) {
 		this.stdWriter,
 		fmt.Sprintf(
 			"%s%s\n",
-			this.outputPrefix(event.Call.ID, event.Call.Op.OpPath),
+			this.outputPrefix(event),
 			this.cliColorer.Info("started op"),
 		),
 	)

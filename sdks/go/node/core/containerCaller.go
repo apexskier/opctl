@@ -120,7 +120,6 @@ func (this _containerCaller) interpretLogs(
 						Data:        chunk,
 						ContainerID: containerCall.ContainerID,
 						OpRef:       containerCall.OpPath,
-						RootCallID:  rootCallID,
 					},
 				}
 			})
@@ -138,7 +137,6 @@ func (this _containerCaller) interpretLogs(
 						Data:        chunk,
 						ContainerID: containerCall.ContainerID,
 						OpRef:       containerCall.OpPath,
-						RootCallID:  rootCallID,
 					},
 				}
 			})

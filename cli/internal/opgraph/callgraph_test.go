@@ -378,6 +378,7 @@ func TestCallGraph(t *testing.T) {
 	// the newline is here just for better test code readability
 	collapsedStr := "\n" + objectUnderTest.String(
 		StaticLoadingSpinner{},
+		clioutput.SimpleOpFormatter{},
 		timestamp.Add(time.Second*60),
 		true,
 	)
@@ -405,6 +406,7 @@ func TestCallGraph(t *testing.T) {
 	// the newline is here just for better test code readability
 	expandedStr := "\n" + objectUnderTest.String(
 		StaticLoadingSpinner{},
+		clioutput.SimpleOpFormatter{},
 		timestamp.Add(time.Second*60),
 		false,
 	)

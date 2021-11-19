@@ -93,9 +93,8 @@ func (clr _caller) Call(
 
 		event := model.Event{
 			CallEnded: &model.CallEnded{
-				Call:    *call,
-				Outputs: outputs,
-				Ref:     opPath,
+				Call:  *call,
+				OpRef: opPath,
 			},
 			Timestamp: time.Now().UTC(),
 		}
@@ -153,8 +152,8 @@ func (clr _caller) Call(
 	eventChannel <- model.Event{
 		Timestamp: callStartTime,
 		CallStarted: &model.CallStarted{
-			Call: *call,
-			Ref:  opPath,
+			Call:  *call,
+			OpRef: opPath,
 		},
 	}
 

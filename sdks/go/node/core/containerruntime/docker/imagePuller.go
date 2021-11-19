@@ -59,7 +59,6 @@ func (ip _imagePuller) Pull(
 				Data:        []byte(fmt.Sprintf("Skipping image pull: %s\n", imageRef)),
 				OpRef:       containerCall.OpPath,
 				ContainerID: containerCall.ContainerID,
-				RootCallID:  rootCallID,
 			},
 		}
 		return nil
