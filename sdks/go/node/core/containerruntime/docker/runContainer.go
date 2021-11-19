@@ -30,6 +30,7 @@ type runContainer interface {
 func newRunContainer(
 	ctx context.Context,
 	dockerClient dockerClientPkg.CommonAPIClient,
+	dockerConfigPath string,
 ) (runContainer, error) {
 	hcf, err := newHostConfigFactory(ctx, dockerClient)
 	if err != nil {
@@ -42,7 +43,7 @@ func newRunContainer(
 		dockerClient:            dockerClient,
 		ensureNetworkExistser:   newEnsureNetworkExistser(dockerClient),
 		hostConfigFactory:       hcf,
-		imagePuller:             newImagePuller(dockerClient),
+		imagePuller:             newImagePuller(dockerClient, dockerConfigPath),
 		imagePusher:             newImagePusher(),
 	}
 	return rc, nil

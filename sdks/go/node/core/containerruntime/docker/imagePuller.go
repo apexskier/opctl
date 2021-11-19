@@ -27,14 +27,17 @@ type imagePuller interface {
 
 func newImagePuller(
 	dockerClient dockerClientPkg.CommonAPIClient,
+	dockerConfigPath string,
 ) imagePuller {
 	return _imagePuller{
 		dockerClient,
+		dockerConfigPath,
 	}
 }
 
 type _imagePuller struct {
-	dockerClient dockerClientPkg.CommonAPIClient
+	dockerClient     dockerClientPkg.CommonAPIClient
+	dockerConfigPath string
 }
 
 func (ip _imagePuller) Pull(
@@ -73,6 +76,11 @@ func (ip _imagePuller) Pull(
 			imagePullCreds.Username,
 			imagePullCreds.Password,
 		)
+		if err != nil {
+			return err
+		}
+	} else {
+		imagePullOptions.RegistryAuth, err = getAuthFromConfig(ip.dockerConfigPath, imageRef)
 		if err != nil {
 			return err
 		}

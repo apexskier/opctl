@@ -54,14 +54,6 @@ func (cc _containerCaller) Call(
 	outputs := map[string]*model.Value{}
 	var exitCode int64
 
-	if containerCall.Image.Ref != nil && containerCall.Image.PullCreds == nil {
-		// TODO: pull auth from docker
-		// containerCall.Image.PullCreds = &model.Creds{
-		//   Username: "test",
-		//   Password: "test",
-		// }
-	}
-
 	logStdOutPR, logStdOutPW := io.Pipe()
 	logStdErrPR, logStdErrPW := io.Pipe()
 

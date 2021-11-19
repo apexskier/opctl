@@ -105,7 +105,14 @@ func newCli(
 	if "k8s" == *containerRuntime {
 		cr, err = k8s.New()
 	} else {
-		cr, err = docker.New(ctx)
+		dockerConfigPath := cli.String(
+			mow.StringOpt{
+				Desc:   "Docker configuration file path, if using the docker container runtime",
+				EnvVar: "OPCTL_DOCKER_CONFIG",
+				Name:   "docker-config",
+			},
+		)
+		cr, err = docker.New(ctx, *dockerConfigPath)
 	}
 	if nil != err {
 		return nil, err
