@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -28,11 +29,11 @@ func ls(
 		node,
 	)
 
-	_tabWriter := new(tabwriter.Writer)
-	defer _tabWriter.Flush()
-	_tabWriter.Init(os.Stdout, 0, 8, 1, '\t', 0)
+	tw := new(tabwriter.Writer)
+	defer tw.Flush()
+	tw.Init(os.Stdout, 0, 8, 1, '\t', 0)
 
-	fmt.Fprintln(_tabWriter, "REF\tDESCRIPTION")
+	fmt.Fprintln(tw, "REF\tDESCRIPTION")
 
 	eventChannel := make(chan model.Event)
 	callID := ""
@@ -62,28 +63,45 @@ func ls(
 		return err
 	}
 
-	for path, op := range opsByPath {
-		opRef := filepath.Join(dirHandle.Ref(), path)
-		if filepath.IsAbs(opRef) {
+	type SortableOp struct {
+		path string
+		ref  string
+	}
+
+	// ensure runnable ops are
+	sortableOps := make([]SortableOp, 0, len(opsByPath))
+	for path := range opsByPath {
+		ref := filepath.Join(dirHandle.Ref(), path)
+		if filepath.IsAbs(ref) {
 			// make absolute paths relative
-			relOpRef, err := filepath.Rel(cwd, opRef)
+			relOpRef, err := filepath.Rel(cwd, ref)
 			if err != nil {
 				return err
 			}
-
-			opRef = strings.TrimPrefix(relOpRef, ".opspec/")
+			ref = strings.TrimPrefix(relOpRef, ".opspec/")
 		}
+		sortableOps = append(sortableOps, SortableOp{
+			path: path,
+			ref:  ref,
+		})
+	}
 
-		scanner := bufio.NewScanner(strings.NewReader(op.Description))
+	sort.Slice(sortableOps, func(i, j int) bool {
+		return strings.Compare(sortableOps[i].ref, sortableOps[j].ref) < 0
+	})
+
+	for _, r := range sortableOps {
+		opDescription := opsByPath[r.path].Description
+		scanner := bufio.NewScanner(strings.NewReader(opDescription))
 		if scanner.Scan() {
 			// first line of description, add the op ref
-			fmt.Fprintf(_tabWriter, "%v\t%v", opRef, scanner.Text())
+			fmt.Fprintf(tw, "%v\t%v", r.ref, scanner.Text())
 		}
 		for scanner.Scan() {
 			// subsequent lines, don't add the op ref but let the description span multiple lines
-			fmt.Fprintf(_tabWriter, "\n\t%v", scanner.Text())
+			fmt.Fprintf(tw, "\n\t%v", scanner.Text())
 		}
-		fmt.Fprintln(_tabWriter)
+		fmt.Fprintln(tw)
 	}
 
 	return nil
