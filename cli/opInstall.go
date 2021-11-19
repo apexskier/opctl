@@ -20,12 +20,12 @@ func opInstall(
 ) error {
 	// install the whole pkg in case relative (intra pkg) refs exist
 	opRefParts := strings.SplitN(opRef, "#", 2)
-	var dataRef string
+	var pkgRef string
 	if len(opRefParts) == 1 {
-		dataRef = opRefParts[0]
+		pkgRef = opRefParts[0]
 	} else {
 		if verAndPathParts := strings.SplitN(opRefParts[1], "/", 2); len(verAndPathParts) != 1 {
-			dataRef = fmt.Sprintf("%s#%s", opRefParts[0], verAndPathParts[0])
+			pkgRef = fmt.Sprintf("%s#%s", opRefParts[0], verAndPathParts[0])
 		}
 	}
 

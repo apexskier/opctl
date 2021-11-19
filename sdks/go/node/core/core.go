@@ -18,18 +18,9 @@ func New(
 	containerRuntime containerruntime.ContainerRuntime,
 	dataDirPath string,
 ) (Core, error) {
-	stateStore, err := newStateStore(
-		ctx,
-		dataDirPath,
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	caller := newCaller(
 		newContainerCaller(
 			containerRuntime,
-			stateStore,
 		),
 		dataDirPath,
 	)
@@ -42,7 +33,6 @@ func New(
 			caller,
 			dataDirPath,
 		),
-		stateStore: stateStore,
 	}, nil
 }
 
@@ -52,7 +42,6 @@ type core struct {
 	containerRuntime containerruntime.ContainerRuntime
 	dataCachePath    string
 	opCaller         opCaller
-	stateStore       stateStore
 }
 
 func (c core) Liveness(

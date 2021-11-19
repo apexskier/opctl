@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -18,6 +17,7 @@ import (
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/node/core"
 	"github.com/opctl/opctl/sdks/go/opspec/opfile"
+	"github.com/pkg/errors"
 )
 
 // RunOpts are options to run a given op through the CLI
@@ -37,7 +37,6 @@ func run(
 	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
 	eventChannel chan model.Event,
 	node core.Core,
-	opFormatter clioutput.OpFormatter,
 	opRef string,
 	opts *RunOpts,
 	disableGraph bool,
@@ -69,7 +68,7 @@ func run(
 
 	// "request animation frame" like loop to force refresh of display loading spinners
 	animationFrame := make(chan bool)
-	if displayLiveGraph {
+	if !disableGraph {
 		go func() {
 			for {
 				time.Sleep(time.Second / 10)
@@ -83,19 +82,19 @@ func run(
 	output := opgraph.NewOutputManager()
 
 	defer func() {
-		output.Print(state.String(opFormatter, loadingSpinner, time.Now(), false))
+		output.Print(state.String(loadingSpinner, time.Now(), false))
 		fmt.Println()
 	}()
 
 	clearGraph := func() {
-		if displayLiveGraph {
+		if !disableGraph {
 			output.Clear()
 		}
 	}
 
 	displayGraph := func() {
-		if displayLiveGraph {
-			output.Print(state.String(opFormatter, loadingSpinner, time.Now(), true))
+		if !disableGraph {
+			output.Print(state.String(loadingSpinner, time.Now(), true))
 		}
 	}
 
@@ -223,7 +222,7 @@ func run(
 			clearGraph()
 			// clear two more lines
 			fmt.Print("\033[1A\033[K\033[1A\033[K")
-			fmt.Println(state.String(opFormatter, opgraph.StaticLoadingSpinner{}, time.Now(), false))
+			fmt.Println(state.String(opgraph.StaticLoadingSpinner{}, time.Now(), false))
 			displayGraph()
 
 		case <-sigTermChannel:

@@ -30,17 +30,14 @@ type containerCaller interface {
 
 func newContainerCaller(
 	containerRuntime containerruntime.ContainerRuntime,
-	stateStore stateStore,
 ) containerCaller {
 	return _containerCaller{
 		containerRuntime: containerRuntime,
-		stateStore:       stateStore,
 	}
 }
 
 type _containerCaller struct {
 	containerRuntime containerruntime.ContainerRuntime
-	stateStore       stateStore
 }
 
 func (cc _containerCaller) Call(
@@ -58,9 +55,11 @@ func (cc _containerCaller) Call(
 	var exitCode int64
 
 	if containerCall.Image.Ref != nil && containerCall.Image.PullCreds == nil {
-		if auth := cc.stateStore.TryGetAuth(*containerCall.Image.Ref); auth != nil {
-			containerCall.Image.PullCreds = &auth.Creds
-		}
+		// TODO: pull auth from docker
+		// containerCall.Image.PullCreds = &model.Creds{
+		//   Username: "test",
+		//   Password: "test",
+		// }
 	}
 
 	logStdOutPR, logStdOutPW := io.Pipe()

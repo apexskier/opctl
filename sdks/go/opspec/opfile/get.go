@@ -16,7 +16,9 @@ func Get(
 	*model.OpSpec,
 	error,
 ) {
-	opFileBytes, err := os.ReadFile(filepath.Join(opPath, FileName))
+	filePath := filepath.Join(opPath, FileName)
+
+	opFileBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}

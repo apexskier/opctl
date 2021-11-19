@@ -111,6 +111,10 @@ func (this _cliOutput) Event(event *model.Event) {
 	}
 }
 
+func (this _cliOutput) opPullProgress(event *model.OpPullProgress) {
+	// TODO
+}
+
 func (this _cliOutput) containerExited(event *model.Event) {
 	var color func(s string) string
 	var writer io.Writer

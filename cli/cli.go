@@ -197,7 +197,6 @@ func newCli(
 				cliParamSatisfier,
 				eventChannel,
 				opNode,
-				opFormatter,
 				*opRef,
 				&RunOpts{Args: *args, ArgFile: *argFile},
 				*noProgress,

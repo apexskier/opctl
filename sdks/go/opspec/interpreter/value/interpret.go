@@ -2,9 +2,7 @@ package value
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"regexp"
 
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec"
