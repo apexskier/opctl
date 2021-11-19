@@ -16,8 +16,8 @@ func (c core) ListDescendants(
 	[]*model.DirEntry,
 	error,
 ) {
-	if req.DataRef == "" {
-		return []*model.DirEntry{}, fmt.Errorf(`"" not a valid data ref`)
+	if req.PkgRef == "" {
+		return []*model.DirEntry{}, fmt.Errorf(`"" not a valid pkg ref`)
 	}
 
 	dataHandle, err := c.ResolveData(ctx, eventChannel, callID, req.PkgRef)
