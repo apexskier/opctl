@@ -87,17 +87,8 @@ var _ = Context("parallelCaller", func() {
 				panic(err)
 			}
 
-			fakeUniqueStringFactory := new(uniquestringFakes.FakeUniqueStringFactory)
 			uniqueStringCallIndex := 0
 			expectedChildCallIDs := []string{}
-			fakeUniqueStringFactory.ConstructStub = func() (string, error) {
-				defer func() {
-					uniqueStringCallIndex++
-				}()
-				childCallID := fmt.Sprintf("%v", uniqueStringCallIndex)
-				expectedChildCallIDs = append(expectedChildCallIDs, fmt.Sprintf("%v", uniqueStringCallIndex))
-				return childCallID, nil
-			}
 			providedOpRef := "providedOpRef"
 			providedParentID := "providedParentID"
 			providedRootID := "providedRootID"
@@ -123,7 +114,6 @@ var _ = Context("parallelCaller", func() {
 
 			objectUnderTest := _parallelCaller{
 				caller:              fakeCaller,
-				uniqueStringFactory: fakeUniqueStringFactory,
 			}
 
 			eventChannel, err := pubSub.Subscribe(
@@ -195,17 +185,6 @@ var _ = Context("parallelCaller", func() {
 				return nil, expectedErr
 			}
 
-			fakeUniqueStringFactory := new(uniquestringFakes.FakeUniqueStringFactory)
-			uniqueStringCallIndex := 0
-			expectedChildCallIDs := []string{}
-			fakeUniqueStringFactory.ConstructStub = func() (string, error) {
-				defer func() {
-					uniqueStringCallIndex++
-				}()
-				childCallID := fmt.Sprintf("%v", uniqueStringCallIndex)
-				expectedChildCallIDs = append(expectedChildCallIDs, childCallID)
-				return childCallID, nil
-			}
 			providedOpRef := "providedOpRef"
 			providedParentID := "providedParentID"
 			providedRootID := "providedRootID"
@@ -231,7 +210,6 @@ var _ = Context("parallelCaller", func() {
 
 			objectUnderTest := _parallelCaller{
 				caller:              fakeCaller,
-				uniqueStringFactory: fakeUniqueStringFactory,
 			}
 
 			/* act */
@@ -289,21 +267,8 @@ var _ = Context("parallelCaller", func() {
 					return nil, nil
 				}
 
-				fakeUniqueStringFactory := new(uniquestringFakes.FakeUniqueStringFactory)
-				uniqueStringCallIndex := 0
-				expectedChildCallIDs := []string{}
-				fakeUniqueStringFactory.ConstructStub = func() (string, error) {
-					defer func() {
-						uniqueStringCallIndex++
-					}()
-					childCallID := fmt.Sprintf("%v", uniqueStringCallIndex)
-					expectedChildCallIDs = append(expectedChildCallIDs, fmt.Sprintf("%v", uniqueStringCallIndex))
-					return childCallID, nil
-				}
-
 				objectUnderTest := _parallelCaller{
 					caller:              fakeCaller,
-					uniqueStringFactory: fakeUniqueStringFactory,
 				}
 
 				/* act */

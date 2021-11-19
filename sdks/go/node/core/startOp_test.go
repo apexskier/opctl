@@ -8,7 +8,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	uniquestringFakes "github.com/opctl/opctl/sdks/go/internal/uniquestring/fakes"
 	"github.com/opctl/opctl/sdks/go/model"
 	. "github.com/opctl/opctl/sdks/go/node/core/internal/fakes"
 )
@@ -25,9 +24,7 @@ var _ = Context("core", func() {
 					},
 				}
 
-				objectUnderTest := core{
-					uniqueStringFactory: new(uniquestringFakes.FakeUniqueStringFactory),
-				}
+				objectUnderTest := core{}
 
 				/* act */
 				_, actualErr := objectUnderTest.StartOp(
