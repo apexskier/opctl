@@ -40,7 +40,7 @@ func run(
 	node node.Node,
 	opRef string,
 	opts *RunOpts,
-	disableGraph bool,
+	noProgress bool,
 ) (map[string]*model.Value, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -69,7 +69,7 @@ func run(
 
 	// "request animation frame" like loop to force refresh of display loading spinners
 	animationFrame := make(chan bool)
-	if !disableGraph {
+	if !noProgress {
 		go func() {
 			for {
 				time.Sleep(time.Second / 10)
@@ -88,13 +88,13 @@ func run(
 	}()
 
 	clearGraph := func() {
-		if !disableGraph {
+		if !noProgress {
 			output.Clear()
 		}
 	}
 
 	displayGraph := func() {
-		if !disableGraph {
+		if !noProgress {
 			output.Print(state.String(loadingSpinner, opFormatter, time.Now(), true))
 		}
 	}
@@ -221,7 +221,7 @@ func run(
 		case event, isEventChannelOpen := <-eventChannel:
 			clearGraph()
 			if !isEventChannelOpen {
-				return nil, errors.New("Event channel closed unexpectedly")
+				return nil, errors.New("event channel closed unexpectedly")
 			}
 
 			if err := state.HandleEvent(&event); err != nil {

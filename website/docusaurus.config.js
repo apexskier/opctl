@@ -21,7 +21,7 @@ module.exports = {
         alt: 'opctl Logo',
         src: 'img/logo.svg',
       },
-      links: [
+      items: [
         { to: 'docs/introduction', label: 'Docs', position: 'left' },
         {
           href: 'https://github.com/orgs/opspec-pkgs/repositories',

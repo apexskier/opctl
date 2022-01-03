@@ -28,6 +28,31 @@ run:
         ref: ../test
         inputs:
           dockerSocket:
-          gitBranch:
           HOME:
           version:
+    # report codecoverage
+    - serial:
+        - op:
+            ref: github.com/opspec-pkgs/git.resolve-commit#1.0.2
+            inputs:
+              dotGitDir: $(../../.git)
+            outputs:
+              commit: $(gitCommit)
+        - container:
+            image:
+              ref: alpine
+            cmd:
+              - sh
+              - -ce
+              - |
+                apk add -U curl
+                curl -Os https://uploader.codecov.io/latest/alpine/codecov
+
+                chmod +x codecov
+                ./codecov
+            dirs:
+              /src: $(../../)
+            envVars:
+              GIT_BRANCH: $(gitBranch)
+              GIT_COMMIT: $(gitCommit)
+            workDir: /src

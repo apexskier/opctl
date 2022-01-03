@@ -66,7 +66,9 @@ func (ip _imagePuller) Pull(
 
 	imagePullCreds := containerCall.Image.PullCreds
 
-	imagePullOptions := types.ImagePullOptions{}
+	imagePullOptions := types.ImagePullOptions{
+		Platform: "linux",
+	}
 	if imagePullCreds != nil &&
 		imagePullCreds.Username != "" &&
 		imagePullCreds.Password != "" {

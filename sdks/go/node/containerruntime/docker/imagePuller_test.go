@@ -5,7 +5,9 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
 
+	"github.com/dgraph-io/badger/v3"
 	"github.com/docker/docker/api/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,11 +16,23 @@ import (
 )
 
 var _ = Context("imagePuller", func() {
+	dbDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := badger.Open(
+		badger.DefaultOptions(dbDir).WithLogger(nil),
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	Context("imageRef valid", func() {
 		It("should call dockerClient.ImagePull w/ expected args", func() {
 			/* arrange */
 			providedImageRef := "imageRef"
-			expectedImagePullOptions := types.ImagePullOptions{}
+			expectedImagePullOptions := types.ImagePullOptions{Platform: "linux"}
 			providedCtx := context.Background()
 
 			imagePullResponse := io.NopCloser(bytes.NewBufferString(""))
@@ -91,7 +105,7 @@ var _ = Context("imagePuller", func() {
 		It("should pul when image is not present and ref is tagged non-latest", func() {
 			/* arrange */
 			providedImageRef := "imageRef:myversion"
-			expectedImagePullOptions := types.ImagePullOptions{}
+			expectedImagePullOptions := types.ImagePullOptions{Platform: "linux"}
 			providedCtx := context.Background()
 
 			imagePullResponse := io.NopCloser(bytes.NewBufferString(""))

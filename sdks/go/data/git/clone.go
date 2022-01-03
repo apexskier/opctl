@@ -17,20 +17,26 @@ import (
 	"github.com/opctl/opctl/sdks/go/model"
 )
 
-// Pull pulls 'dataRef' to 'path'
+// Clone 'dataRef' to 'path'
+// nil pullCreds will be ignored
 //
 // expected errs:
 //  - ErrDataProviderAuthentication on authentication failure
 //  - ErrDataProviderAuthorization on authorization failure
-func (gp *_git) pull(
+func (gp *_git) Clone(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	callID string,
-	dataRef *ref,
+	dataRef string,
 ) error {
-	opPath := dataRef.ToPath(gp.basePath)
+	parsedPkgRef, err := parseRef(dataRef)
+	if err != nil {
+		return fmt.Errorf("invalid git ref: %w", err)
+	}
 
-	url := fmt.Sprintf("https://%s", dataRef.Name)
+	opPath := parsedPkgRef.ToPath(gp.basePath)
+
+	url := fmt.Sprintf("https://%s", parsedPkgRef.Name)
 	creds, err := getCredentials(ctx, url)
 	if err != nil {
 		return fmt.Errorf("invalid git ref: %w", err)
@@ -38,7 +44,7 @@ func (gp *_git) pull(
 	reader, writer := io.Pipe()
 	cloneOptions := &git.CloneOptions{
 		URL:           url,
-		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/tags/%s", dataRef.Version)),
+		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/tags/%s", parsedPkgRef.Version)),
 		Depth:         1,
 		Progress:      writer,
 		Auth: &http.BasicAuth{
@@ -56,7 +62,7 @@ func (gp *_git) pull(
 					Timestamp: time.Now().UTC(),
 					OpPullProgress: &model.OpPullProgress{
 						ContainerID: callID,
-						OpRef:       dataRef.String(),
+						OpRef:       parsedPkgRef.String(),
 						Data:        chunk,
 					},
 				}
@@ -71,7 +77,7 @@ func (gp *_git) pull(
 		cloneOptions,
 	); err != nil {
 		if _, ok := err.(git.NoMatchingRefSpecError); ok {
-			return fmt.Errorf("version '%s' not found", dataRef.Version)
+			return fmt.Errorf("version '%s' not found", parsedPkgRef.Version)
 		}
 		if errors.Is(err, transport.ErrAuthenticationRequired) {
 			return model.ErrDataProviderAuthentication{}

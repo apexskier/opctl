@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/go-connections/nat"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
@@ -17,6 +20,11 @@ import (
 var _ = Context("RunContainer", func() {
 	closedContainerWaitOkBodyChan := make(chan container.ContainerWaitOKBody)
 	close(closedContainerWaitOkBodyChan)
+
+	dbDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		panic(err)
+	}
 
 	It("should call dockerClient.ContainerRemove w/ expected args", func() {
 		/* arrange */
@@ -47,9 +55,9 @@ var _ = Context("RunContainer", func() {
 		/* act */
 		objectUnderTest.RunContainer(
 			context.Background(),
+			make(chan model.Event),
 			providedReq,
 			"rootCallID",
-			new(FakeEventPublisher),
 			nopWriteCloser{io.Discard},
 			nopWriteCloser{io.Discard},
 		)
@@ -72,13 +80,13 @@ var _ = Context("RunContainer", func() {
 				containerStdOutStreamer: new(FakeContainerLogStreamer),
 				dockerClient:            new(FakeCommonAPIClient),
 				ensureNetworkExistser:   new(FakeEnsureNetworkExistser),
-				hostConfigFactory:       new(FakeHostConfigFactory),
 				imagePuller:             new(FakeImagePuller),
 			}
 
 			/* act */
 			_, actualErr := objectUnderTest.RunContainer(
 				context.Background(),
+				make(chan model.Event),
 				&model.ContainerCall{
 					Image: &model.ContainerCallImage{Ref: new(string)},
 					Ports: map[string]string{
@@ -86,7 +94,6 @@ var _ = Context("RunContainer", func() {
 					},
 				},
 				"rootCallID",
-				new(FakeEventPublisher),
 				nopWriteCloser{io.Discard},
 				nopWriteCloser{io.Discard},
 			)
@@ -95,69 +102,7 @@ var _ = Context("RunContainer", func() {
 			Expect(actualErr).To(MatchError("Invalid containerPort: *"))
 		})
 	})
-	Context("portBindingsFactory.Construct doesn't err", func() {
-
-		It("should call hostConfigFactory.Construct w expected args", func() {
-			/* arrange */
-			providedReq := &model.ContainerCall{
-				BaseCall: model.BaseCall{},
-				Dirs: map[string]string{
-					"dir1ContainerPath": "dir1HostPath",
-					"dir2ContainerPath": "dir2HostPath",
-				},
-				Files: map[string]string{
-					"file1ContainerPath": "file1HostPath",
-					"file2ContainerPath": "file2HostPath",
-				},
-				Image: &model.ContainerCallImage{Ref: new(string)},
-				Sockets: map[string]string{
-					"/unixSocket1ContainerAddress": "/unixSocket1HostAddress",
-					"/unixSocket2ContainerAddress": "/unixSocket2HostAddress",
-				},
-				Ports: map[string]string{
-					"80": "80",
-				},
-			}
-
-			portBindings, err := constructPortBindings(providedReq.Ports)
-			if err != nil {
-				panic(err)
-			}
-
-			fakeHostConfigFactory := new(FakeHostConfigFactory)
-
-			fakeDockerClient := new(FakeCommonAPIClient)
-			fakeDockerClient.ContainerWaitReturns(closedContainerWaitOkBodyChan, nil)
-
-			objectUnderTest := _runContainer{
-				containerStdErrStreamer: new(FakeContainerLogStreamer),
-				containerStdOutStreamer: new(FakeContainerLogStreamer),
-				dockerClient:            fakeDockerClient,
-				ensureNetworkExistser:   new(FakeEnsureNetworkExistser),
-				hostConfigFactory:       fakeHostConfigFactory,
-				imagePuller:             new(FakeImagePuller),
-			}
-
-			/* act */
-			objectUnderTest.RunContainer(
-				context.Background(),
-				providedReq,
-				"rootCallID",
-				new(FakeEventPublisher),
-				nopWriteCloser{io.Discard},
-				nopWriteCloser{io.Discard},
-			)
-
-			/* assert */
-			actualDirs,
-				actualFiles,
-				actualSockets,
-				actualPortBindings := fakeHostConfigFactory.ConstructArgsForCall(0)
-			Expect(actualDirs).To(Equal(providedReq.Dirs))
-			Expect(actualFiles).To(Equal(providedReq.Files))
-			Expect(actualSockets).To(Equal(providedReq.Sockets))
-			Expect(actualPortBindings).To(Equal(portBindings))
-		})
+	Context("constructPortBindings doesn't err", func() {
 
 		It("should call imagePuller.Pull w/ expected args", func() {
 
@@ -182,16 +127,15 @@ var _ = Context("RunContainer", func() {
 				containerStdOutStreamer: new(FakeContainerLogStreamer),
 				dockerClient:            fakeDockerClient,
 				ensureNetworkExistser:   new(FakeEnsureNetworkExistser),
-				hostConfigFactory:       new(FakeHostConfigFactory),
 				imagePuller:             fakeImagePuller,
 			}
 
 			/* act */
 			objectUnderTest.RunContainer(
 				providedCtx,
+				make(chan model.Event),
 				providedReq,
 				providedRootCallID,
-				providedEventPublisher,
 				nopWriteCloser{io.Discard},
 				nopWriteCloser{io.Discard},
 			)
@@ -214,8 +158,20 @@ var _ = Context("RunContainer", func() {
 			providedReq := &model.ContainerCall{
 				BaseCall:    model.BaseCall{},
 				ContainerID: "dummyContainerID",
-				Image:       &model.ContainerCallImage{Ref: new(string)},
-				Name:        new(string),
+				Dirs: map[string]string{
+					"dir1ContainerPath": "dir1HostPath",
+				},
+				Files: map[string]string{
+					"file1ContainerPath": "file1HostPath",
+				},
+				Image: &model.ContainerCallImage{Ref: new(string)},
+				Name:  new(string),
+				Sockets: map[string]string{
+					"/unixSocket1ContainerAddress": "/unixSocket1HostAddress",
+				},
+				Ports: map[string]string{
+					"80": "80",
+				},
 			}
 
 			expectedPortBindings, err := constructPortBindings(providedReq.Ports)
@@ -233,13 +189,52 @@ var _ = Context("RunContainer", func() {
 				"rootCallID",
 			)
 
-			fakeHostConfigFactory := new(FakeHostConfigFactory)
-			expectedHostConfig := &container.HostConfig{}
-			fakeHostConfigFactory.ConstructReturns(expectedHostConfig)
+			expectedHostConfig := &container.HostConfig{
+				Mounts: []mount.Mount{
+					{
+						Type:          "bind",
+						Target:        "file1ContainerPath",
+						Source:        "file1HostPath",
+						Consistency:   "cached",
+						ReadOnly:      false,
+						BindOptions:   nil,
+						VolumeOptions: nil,
+						TmpfsOptions:  nil,
+					},
+					{
+						Type:          "bind",
+						Source:        "dir1HostPath",
+						Target:        "dir1ContainerPath",
+						Consistency:   "cached",
+						ReadOnly:      false,
+						BindOptions:   nil,
+						TmpfsOptions:  nil,
+						VolumeOptions: nil,
+					},
+					{
+						Type:          "bind",
+						Source:        "/unixSocket1HostAddress",
+						Target:        "/unixSocket1ContainerAddress",
+						ReadOnly:      false,
+						Consistency:   "",
+						BindOptions:   nil,
+						VolumeOptions: nil,
+						TmpfsOptions:  nil,
+					},
+				},
+				PortBindings: nat.PortMap{
+					"80/tcp": []nat.PortBinding{
+						{
+							HostPort: "80",
+						},
+					},
+				},
+				Privileged: true,
+			}
 
 			expectedNetworkingConfig := &network.NetworkingConfig{
 				EndpointsConfig: map[string]*network.EndpointSettings{
-					dockerNetworkName: {
+					networkName: {
 						Aliases: []string{
 							*providedReq.Name,
 						},
@@ -255,16 +250,15 @@ var _ = Context("RunContainer", func() {
 				containerStdOutStreamer: new(FakeContainerLogStreamer),
 				dockerClient:            fakeDockerClient,
 				ensureNetworkExistser:   new(FakeEnsureNetworkExistser),
-				hostConfigFactory:       fakeHostConfigFactory,
 				imagePuller:             new(FakeImagePuller),
 			}
 
 			/* act */
 			objectUnderTest.RunContainer(
 				providedCtx,
+				make(chan model.Event),
 				providedReq,
 				"rootCallID",
-				new(FakeEventPublisher),
 				nopWriteCloser{io.Discard},
 				nopWriteCloser{io.Discard},
 			)
@@ -274,12 +268,14 @@ var _ = Context("RunContainer", func() {
 				actualContainerConfig,
 				actualHostConfig,
 				actualNetworkingConfig,
+				actualPlatformConfig,
 				actualContainerName := fakeDockerClient.ContainerCreateArgsForCall(0)
 
 			Expect(actualCtx).To(Equal(providedCtx))
 			Expect(actualContainerConfig).To(Equal(expectedContainerConfig))
-			Expect(actualHostConfig).To(Equal(expectedHostConfig))
+			Expect(*actualHostConfig).To(Equal(*expectedHostConfig))
 			Expect(actualNetworkingConfig).To(Equal(expectedNetworkingConfig))
+			Expect(actualPlatformConfig).To(BeNil())
 			Expect(actualContainerName).To(Equal(fmt.Sprintf("opctl_%s", providedReq.ContainerID)))
 		})
 	})

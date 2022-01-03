@@ -1,45 +1,14 @@
 package docker
 
 import (
-	"context"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
-	dockerClientPkg "github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
 
-//counterfeiter:generate -o internal/fakes/hostConfigFactory.go . hostConfigFactory
-type hostConfigFactory interface {
-	Construct(
-		containerCallDirs map[string]string,
-		containerCallFiles map[string]string,
-		containerCallSockets map[string]string,
-		portBindings nat.PortMap,
-	) *container.HostConfig
-}
-
-func newHostConfigFactory(
-	ctx context.Context,
-	dockerClient dockerClientPkg.CommonAPIClient,
-) (hostConfigFactory, error) {
-	fspc, err := newFSPathConverter(ctx, dockerClient)
-	if err != nil {
-		return _hostConfigFactory{}, err
-	}
-
-	hcf := _hostConfigFactory{
-		fsPathConverter: fspc,
-	}
-	return hcf, nil
-}
-
-type _hostConfigFactory struct {
-	fsPathConverter fsPathConverter
-}
-
-func (hcf _hostConfigFactory) Construct(
+func constructHostConfig(
 	containerCallDirs map[string]string,
 	containerCallFiles map[string]string,
 	containerCallSockets map[string]string,
@@ -57,7 +26,7 @@ func (hcf _hostConfigFactory) Construct(
 			hostConfig.Mounts,
 			mount.Mount{
 				Type:        mount.TypeBind,
-				Source:      hcf.fsPathConverter.LocalToEngine(hostFilePath),
+				Source:      hostFilePath,
 				Target:      containerFilePath,
 				Consistency: mount.ConsistencyCached,
 			},
@@ -68,7 +37,7 @@ func (hcf _hostConfigFactory) Construct(
 			hostConfig.Mounts,
 			mount.Mount{
 				Type:        mount.TypeBind,
-				Source:      hcf.fsPathConverter.LocalToEngine(hostDirPath),
+				Source:      hostDirPath,
 				Target:      containerDirPath,
 				Consistency: mount.ConsistencyCached,
 			},
@@ -82,7 +51,7 @@ func (hcf _hostConfigFactory) Construct(
 				hostConfig.Mounts,
 				mount.Mount{
 					Type:   mount.TypeBind,
-					Source: hcf.fsPathConverter.LocalToEngine(hostSocketAddress),
+					Source: hostSocketAddress,
 					Target: containerSocketAddress,
 				},
 			)

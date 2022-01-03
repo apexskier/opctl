@@ -1,13 +1,13 @@
-package iruntime
+package lt
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"testing"
 )
 
 func Test(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "opctl/sdks/go/internal/iruntime")
+	RunSpecs(t, "opspec/interpreter/call/predicates/predicate/lt")
 }

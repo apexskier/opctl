@@ -162,10 +162,6 @@ var _ = Context("caller", func() {
 					},
 				}
 
-				fakePubSub := new(FakePubSub)
-				// ensure eventChan closed so call exits
-				fakePubSub.SubscribeReturns(closedEventChan, nil)
-
 				dataDir, err := os.MkdirTemp("", "")
 				if err != nil {
 					panic(err)
@@ -233,10 +229,6 @@ var _ = Context("caller", func() {
 						Inputs: map[string]*model.Value{},
 					},
 				}
-
-				fakePubSub := new(FakePubSub)
-				// ensure eventChan closed so call exits
-				fakePubSub.SubscribeReturns(closedEventChan, nil)
 
 				dataDir, err := os.MkdirTemp("", "")
 				if err != nil {

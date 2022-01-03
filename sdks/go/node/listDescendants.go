@@ -16,11 +16,11 @@ func (c core) ListDescendants(
 	[]*model.DirEntry,
 	error,
 ) {
-	if req.PkgRef == "" {
-		return []*model.DirEntry{}, fmt.Errorf(`"" not a valid pkg ref`)
+	if req.DataRef == "" {
+		return []*model.DirEntry{}, fmt.Errorf(`"" not a valid data ref`)
 	}
 
-	dataHandle, err := c.ResolveData(ctx, eventChannel, callID, req.PkgRef)
+	dataHandle, err := c.ResolveData(ctx, eventChannel, callID, req.DataRef)
 	if err != nil {
 		return nil, err
 	}

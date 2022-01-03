@@ -39,7 +39,7 @@ func (np _node) TryResolve(
 		eventChannel,
 		callID,
 		model.ListDescendantsReq{
-			PkgRef: dataRef,
+			DataRef: dataRef,
 		},
 	); err != nil {
 		return nil, err

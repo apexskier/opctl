@@ -13,47 +13,24 @@ import (
 	"github.com/opctl/opctl/sdks/go/model"
 )
 
-var _ = Context("Pull", func() {
+var _ = Context("Clone", func() {
+	Context("parseRef errs", func() {
+		It("should return error", func() {
+			/* arrange */
+			/* act */
+			actualError := Clone(
+				context.Background(),
+				"dummyPath",
+				"\\///%%&",
+				nil,
+			)
+
+			/* assert */
+			Expect(actualError).To(MatchError(`invalid git ref: parse "\\///%%&": invalid URL escape "%%&"`))
+		})
+	})
 	Context("parseRef doesn't err", func() {
 		Context("git.PlainClone errors", func() {
-			Context("err.Error() returns git.ErrRepositoryAlreadyExists", func() {
-				It("shouldn't error", func() {
-					/* arrange */
-					providedPath, err := os.MkdirTemp("", "")
-					if err != nil {
-						panic(err)
-					}
-					// some small public repo
-					providedRef := "github.com/opspec-pkgs/_.op.create#3.2.0"
-
-					/* act */
-					firstErr := objectUnderTest.pull(
-						context.Background(),
-						nil,
-						"callID",
-						&ref{
-							Name:    "github.com/opspec-pkgs/_.op.create",
-							Version: "3.2.0",
-						},
-					)
-					if firstErr != nil {
-						panic(firstErr)
-					}
-
-					actualError := objectUnderTest.pull(
-						context.Background(),
-						nil,
-						"callID",
-						&ref{
-							Name:    "github.com/opspec-pkgs/_.op.create",
-							Version: "3.2.0",
-						},
-					)
-
-					/* assert */
-					Expect(actualError).To(BeNil())
-				})
-			})
 			Context("err.Error() returns transport.ErrAuthenticationRequired error", func() {
 				It("should return expected error", func() {
 					/* arrange */
@@ -79,7 +56,7 @@ var _ = Context("Pull", func() {
 					expectedError := model.ErrDataProviderAuthentication{}
 
 					/* act */
-					actualError := objectUnderTest.pull(
+					actualError := Clone(
 						context.Background(),
 						nil,
 						"callID",
@@ -118,7 +95,7 @@ var _ = Context("Pull", func() {
 					expectedError := model.ErrDataProviderAuthorization{}
 
 					/* act */
-					actualError := objectUnderTest.pull(
+					actualError := Clone(
 						context.Background(),
 						nil,
 						"callId",
@@ -155,7 +132,7 @@ var _ = Context("Pull", func() {
 					}
 
 					/* act */
-					actualError := objectUnderTest.pull(
+					actualError := Clone(
 						context.Background(),
 						nil,
 						"callId",

@@ -37,6 +37,13 @@ type _containerRuntime struct {
 	k8sClient *kubernetes.Clientset
 }
 
+func (cr _containerRuntime) Delete(
+	ctx context.Context,
+) error {
+	// for now this is a no-op
+	return nil
+}
+
 func (cr _containerRuntime) DeleteContainerIfExists(
 	ctx context.Context,
 	containerID string,
@@ -49,6 +56,13 @@ func (cr _containerRuntime) DeleteContainerIfExists(
 		return fmt.Errorf("unable to delete k8s container: %w", err)
 	}
 
+	return nil
+}
+
+func (cr _containerRuntime) Kill(
+	ctx context.Context,
+) error {
+	// for now this is a no-op
 	return nil
 }
 

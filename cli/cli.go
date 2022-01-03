@@ -17,11 +17,10 @@ import (
 	"github.com/opctl/opctl/sdks/go/node/containerruntime"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime/docker"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime/k8s"
+	"github.com/opctl/opctl/sdks/go/node/containerruntime/qemu"
 	"github.com/opctl/opctl/sdks/go/opspec"
 	"golang.org/x/term"
 )
-
-var testModeEnvVar = "OPCTL_TEST_MODE"
 
 type cli interface {
 	Run(args []string) error
@@ -84,7 +83,7 @@ func newCli(
 
 	containerRuntime := cli.String(
 		mow.StringOpt{
-			Desc:   "Runtime for opctl containers",
+			Desc:   "Runtime for opctl containers. Can be 'docker', 'k8s', or 'qemu' (experimental)",
 			EnvVar: "OPCTL_CONTAINER_RUNTIME",
 			Name:   "container-runtime",
 			Value:  "docker",
@@ -107,8 +106,10 @@ func newCli(
 	}
 
 	var cr containerruntime.ContainerRuntime
-	if "k8s" == *containerRuntime {
+	if *containerRuntime == "k8s" {
 		cr, err = k8s.New()
+	} else if *containerRuntime == "qemu" {
+		cr, err = qemu.New(ctx, false)
 	} else {
 		dockerConfigPath := cli.String(
 			mow.StringOpt{
@@ -117,7 +118,7 @@ func newCli(
 				Name:   "docker-config",
 			},
 		)
-		cr, err = docker.New(ctx, *dockerConfigPath)
+		cr, err = docker.New(ctx, "unix:///var/run/docker.sock", *dockerConfigPath)
 	}
 	if nil != err {
 		return nil, err

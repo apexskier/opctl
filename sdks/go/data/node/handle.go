@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"path"
 
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/node"
@@ -37,8 +38,7 @@ func (nh handle) GetContent(
 		eventChannel,
 		callID,
 		model.GetDataReq{
-			ContentPath: contentPath,
-			PkgRef:      nh.dataRef,
+			DataRef: path.Join(nh.dataRef, contentPath),
 		},
 	)
 }
@@ -56,7 +56,7 @@ func (nh handle) ListDescendants(
 		eventChannel,
 		callID,
 		model.ListDescendantsReq{
-			PkgRef: nh.dataRef,
+			DataRef: nh.dataRef,
 		},
 	)
 }

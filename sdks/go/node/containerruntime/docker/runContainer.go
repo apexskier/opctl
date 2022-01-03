@@ -32,17 +32,11 @@ func newRunContainer(
 	dockerClient dockerClientPkg.CommonAPIClient,
 	dockerConfigPath string,
 ) (runContainer, error) {
-	hcf, err := newHostConfigFactory(ctx, dockerClient)
-	if err != nil {
-		return _runContainer{}, err
-	}
-
 	rc := _runContainer{
 		containerStdErrStreamer: newContainerStdErrStreamer(dockerClient),
 		containerStdOutStreamer: newContainerStdOutStreamer(dockerClient),
 		dockerClient:            dockerClient,
 		ensureNetworkExistser:   newEnsureNetworkExistser(dockerClient),
-		hostConfigFactory:       hcf,
 		imagePuller:             newImagePuller(dockerClient, dockerConfigPath),
 		imagePusher:             newImagePusher(),
 	}
@@ -54,7 +48,6 @@ type _runContainer struct {
 	containerStdOutStreamer containerLogStreamer
 	dockerClient            dockerClientPkg.CommonAPIClient
 	ensureNetworkExistser   ensureNetworkExistser
-	hostConfigFactory       hostConfigFactory
 	imagePuller             imagePuller
 	imagePusher             imagePusher
 }
@@ -74,7 +67,7 @@ func (cr _runContainer) RunContainer(
 	// @TODO: remove when socket outputs supported
 	if err := cr.ensureNetworkExistser.EnsureNetworkExists(
 		ctx,
-		dockerNetworkName,
+		networkName,
 	); err != nil {
 		return nil, err
 	}
@@ -129,21 +122,14 @@ func (cr _runContainer) RunContainer(
 		return nil, err
 	}
 
-	hostConfig := cr.hostConfigFactory.Construct(
-		req.Dirs,
-		req.Files,
-		req.Sockets,
-		portBindings,
-	)
-
 	// construct networking config
 	networkingConfig := &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
-			dockerNetworkName: {},
+			networkName: {},
 		},
 	}
 	if req.Name != nil {
-		networkingConfig.EndpointsConfig[dockerNetworkName].Aliases = []string{
+		networkingConfig.EndpointsConfig[networkName].Aliases = []string{
 			*req.Name,
 		}
 	}
@@ -160,8 +146,15 @@ func (cr _runContainer) RunContainer(
 			req.ContainerID,
 			rootCallID,
 		),
-		hostConfig,
+		constructHostConfig(
+			req.Dirs,
+			req.Files,
+			req.Sockets,
+			portBindings,
+		),
 		networkingConfig,
+		// platform requires API v1.41 so set to nil to avoid version errors
+		nil,
 		containerName,
 	)
 	if createErr != nil {

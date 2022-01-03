@@ -2,12 +2,11 @@ package model
 
 // GetDataReq deprecated
 type GetDataReq struct {
-	ContentPath string
-	PkgRef      string
+	DataRef string
 }
 
 type ListDescendantsReq struct {
-	PkgRef string `json:"pkgRef"`
+	DataRef string `json:"dataRef"`
 }
 
 type StartOpReq struct {

@@ -19,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type FakeCommonAPIClient struct {
@@ -168,14 +169,15 @@ type FakeCommonAPIClient struct {
 		result1 types.IDResponse
 		result2 error
 	}
-	ContainerCreateStub        func(context.Context, *container.Config, *container.HostConfig, *network.NetworkingConfig, string) (container.ContainerCreateCreatedBody, error)
+	ContainerCreateStub        func(context.Context, *container.Config, *container.HostConfig, *network.NetworkingConfig, *v1.Platform, string) (container.ContainerCreateCreatedBody, error)
 	containerCreateMutex       sync.RWMutex
 	containerCreateArgsForCall []struct {
 		arg1 context.Context
 		arg2 *container.Config
 		arg3 *container.HostConfig
 		arg4 *network.NetworkingConfig
-		arg5 string
+		arg5 *v1.Platform
+		arg6 string
 	}
 	containerCreateReturns struct {
 		result1 container.ContainerCreateCreatedBody
@@ -460,6 +462,20 @@ type FakeCommonAPIClient struct {
 		result2 error
 	}
 	containerStatsReturnsOnCall map[int]struct {
+		result1 types.ContainerStats
+		result2 error
+	}
+	ContainerStatsOneShotStub        func(context.Context, string) (types.ContainerStats, error)
+	containerStatsOneShotMutex       sync.RWMutex
+	containerStatsOneShotArgsForCall []struct {
+		arg1 context.Context
+		arg2 string
+	}
+	containerStatsOneShotReturns struct {
+		result1 types.ContainerStats
+		result2 error
+	}
+	containerStatsOneShotReturnsOnCall map[int]struct {
 		result1 types.ContainerStats
 		result2 error
 	}
@@ -2310,7 +2326,7 @@ func (fake *FakeCommonAPIClient) ContainerCommitReturnsOnCall(i int, result1 typ
 	}{result1, result2}
 }
 
-func (fake *FakeCommonAPIClient) ContainerCreate(arg1 context.Context, arg2 *container.Config, arg3 *container.HostConfig, arg4 *network.NetworkingConfig, arg5 string) (container.ContainerCreateCreatedBody, error) {
+func (fake *FakeCommonAPIClient) ContainerCreate(arg1 context.Context, arg2 *container.Config, arg3 *container.HostConfig, arg4 *network.NetworkingConfig, arg5 *v1.Platform, arg6 string) (container.ContainerCreateCreatedBody, error) {
 	fake.containerCreateMutex.Lock()
 	ret, specificReturn := fake.containerCreateReturnsOnCall[len(fake.containerCreateArgsForCall)]
 	fake.containerCreateArgsForCall = append(fake.containerCreateArgsForCall, struct {
@@ -2318,12 +2334,13 @@ func (fake *FakeCommonAPIClient) ContainerCreate(arg1 context.Context, arg2 *con
 		arg2 *container.Config
 		arg3 *container.HostConfig
 		arg4 *network.NetworkingConfig
-		arg5 string
-	}{arg1, arg2, arg3, arg4, arg5})
-	fake.recordInvocation("ContainerCreate", []interface{}{arg1, arg2, arg3, arg4, arg5})
+		arg5 *v1.Platform
+		arg6 string
+	}{arg1, arg2, arg3, arg4, arg5, arg6})
+	fake.recordInvocation("ContainerCreate", []interface{}{arg1, arg2, arg3, arg4, arg5, arg6})
 	fake.containerCreateMutex.Unlock()
 	if fake.ContainerCreateStub != nil {
-		return fake.ContainerCreateStub(arg1, arg2, arg3, arg4, arg5)
+		return fake.ContainerCreateStub(arg1, arg2, arg3, arg4, arg5, arg6)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -2338,17 +2355,17 @@ func (fake *FakeCommonAPIClient) ContainerCreateCallCount() int {
 	return len(fake.containerCreateArgsForCall)
 }
 
-func (fake *FakeCommonAPIClient) ContainerCreateCalls(stub func(context.Context, *container.Config, *container.HostConfig, *network.NetworkingConfig, string) (container.ContainerCreateCreatedBody, error)) {
+func (fake *FakeCommonAPIClient) ContainerCreateCalls(stub func(context.Context, *container.Config, *container.HostConfig, *network.NetworkingConfig, *v1.Platform, string) (container.ContainerCreateCreatedBody, error)) {
 	fake.containerCreateMutex.Lock()
 	defer fake.containerCreateMutex.Unlock()
 	fake.ContainerCreateStub = stub
 }
 
-func (fake *FakeCommonAPIClient) ContainerCreateArgsForCall(i int) (context.Context, *container.Config, *container.HostConfig, *network.NetworkingConfig, string) {
+func (fake *FakeCommonAPIClient) ContainerCreateArgsForCall(i int) (context.Context, *container.Config, *container.HostConfig, *network.NetworkingConfig, *v1.Platform, string) {
 	fake.containerCreateMutex.RLock()
 	defer fake.containerCreateMutex.RUnlock()
 	argsForCall := fake.containerCreateArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5, argsForCall.arg6
 }
 
 func (fake *FakeCommonAPIClient) ContainerCreateReturns(result1 container.ContainerCreateCreatedBody, result2 error) {
@@ -3642,6 +3659,70 @@ func (fake *FakeCommonAPIClient) ContainerStatsReturnsOnCall(i int, result1 type
 		})
 	}
 	fake.containerStatsReturnsOnCall[i] = struct {
+		result1 types.ContainerStats
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeCommonAPIClient) ContainerStatsOneShot(arg1 context.Context, arg2 string) (types.ContainerStats, error) {
+	fake.containerStatsOneShotMutex.Lock()
+	ret, specificReturn := fake.containerStatsOneShotReturnsOnCall[len(fake.containerStatsOneShotArgsForCall)]
+	fake.containerStatsOneShotArgsForCall = append(fake.containerStatsOneShotArgsForCall, struct {
+		arg1 context.Context
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("ContainerStatsOneShot", []interface{}{arg1, arg2})
+	fake.containerStatsOneShotMutex.Unlock()
+	if fake.ContainerStatsOneShotStub != nil {
+		return fake.ContainerStatsOneShotStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.containerStatsOneShotReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeCommonAPIClient) ContainerStatsOneShotCallCount() int {
+	fake.containerStatsOneShotMutex.RLock()
+	defer fake.containerStatsOneShotMutex.RUnlock()
+	return len(fake.containerStatsOneShotArgsForCall)
+}
+
+func (fake *FakeCommonAPIClient) ContainerStatsOneShotCalls(stub func(context.Context, string) (types.ContainerStats, error)) {
+	fake.containerStatsOneShotMutex.Lock()
+	defer fake.containerStatsOneShotMutex.Unlock()
+	fake.ContainerStatsOneShotStub = stub
+}
+
+func (fake *FakeCommonAPIClient) ContainerStatsOneShotArgsForCall(i int) (context.Context, string) {
+	fake.containerStatsOneShotMutex.RLock()
+	defer fake.containerStatsOneShotMutex.RUnlock()
+	argsForCall := fake.containerStatsOneShotArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeCommonAPIClient) ContainerStatsOneShotReturns(result1 types.ContainerStats, result2 error) {
+	fake.containerStatsOneShotMutex.Lock()
+	defer fake.containerStatsOneShotMutex.Unlock()
+	fake.ContainerStatsOneShotStub = nil
+	fake.containerStatsOneShotReturns = struct {
+		result1 types.ContainerStats
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeCommonAPIClient) ContainerStatsOneShotReturnsOnCall(i int, result1 types.ContainerStats, result2 error) {
+	fake.containerStatsOneShotMutex.Lock()
+	defer fake.containerStatsOneShotMutex.Unlock()
+	fake.ContainerStatsOneShotStub = nil
+	if fake.containerStatsOneShotReturnsOnCall == nil {
+		fake.containerStatsOneShotReturnsOnCall = make(map[int]struct {
+			result1 types.ContainerStats
+			result2 error
+		})
+	}
+	fake.containerStatsOneShotReturnsOnCall[i] = struct {
 		result1 types.ContainerStats
 		result2 error
 	}{result1, result2}
@@ -9009,6 +9090,8 @@ func (fake *FakeCommonAPIClient) Invocations() map[string][][]interface{} {
 	defer fake.containerStatPathMutex.RUnlock()
 	fake.containerStatsMutex.RLock()
 	defer fake.containerStatsMutex.RUnlock()
+	fake.containerStatsOneShotMutex.RLock()
+	defer fake.containerStatsOneShotMutex.RUnlock()
 	fake.containerStopMutex.RLock()
 	defer fake.containerStopMutex.RUnlock()
 	fake.containerTopMutex.RLock()
