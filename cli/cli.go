@@ -13,10 +13,10 @@ import (
 	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
 	"github.com/opctl/opctl/cli/internal/dataresolver"
 	"github.com/opctl/opctl/sdks/go/model"
-	"github.com/opctl/opctl/sdks/go/node/core"
-	"github.com/opctl/opctl/sdks/go/node/core/containerruntime"
-	"github.com/opctl/opctl/sdks/go/node/core/containerruntime/docker"
-	"github.com/opctl/opctl/sdks/go/node/core/containerruntime/k8s"
+	"github.com/opctl/opctl/sdks/go/node"
+	"github.com/opctl/opctl/sdks/go/node/containerruntime"
+	"github.com/opctl/opctl/sdks/go/node/containerruntime/docker"
+	"github.com/opctl/opctl/sdks/go/node/containerruntime/k8s"
 	"github.com/opctl/opctl/sdks/go/opspec"
 	"golang.org/x/term"
 )
@@ -125,7 +125,7 @@ func newCli(
 
 	eventChannel := make(chan model.Event)
 
-	opNode, err := core.New(ctx, cr, *datadirPath)
+	opNode, err := node.New(ctx, cr, *datadirPath)
 	if err != nil {
 		return nil, err
 	}

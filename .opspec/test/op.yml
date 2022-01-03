@@ -19,9 +19,6 @@ inputs:
         format: semver
 run:
   parallel:
-    # api tests
-    - op:
-        ref: ../../api/.opspec/test
     # cli system opspec tests
     - serial:
         - op:

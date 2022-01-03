@@ -13,7 +13,7 @@ import (
 	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
 	"github.com/opctl/opctl/cli/internal/dataresolver"
 	"github.com/opctl/opctl/sdks/go/model"
-	"github.com/opctl/opctl/sdks/go/node/core"
+	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
@@ -22,7 +22,7 @@ func ls(
 	ctx context.Context,
 	opFormatter clioutput.OpFormatter,
 	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
-	node core.Core,
+	node node.Node,
 	dirRef string,
 ) error {
 	dataResolver := dataresolver.New(

@@ -15,7 +15,7 @@ import (
 	"github.com/opctl/opctl/cli/internal/dataresolver"
 	"github.com/opctl/opctl/cli/internal/opgraph"
 	"github.com/opctl/opctl/sdks/go/model"
-	"github.com/opctl/opctl/sdks/go/node/core"
+	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/opspec/opfile"
 	"github.com/pkg/errors"
 )
@@ -37,7 +37,7 @@ func run(
 	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
 	opFormatter clioutput.OpFormatter,
 	eventChannel chan model.Event,
-	node core.Core,
+	node node.Node,
 	opRef string,
 	opts *RunOpts,
 	disableGraph bool,
