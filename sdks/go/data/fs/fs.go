@@ -47,11 +47,11 @@ func (fp _fs) TryResolve(
 		return newHandle(dataRef), nil
 	}
 
+	var aggregateErr aggregateError.ErrAggregate
+
 	if len(fp.basePaths) == 0 {
 		return nil, errors.New("skipped")
 	}
-
-	var aggregateErr aggregateError.ErrAggregate
 
 	for _, basePath := range fp.basePaths {
 		// attempt to resolve from basePath

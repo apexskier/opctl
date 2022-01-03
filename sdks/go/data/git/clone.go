@@ -42,6 +42,7 @@ func (gp *_git) Clone(
 		return fmt.Errorf("invalid git ref: %w", err)
 	}
 	reader, writer := io.Pipe()
+	defer writer.Close()
 	cloneOptions := &git.CloneOptions{
 		URL:           url,
 		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/tags/%s", parsedPkgRef.Version)),
@@ -94,18 +95,6 @@ func (gp *_git) Clone(
 		}
 		return err
 	}
-	writer.Close()
-
-	// err = <-outputErr
-	// if err != nil {
-	// 	fmt.Println("err", err)
-	// 	fmt.Fprintf(os.Stderr, "cleaning up %v\n", dataRef)
-	// 	err := os.RemoveAll(opPath)
-	// 	if err != nil {
-	// 		fmt.Fprintf(os.Stderr, "failed to cleanup partially downloaded op: %v\n", err)
-	// 	}
-	// 	return err
-	// }
 
 	return os.RemoveAll(filepath.Join(opPath, ".git"))
 }
