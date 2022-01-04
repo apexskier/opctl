@@ -8,7 +8,6 @@ import (
 	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
 	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/data/fs"
-	dataNode "github.com/opctl/opctl/sdks/go/data/node"
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/opspec"
@@ -55,9 +54,7 @@ func (dtr _dataResolver) Resolve(
 		ctx,
 		dataRef,
 		fsProvider,
-		dataNode.New(
-			dtr.node,
-		),
+		dtr.node,
 	)
 
 	return opDirHandle, err

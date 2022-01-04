@@ -12,6 +12,8 @@ import (
 
 // Node is the main structure to run and interact with ops
 type Node interface {
+	model.DataProvider
+
 	// StartOp starts an op and returns the root call ID
 	StartOp(
 		ctx context.Context,

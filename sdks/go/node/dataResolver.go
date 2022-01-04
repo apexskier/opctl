@@ -5,11 +5,30 @@ import (
 	"path"
 
 	"github.com/opctl/opctl/sdks/go/model"
-	"github.com/opctl/opctl/sdks/go/node"
 )
 
+func (core) Label() string {
+	return "opctl node"
+}
+
+func (np core) TryResolve(
+	ctx context.Context,
+	dataRef string,
+) (model.DataHandle, error) {
+	if _, err := np.ListDescendants(
+		ctx,
+		model.ListDescendantsReq{
+			DataRef: dataRef,
+		},
+	); err != nil {
+		return nil, err
+	}
+
+	return newHandle(np, dataRef), nil
+}
+
 func newHandle(
-	node node.Node,
+	node Node,
 	dataRef string,
 ) model.DataHandle {
 	return handle{
@@ -20,7 +39,7 @@ func newHandle(
 
 // handle allows interacting w/ data sourced from an opctl node
 type handle struct {
-	node    node.Node
+	node    Node
 	dataRef string
 }
 
