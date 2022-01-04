@@ -9,14 +9,14 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/opctl/opctl/sdks/go/data"
 	aggregateError "github.com/opctl/opctl/sdks/go/internal/aggregate_error"
-	"github.com/opctl/opctl/sdks/go/model"
 )
 
 // New returns a data provider which sources data from the filesystem
 func New(
 	basePaths ...string,
-) model.DataProvider {
+) data.DataProvider {
 	return _fs{
 		basePaths: basePaths,
 	}
@@ -33,7 +33,7 @@ func (fp _fs) Label() string {
 func (fp _fs) TryResolve(
 	ctx context.Context,
 	dataRef string,
-) (model.DataHandle, error) {
+) (data.DataHandle, error) {
 
 	if filepath.IsAbs(dataRef) {
 		if _, err := os.Stat(dataRef); err != nil {

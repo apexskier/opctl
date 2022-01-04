@@ -5,6 +5,7 @@ import (
 	"io"
 	"path/filepath"
 
+	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec/opfile"
 	"github.com/pkg/errors"
@@ -13,7 +14,7 @@ import (
 // List ops recursively within a directory, returning discovered op files by ref. Invalid ops will be returned in the error map.
 func List(
 	ctx context.Context,
-	dirHandle model.DataHandle,
+	dirHandle data.DataHandle,
 ) (map[string]*model.OpSpec, map[string]error, error) {
 	contents, err := dirHandle.ListDescendants(ctx)
 	if err != nil {

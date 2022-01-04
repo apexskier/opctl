@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/data/fs"
 	aggregateError "github.com/opctl/opctl/sdks/go/internal/aggregate_error"
-	"github.com/opctl/opctl/sdks/go/model"
 )
 
 var _ = Context("Resolve", func() {
@@ -19,7 +18,7 @@ var _ = Context("Resolve", func() {
 		It("should return error", func() {
 			/* arrange */
 			provider0 := fs.New()
-			providedProviders := []model.DataProvider{provider0}
+			providedProviders := []DataProvider{provider0}
 			dataRef := "\\not/exist"
 
 			/* act */
@@ -44,7 +43,7 @@ var _ = Context("Resolve", func() {
 			opRef := filepath.Join(wd, "testdata/testop")
 			provider0 := fs.New(filepath.Dir(opRef))
 
-			providedProviders := []model.DataProvider{provider0}
+			providedProviders := []DataProvider{provider0}
 
 			/* act */
 			actualHandle, actualErr := Resolve(

@@ -5,12 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/opctl/opctl/sdks/go/model"
+	"github.com/opctl/opctl/sdks/go/data"
 )
 
 func newHandle(
 	path string,
-) model.DataHandle {
+) data.DataHandle {
 	return handle{
 		path: path,
 	}
@@ -25,14 +25,14 @@ func (lh handle) GetContent(
 	ctx context.Context,
 	contentPath string,
 ) (
-	model.ReadSeekCloser,
+	data.ReadSeekCloser,
 	error,
 ) {
 	return os.Open(filepath.Join(lh.path, contentPath))
 }
 
 func (lh handle) ListDescendants(ctx context.Context) (
-	[]*model.DirEntry,
+	[]*data.DirEntry,
 	error,
 ) {
 	return lh.rListDescendants(lh.path)
@@ -42,7 +42,7 @@ func (lh handle) ListDescendants(ctx context.Context) (
 func (lh handle) rListDescendants(
 	path string,
 ) (
-	[]*model.DirEntry,
+	[]*data.DirEntry,
 	error,
 ) {
 	childDirEntries, err := os.ReadDir(path)
@@ -50,7 +50,7 @@ func (lh handle) rListDescendants(
 		return nil, err
 	}
 
-	var contents []*model.DirEntry
+	var contents []*data.DirEntry
 	for _, childDirEntry := range childDirEntries {
 
 		absContentPath := filepath.Join(path, childDirEntry.Name())
@@ -76,7 +76,7 @@ func (lh handle) rListDescendants(
 
 		contents = append(
 			contents,
-			&model.DirEntry{
+			&data.DirEntry{
 				Mode: childFileInfo.Mode(),
 				Path: filepath.Join(string(os.PathSeparator), relContentPath),
 				Size: childFileInfo.Size(),

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	aggregateError "github.com/opctl/opctl/sdks/go/internal/aggregate_error"
-	"github.com/opctl/opctl/sdks/go/model"
 )
 
 // Resolve "dataRef" from "providers" in order
@@ -16,9 +15,9 @@ import (
 func Resolve(
 	ctx context.Context,
 	dataRef string,
-	providers ...model.DataProvider,
+	providers ...DataProvider,
 ) (
-	model.DataHandle,
+	DataHandle,
 	error,
 ) {
 	var agg aggregateError.ErrAggregate

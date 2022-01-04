@@ -3,6 +3,7 @@ package node
 import (
 	"context"
 
+	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/model"
 )
 
@@ -12,7 +13,7 @@ import (
 
 // Node is the main structure to run and interact with ops
 type Node interface {
-	model.DataProvider
+	data.DataProvider
 
 	// StartOp starts an op and returns the root call ID
 	StartOp(
@@ -34,7 +35,7 @@ type Node interface {
 		ctx context.Context,
 		req model.GetDataReq,
 	) (
-		model.ReadSeekCloser,
+		data.ReadSeekCloser,
 		error,
 	)
 
@@ -48,7 +49,7 @@ type Node interface {
 		ctx context.Context,
 		req model.ListDescendantsReq,
 	) (
-		[]*model.DirEntry,
+		[]*data.DirEntry,
 		error,
 	)
 }

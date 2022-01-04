@@ -4,6 +4,7 @@ import (
 	"context"
 	"path"
 
+	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/model"
 )
 
@@ -14,7 +15,7 @@ func (core) Label() string {
 func (np core) TryResolve(
 	ctx context.Context,
 	dataRef string,
-) (model.DataHandle, error) {
+) (data.DataHandle, error) {
 	if _, err := np.ListDescendants(
 		ctx,
 		model.ListDescendantsReq{
@@ -30,7 +31,7 @@ func (np core) TryResolve(
 func newHandle(
 	node Node,
 	dataRef string,
-) model.DataHandle {
+) data.DataHandle {
 	return handle{
 		node:    node,
 		dataRef: dataRef,
@@ -47,7 +48,7 @@ func (nh handle) GetContent(
 	ctx context.Context,
 	contentPath string,
 ) (
-	model.ReadSeekCloser,
+	data.ReadSeekCloser,
 	error,
 ) {
 	return nh.node.GetData(
@@ -61,7 +62,7 @@ func (nh handle) GetContent(
 func (nh handle) ListDescendants(
 	ctx context.Context,
 ) (
-	[]*model.DirEntry,
+	[]*data.DirEntry,
 	error,
 ) {
 	return nh.node.ListDescendants(

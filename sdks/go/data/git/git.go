@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/opctl/opctl/sdks/go/model"
+	"github.com/opctl/opctl/sdks/go/data"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -19,7 +19,7 @@ var resolveSingleFlightGroup singleflight.Group
 // New returns a data provider which sources data from git repos
 func New(
 	basePath string,
-) model.DataProvider {
+) data.DataProvider {
 	return &_git{
 		basePath: basePath,
 	}
@@ -36,7 +36,7 @@ func (gp *_git) Label() string {
 func (gp *_git) TryResolve(
 	ctx context.Context,
 	dataRef string,
-) (model.DataHandle, error) {
+) (data.DataHandle, error) {
 	// attempt to resolve within singleFlight.Group to ensure concurrent resolves don't race
 	handle, err, _ := resolveSingleFlightGroup.Do(
 		dataRef,
@@ -73,5 +73,5 @@ func (gp *_git) TryResolve(
 	if err != nil {
 		return nil, err
 	}
-	return handle.(model.DataHandle), nil
+	return handle.(data.DataHandle), nil
 }

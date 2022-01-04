@@ -9,7 +9,7 @@ import (
 )
 
 type FakeDataHandle struct {
-	GetContentStub        func(context.Context, chan model.Event, string, string) (model.ReadSeekCloser, error)
+	GetContentStub        func(context.Context, chan model.Event, string, string) (data.ReadSeekCloser, error)
 	getContentMutex       sync.RWMutex
 	getContentArgsForCall []struct {
 		arg1 context.Context
@@ -18,14 +18,14 @@ type FakeDataHandle struct {
 		arg4 string
 	}
 	getContentReturns struct {
-		result1 model.ReadSeekCloser
+		result1 data.ReadSeekCloser
 		result2 error
 	}
 	getContentReturnsOnCall map[int]struct {
-		result1 model.ReadSeekCloser
+		result1 data.ReadSeekCloser
 		result2 error
 	}
-	ListDescendantsStub        func(context.Context, chan model.Event, string) ([]*model.DirEntry, error)
+	ListDescendantsStub        func(context.Context, chan model.Event, string) ([]*data.DirEntry, error)
 	listDescendantsMutex       sync.RWMutex
 	listDescendantsArgsForCall []struct {
 		arg1 context.Context
@@ -33,11 +33,11 @@ type FakeDataHandle struct {
 		arg3 string
 	}
 	listDescendantsReturns struct {
-		result1 []*model.DirEntry
+		result1 []*data.DirEntry
 		result2 error
 	}
 	listDescendantsReturnsOnCall map[int]struct {
-		result1 []*model.DirEntry
+		result1 []*data.DirEntry
 		result2 error
 	}
 	PathStub        func() *string
@@ -64,7 +64,7 @@ type FakeDataHandle struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeDataHandle) GetContent(arg1 context.Context, arg2 chan model.Event, arg3 string, arg4 string) (model.ReadSeekCloser, error) {
+func (fake *FakeDataHandle) GetContent(arg1 context.Context, arg2 chan model.Event, arg3 string, arg4 string) (data.ReadSeekCloser, error) {
 	fake.getContentMutex.Lock()
 	ret, specificReturn := fake.getContentReturnsOnCall[len(fake.getContentArgsForCall)]
 	fake.getContentArgsForCall = append(fake.getContentArgsForCall, struct {
@@ -91,7 +91,7 @@ func (fake *FakeDataHandle) GetContentCallCount() int {
 	return len(fake.getContentArgsForCall)
 }
 
-func (fake *FakeDataHandle) GetContentCalls(stub func(context.Context, chan model.Event, string, string) (model.ReadSeekCloser, error)) {
+func (fake *FakeDataHandle) GetContentCalls(stub func(context.Context, chan model.Event, string, string) (data.ReadSeekCloser, error)) {
 	fake.getContentMutex.Lock()
 	defer fake.getContentMutex.Unlock()
 	fake.GetContentStub = stub
@@ -104,33 +104,33 @@ func (fake *FakeDataHandle) GetContentArgsForCall(i int) (context.Context, chan 
 	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
 }
 
-func (fake *FakeDataHandle) GetContentReturns(result1 model.ReadSeekCloser, result2 error) {
+func (fake *FakeDataHandle) GetContentReturns(result1 data.ReadSeekCloser, result2 error) {
 	fake.getContentMutex.Lock()
 	defer fake.getContentMutex.Unlock()
 	fake.GetContentStub = nil
 	fake.getContentReturns = struct {
-		result1 model.ReadSeekCloser
+		result1 data.ReadSeekCloser
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeDataHandle) GetContentReturnsOnCall(i int, result1 model.ReadSeekCloser, result2 error) {
+func (fake *FakeDataHandle) GetContentReturnsOnCall(i int, result1 data.ReadSeekCloser, result2 error) {
 	fake.getContentMutex.Lock()
 	defer fake.getContentMutex.Unlock()
 	fake.GetContentStub = nil
 	if fake.getContentReturnsOnCall == nil {
 		fake.getContentReturnsOnCall = make(map[int]struct {
-			result1 model.ReadSeekCloser
+			result1 data.ReadSeekCloser
 			result2 error
 		})
 	}
 	fake.getContentReturnsOnCall[i] = struct {
-		result1 model.ReadSeekCloser
+		result1 data.ReadSeekCloser
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeDataHandle) ListDescendants(arg1 context.Context, arg2 chan model.Event, arg3 string) ([]*model.DirEntry, error) {
+func (fake *FakeDataHandle) ListDescendants(arg1 context.Context, arg2 chan model.Event, arg3 string) ([]*data.DirEntry, error) {
 	fake.listDescendantsMutex.Lock()
 	ret, specificReturn := fake.listDescendantsReturnsOnCall[len(fake.listDescendantsArgsForCall)]
 	fake.listDescendantsArgsForCall = append(fake.listDescendantsArgsForCall, struct {
@@ -156,7 +156,7 @@ func (fake *FakeDataHandle) ListDescendantsCallCount() int {
 	return len(fake.listDescendantsArgsForCall)
 }
 
-func (fake *FakeDataHandle) ListDescendantsCalls(stub func(context.Context, chan model.Event, string) ([]*model.DirEntry, error)) {
+func (fake *FakeDataHandle) ListDescendantsCalls(stub func(context.Context, chan model.Event, string) ([]*data.DirEntry, error)) {
 	fake.listDescendantsMutex.Lock()
 	defer fake.listDescendantsMutex.Unlock()
 	fake.ListDescendantsStub = stub
@@ -169,28 +169,28 @@ func (fake *FakeDataHandle) ListDescendantsArgsForCall(i int) (context.Context, 
 	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
-func (fake *FakeDataHandle) ListDescendantsReturns(result1 []*model.DirEntry, result2 error) {
+func (fake *FakeDataHandle) ListDescendantsReturns(result1 []*data.DirEntry, result2 error) {
 	fake.listDescendantsMutex.Lock()
 	defer fake.listDescendantsMutex.Unlock()
 	fake.ListDescendantsStub = nil
 	fake.listDescendantsReturns = struct {
-		result1 []*model.DirEntry
+		result1 []*data.DirEntry
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeDataHandle) ListDescendantsReturnsOnCall(i int, result1 []*model.DirEntry, result2 error) {
+func (fake *FakeDataHandle) ListDescendantsReturnsOnCall(i int, result1 []*data.DirEntry, result2 error) {
 	fake.listDescendantsMutex.Lock()
 	defer fake.listDescendantsMutex.Unlock()
 	fake.ListDescendantsStub = nil
 	if fake.listDescendantsReturnsOnCall == nil {
 		fake.listDescendantsReturnsOnCall = make(map[int]struct {
-			result1 []*model.DirEntry
+			result1 []*data.DirEntry
 			result2 error
 		})
 	}
 	fake.listDescendantsReturnsOnCall[i] = struct {
-		result1 []*model.DirEntry
+		result1 []*data.DirEntry
 		result2 error
 	}{result1, result2}
 }
@@ -329,4 +329,4 @@ func (fake *FakeDataHandle) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ model.DataHandle = new(FakeDataHandle)
+var _ data.DataHandle = new(FakeDataHandle)

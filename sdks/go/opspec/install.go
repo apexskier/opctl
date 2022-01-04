@@ -6,14 +6,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/opctl/opctl/sdks/go/model"
+	"github.com/opctl/opctl/sdks/go/data"
 )
 
 // Install an op at path
 func Install(
 	ctx context.Context,
 	path string,
-	handle model.DataHandle,
+	handle data.DataHandle,
 ) error {
 	contentsList, err := handle.ListDescendants(ctx)
 	if err != nil {

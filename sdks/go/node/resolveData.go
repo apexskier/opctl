@@ -6,7 +6,6 @@ import (
 	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/data/fs"
 	"github.com/opctl/opctl/sdks/go/data/git"
-	"github.com/opctl/opctl/sdks/go/model"
 )
 
 // Resolve attempts to resolve data via local filesystem or git
@@ -19,7 +18,7 @@ func (cr core) ResolveData(
 	ctx context.Context,
 	dataRef string,
 ) (
-	model.DataHandle,
+	data.DataHandle,
 	error,
 ) {
 	return data.Resolve(

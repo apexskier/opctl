@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/model"
 )
 
@@ -11,7 +12,7 @@ func (c core) GetData(
 	ctx context.Context,
 	req model.GetDataReq,
 ) (
-	model.ReadSeekCloser,
+	data.ReadSeekCloser,
 	error,
 ) {
 	if req.DataRef == "" {

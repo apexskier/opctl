@@ -8,7 +8,6 @@ import (
 	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
 	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/data/fs"
-	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
@@ -18,7 +17,7 @@ type DataResolver interface {
 	Resolve(
 		ctx context.Context,
 		dataRef string,
-	) (model.DataHandle, error)
+	) (data.DataHandle, error)
 }
 
 func New(
@@ -39,7 +38,7 @@ type _dataResolver struct {
 func (dtr _dataResolver) Resolve(
 	ctx context.Context,
 	dataRef string,
-) (model.DataHandle, error) {
+) (data.DataHandle, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return nil, err
