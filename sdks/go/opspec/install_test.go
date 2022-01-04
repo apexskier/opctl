@@ -8,9 +8,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	dataFakes "github.com/opctl/opctl/sdks/go/data/fakes"
 	"github.com/opctl/opctl/sdks/go/data/fs"
 	"github.com/opctl/opctl/sdks/go/model"
-	modelFakes "github.com/opctl/opctl/sdks/go/model/fakes"
 )
 
 var _ = Context("Install", func() {
@@ -18,7 +18,7 @@ var _ = Context("Install", func() {
 
 	It("should call handle.ListDescendants w/ expected args", func() {
 		/* arrange */
-		fakeHandle := new(modelFakes.FakeDataHandle)
+		fakeHandle := new(dataFakes.FakeDataHandle)
 
 		/* act */
 		Install(providedCtx, "", fakeHandle)
@@ -31,7 +31,7 @@ var _ = Context("Install", func() {
 			/* arrange */
 			expectedError := errors.New("dummyError")
 
-			fakeHandle := new(modelFakes.FakeDataHandle)
+			fakeHandle := new(dataFakes.FakeDataHandle)
 			fakeHandle.ListDescendantsReturns(nil, expectedError)
 
 			/* act */
@@ -44,7 +44,7 @@ var _ = Context("Install", func() {
 	Context("handle.ListDescendants doesn't err", func() {
 		It("should call handle.GetContent w/ expected args", func() {
 			/* arrange */
-			fakeHandle := new(modelFakes.FakeDataHandle)
+			fakeHandle := new(dataFakes.FakeDataHandle)
 			contentsList := []*model.DirEntry{
 				{
 					Path: "dirEntry1PathGetContents",
@@ -79,7 +79,7 @@ var _ = Context("Install", func() {
 				/* arrange */
 				expectedError := errors.New("dummyError")
 
-				fakeHandle := new(modelFakes.FakeDataHandle)
+				fakeHandle := new(dataFakes.FakeDataHandle)
 				fakeHandle.ListDescendantsReturns([]*model.DirEntry{{}}, expectedError)
 
 				fakeHandle.GetContentReturns(nil, expectedError)

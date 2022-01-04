@@ -2,10 +2,10 @@ package node
 
 import (
 	"context"
+	"fmt"
 	"path"
 
 	"github.com/opctl/opctl/sdks/go/data"
-	"github.com/opctl/opctl/sdks/go/model"
 )
 
 func (core) Label() string {
@@ -16,20 +16,15 @@ func (np core) TryResolve(
 	ctx context.Context,
 	dataRef string,
 ) (data.DataHandle, error) {
-	if _, err := np.ListDescendants(
-		ctx,
-		model.ListDescendantsReq{
-			DataRef: dataRef,
-		},
-	); err != nil {
+	h := newHandle(np, dataRef)
+	if _, err := h.ListDescendants(ctx); err != nil {
 		return nil, err
 	}
-
-	return newHandle(np, dataRef), nil
+	return h, nil
 }
 
 func newHandle(
-	node Node,
+	node core,
 	dataRef string,
 ) data.DataHandle {
 	return handle{
@@ -40,7 +35,7 @@ func newHandle(
 
 // handle allows interacting w/ data sourced from an opctl node
 type handle struct {
-	node    Node
+	node    core
 	dataRef string
 }
 
@@ -51,12 +46,18 @@ func (nh handle) GetContent(
 	data.ReadSeekCloser,
 	error,
 ) {
-	return nh.node.GetData(
-		ctx,
-		model.GetDataReq{
-			DataRef: path.Join(nh.dataRef, contentPath),
-		},
-	)
+	dataRef := path.Join(nh.dataRef, contentPath)
+
+	if dataRef == "" {
+		return nil, fmt.Errorf(`"" not a valid data ref`)
+	}
+
+	dataHandle, err := nh.node.ResolveData(ctx, dataRef)
+	if err != nil {
+		return nil, err
+	}
+
+	return dataHandle.GetContent(ctx, "")
 }
 
 func (nh handle) ListDescendants(
@@ -65,12 +66,16 @@ func (nh handle) ListDescendants(
 	[]*data.DirEntry,
 	error,
 ) {
-	return nh.node.ListDescendants(
-		ctx,
-		model.ListDescendantsReq{
-			DataRef: nh.dataRef,
-		},
-	)
+	if nh.dataRef == "" {
+		return []*data.DirEntry{}, fmt.Errorf(`"" not a valid data ref`)
+	}
+
+	dataHandle, err := nh.node.ResolveData(ctx, nh.dataRef)
+	if err != nil {
+		return nil, err
+	}
+
+	return dataHandle.ListDescendants(ctx)
 }
 
 func (handle) Path() *string {

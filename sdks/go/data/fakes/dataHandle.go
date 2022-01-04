@@ -5,17 +5,15 @@ import (
 	"context"
 	"sync"
 
-	"github.com/opctl/opctl/sdks/go/model"
+	"github.com/opctl/opctl/sdks/go/data"
 )
 
 type FakeDataHandle struct {
-	GetContentStub        func(context.Context, chan model.Event, string, string) (data.ReadSeekCloser, error)
+	GetContentStub        func(context.Context, string) (data.ReadSeekCloser, error)
 	getContentMutex       sync.RWMutex
 	getContentArgsForCall []struct {
 		arg1 context.Context
-		arg2 chan model.Event
-		arg3 string
-		arg4 string
+		arg2 string
 	}
 	getContentReturns struct {
 		result1 data.ReadSeekCloser
@@ -25,12 +23,10 @@ type FakeDataHandle struct {
 		result1 data.ReadSeekCloser
 		result2 error
 	}
-	ListDescendantsStub        func(context.Context, chan model.Event, string) ([]*data.DirEntry, error)
+	ListDescendantsStub        func(context.Context) ([]*data.DirEntry, error)
 	listDescendantsMutex       sync.RWMutex
 	listDescendantsArgsForCall []struct {
 		arg1 context.Context
-		arg2 chan model.Event
-		arg3 string
 	}
 	listDescendantsReturns struct {
 		result1 []*data.DirEntry
@@ -64,19 +60,17 @@ type FakeDataHandle struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeDataHandle) GetContent(arg1 context.Context, arg2 chan model.Event, arg3 string, arg4 string) (data.ReadSeekCloser, error) {
+func (fake *FakeDataHandle) GetContent(arg1 context.Context, arg2 string) (data.ReadSeekCloser, error) {
 	fake.getContentMutex.Lock()
 	ret, specificReturn := fake.getContentReturnsOnCall[len(fake.getContentArgsForCall)]
 	fake.getContentArgsForCall = append(fake.getContentArgsForCall, struct {
 		arg1 context.Context
-		arg2 chan model.Event
-		arg3 string
-		arg4 string
-	}{arg1, arg2, arg3, arg4})
-	fake.recordInvocation("GetContent", []interface{}{arg1, arg2, arg3, arg4})
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("GetContent", []interface{}{arg1, arg2})
 	fake.getContentMutex.Unlock()
 	if fake.GetContentStub != nil {
-		return fake.GetContentStub(arg1, arg2, arg3, arg4)
+		return fake.GetContentStub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -91,17 +85,17 @@ func (fake *FakeDataHandle) GetContentCallCount() int {
 	return len(fake.getContentArgsForCall)
 }
 
-func (fake *FakeDataHandle) GetContentCalls(stub func(context.Context, chan model.Event, string, string) (data.ReadSeekCloser, error)) {
+func (fake *FakeDataHandle) GetContentCalls(stub func(context.Context, string) (data.ReadSeekCloser, error)) {
 	fake.getContentMutex.Lock()
 	defer fake.getContentMutex.Unlock()
 	fake.GetContentStub = stub
 }
 
-func (fake *FakeDataHandle) GetContentArgsForCall(i int) (context.Context, chan model.Event, string, string) {
+func (fake *FakeDataHandle) GetContentArgsForCall(i int) (context.Context, string) {
 	fake.getContentMutex.RLock()
 	defer fake.getContentMutex.RUnlock()
 	argsForCall := fake.getContentArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeDataHandle) GetContentReturns(result1 data.ReadSeekCloser, result2 error) {
@@ -130,18 +124,16 @@ func (fake *FakeDataHandle) GetContentReturnsOnCall(i int, result1 data.ReadSeek
 	}{result1, result2}
 }
 
-func (fake *FakeDataHandle) ListDescendants(arg1 context.Context, arg2 chan model.Event, arg3 string) ([]*data.DirEntry, error) {
+func (fake *FakeDataHandle) ListDescendants(arg1 context.Context) ([]*data.DirEntry, error) {
 	fake.listDescendantsMutex.Lock()
 	ret, specificReturn := fake.listDescendantsReturnsOnCall[len(fake.listDescendantsArgsForCall)]
 	fake.listDescendantsArgsForCall = append(fake.listDescendantsArgsForCall, struct {
 		arg1 context.Context
-		arg2 chan model.Event
-		arg3 string
-	}{arg1, arg2, arg3})
-	fake.recordInvocation("ListDescendants", []interface{}{arg1, arg2, arg3})
+	}{arg1})
+	fake.recordInvocation("ListDescendants", []interface{}{arg1})
 	fake.listDescendantsMutex.Unlock()
 	if fake.ListDescendantsStub != nil {
-		return fake.ListDescendantsStub(arg1, arg2, arg3)
+		return fake.ListDescendantsStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -156,17 +148,17 @@ func (fake *FakeDataHandle) ListDescendantsCallCount() int {
 	return len(fake.listDescendantsArgsForCall)
 }
 
-func (fake *FakeDataHandle) ListDescendantsCalls(stub func(context.Context, chan model.Event, string) ([]*data.DirEntry, error)) {
+func (fake *FakeDataHandle) ListDescendantsCalls(stub func(context.Context) ([]*data.DirEntry, error)) {
 	fake.listDescendantsMutex.Lock()
 	defer fake.listDescendantsMutex.Unlock()
 	fake.ListDescendantsStub = stub
 }
 
-func (fake *FakeDataHandle) ListDescendantsArgsForCall(i int) (context.Context, chan model.Event, string) {
+func (fake *FakeDataHandle) ListDescendantsArgsForCall(i int) context.Context {
 	fake.listDescendantsMutex.RLock()
 	defer fake.listDescendantsMutex.RUnlock()
 	argsForCall := fake.listDescendantsArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+	return argsForCall.arg1
 }
 
 func (fake *FakeDataHandle) ListDescendantsReturns(result1 []*data.DirEntry, result2 error) {
