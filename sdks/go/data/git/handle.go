@@ -26,8 +26,6 @@ type handle struct {
 
 func (gh handle) GetContent(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	contentPath string,
 ) (
 	model.ReadSeekCloser,
@@ -38,8 +36,6 @@ func (gh handle) GetContent(
 
 func (gh handle) ListDescendants(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 ) (
 	[]*model.DirEntry,
 	error,

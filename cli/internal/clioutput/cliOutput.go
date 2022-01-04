@@ -105,14 +105,7 @@ func (clio _cliOutput) Event(event *model.Event) {
 
 	case event.CallStarted != nil && event.CallStarted.Call.Op != nil:
 		clio.opStarted(event.CallStarted)
-
-	case event.OpPullProgress != nil:
-		clio.opPullProgress(event.OpPullProgress)
 	}
-}
-
-func (clio _cliOutput) opPullProgress(event *model.OpPullProgress) {
-	// TODO
 }
 
 func (clio _cliOutput) containerExited(event *model.Event) {

@@ -104,12 +104,8 @@ func run(
 		node,
 	)
 
-	callID := "root"
-
 	opHandle, err := dataResolver.Resolve(
 		ctx,
-		eventChannel,
-		callID,
 		opRef,
 	)
 	if err != nil {
@@ -118,8 +114,6 @@ func run(
 
 	opFileReader, err := opHandle.GetContent(
 		ctx,
-		eventChannel,
-		callID,
 		opfile.FileName,
 	)
 	if err != nil {

@@ -30,8 +30,6 @@ type Node interface {
 	//  - ErrDataRefResolution on resolution failure
 	GetData(
 		ctx context.Context,
-		eventChannel chan model.Event,
-		callID string,
 		req model.GetDataReq,
 	) (
 		model.ReadSeekCloser,
@@ -46,8 +44,6 @@ type Node interface {
 	//  - ErrDataRefResolution on resolution failure
 	ListDescendants(
 		ctx context.Context,
-		eventChannel chan model.Event,
-		callID string,
 		req model.ListDescendantsReq,
 	) (
 		[]*model.DirEntry,

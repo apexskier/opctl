@@ -28,16 +28,12 @@ func (np _node) Label() string {
 
 func (np _node) TryResolve(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	dataRef string,
 ) (model.DataHandle, error) {
 
 	// ensure resolvable by listing contents w/out err
 	if _, err := np.node.ListDescendants(
 		ctx,
-		eventChannel,
-		callID,
 		model.ListDescendantsReq{
 			DataRef: dataRef,
 		},

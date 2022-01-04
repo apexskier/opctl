@@ -32,8 +32,6 @@ func (fp _fs) Label() string {
 
 func (fp _fs) TryResolve(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	dataRef string,
 ) (model.DataHandle, error) {
 

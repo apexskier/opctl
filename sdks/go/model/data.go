@@ -23,8 +23,6 @@ type DataHandle interface {
 	// ListDescendants lists descendant of the data node pointed to by the current handle
 	ListDescendants(
 		ctx context.Context,
-		eventChannel chan Event,
-		callID string,
 	) (
 		[]*DirEntry,
 		error,
@@ -33,8 +31,6 @@ type DataHandle interface {
 	// GetContent gets data from the current handle
 	GetContent(
 		ctx context.Context,
-		eventChannel chan Event,
-		callID string,
 		contentPath string,
 	) (
 		ReadSeekCloser,

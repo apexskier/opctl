@@ -24,8 +24,6 @@ func (this core) StartOp(
 
 	opHandle, err := data.Resolve(
 		ctx,
-		eventChannel,
-		callID,
 		req.Op.Ref,
 		fs.New(),
 		git.New(this.dataCachePath),

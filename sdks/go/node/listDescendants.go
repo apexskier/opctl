@@ -9,8 +9,6 @@ import (
 
 func (c core) ListDescendants(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	req model.ListDescendantsReq,
 ) (
 	[]*model.DirEntry,
@@ -20,10 +18,10 @@ func (c core) ListDescendants(
 		return []*model.DirEntry{}, fmt.Errorf(`"" not a valid data ref`)
 	}
 
-	dataHandle, err := c.ResolveData(ctx, eventChannel, callID, req.DataRef)
+	dataHandle, err := c.ResolveData(ctx, req.DataRef)
 	if err != nil {
 		return nil, err
 	}
 
-	return dataHandle.ListDescendants(ctx, eventChannel, callID)
+	return dataHandle.ListDescendants(ctx)
 }

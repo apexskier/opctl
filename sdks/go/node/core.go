@@ -7,16 +7,15 @@ import (
 	"context"
 	"path/filepath"
 
-	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime"
 )
 
-// New returns a new LocalCore initialized with the given options
+// New returns a new Node
 func New(
 	ctx context.Context,
 	containerRuntime containerruntime.ContainerRuntime,
 	dataDirPath string,
-) (Core, error) {
+) (Node, error) {
 	caller := newCaller(
 		newContainerCaller(
 			containerRuntime,
@@ -41,34 +40,4 @@ type core struct {
 	containerRuntime containerruntime.ContainerRuntime
 	dataCachePath    string
 	opCaller         opCaller
-}
-
-func (c core) Liveness(
-	ctx context.Context,
-) error {
-	return nil
-}
-
-//counterfeiter:generate -o fakes/core.go . Core
-
-// Core is an Node that supports running ops directly on the current machine
-type Core interface {
-	Node
-
-	// Resolve attempts to resolve data via local filesystem or git
-	// nil pullCreds will be ignored
-	//
-	// expected errs:
-	//  - ErrDataProviderAuthentication on authentication failure
-	//  - ErrDataProviderAuthorization on authorization failure
-	//  - ErrDataRefResolution on resolution failure
-	ResolveData(
-		ctx context.Context,
-		eventChannel chan model.Event,
-		callID string,
-		dataRef string,
-	) (
-		model.DataHandle,
-		error,
-	)
 }

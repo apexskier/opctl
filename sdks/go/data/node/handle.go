@@ -26,8 +26,6 @@ type handle struct {
 
 func (nh handle) GetContent(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	contentPath string,
 ) (
 	model.ReadSeekCloser,
@@ -35,8 +33,6 @@ func (nh handle) GetContent(
 ) {
 	return nh.node.GetData(
 		ctx,
-		eventChannel,
-		callID,
 		model.GetDataReq{
 			DataRef: path.Join(nh.dataRef, contentPath),
 		},
@@ -45,16 +41,12 @@ func (nh handle) GetContent(
 
 func (nh handle) ListDescendants(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 ) (
 	[]*model.DirEntry,
 	error,
 ) {
 	return nh.node.ListDescendants(
 		ctx,
-		eventChannel,
-		callID,
 		model.ListDescendantsReq{
 			DataRef: nh.dataRef,
 		},

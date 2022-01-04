@@ -15,8 +15,6 @@ import (
 //  - ErrDataProviderAuthorization on authorization failure
 func Resolve(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	dataRef string,
 	providers ...model.DataProvider,
 ) (
@@ -26,7 +24,7 @@ func Resolve(
 	var agg aggregateError.ErrAggregate
 
 	for _, src := range providers {
-		handle, err := src.TryResolve(ctx, eventChannel, callID, dataRef)
+		handle, err := src.TryResolve(ctx, dataRef)
 		if err != nil {
 			agg.AddError(fmt.Errorf("%s: %w", src.Label(), err))
 		} else if handle != nil {

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/opctl/opctl/cli/internal/dataresolver"
-	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
@@ -29,14 +28,8 @@ func opInstall(
 		}
 	}
 
-	callID := ""
-
-	eventChannel := make(chan model.Event)
-
 	opDirHandle, err := dataResolver.Resolve(
 		ctx,
-		eventChannel,
-		callID,
 		dataRef,
 	)
 	if err != nil {
@@ -45,8 +38,6 @@ func opInstall(
 
 	return opspec.Install(
 		ctx,
-		eventChannel,
-		callID,
 		filepath.Join(path, dataRef),
 		opDirHandle,
 	)

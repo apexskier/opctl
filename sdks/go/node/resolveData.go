@@ -17,8 +17,6 @@ import (
 //  - ErrDataProviderAuthorization on authorization failure
 func (cr core) ResolveData(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	dataRef string,
 ) (
 	model.DataHandle,
@@ -26,8 +24,6 @@ func (cr core) ResolveData(
 ) {
 	return data.Resolve(
 		ctx,
-		eventChannel,
-		callID,
 		dataRef,
 		fs.New(),
 		git.New(cr.dataCachePath),

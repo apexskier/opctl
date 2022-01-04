@@ -13,11 +13,9 @@ import (
 // List ops recursively within a directory, returning discovered op files by ref. Invalid ops will be returned in the error map.
 func List(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	dirHandle model.DataHandle,
 ) (map[string]*model.OpSpec, map[string]error, error) {
-	contents, err := dirHandle.ListDescendants(ctx, eventChannel, callID)
+	contents, err := dirHandle.ListDescendants(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -29,7 +27,7 @@ func List(
 			opFileName := filepath.Join(dirHandle.Ref(), content.Path)
 			ref := filepath.Dir(opFileName)
 
-			opFileReader, err := dirHandle.GetContent(ctx, eventChannel, callID, content.Path)
+			opFileReader, err := dirHandle.GetContent(ctx, content.Path)
 			if err != nil {
 				erroringOpsByPath[ref] = errors.Wrapf(err, "error opening %s", opFileName)
 				continue

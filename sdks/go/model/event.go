@@ -8,7 +8,6 @@ type Event struct {
 	CallStarted              *CallStarted              `json:"callStarted,omitempty"`
 	ContainerStdErrWrittenTo *ContainerStdErrWrittenTo `json:"containerStdErrWrittenTo,omitempty"`
 	ContainerStdOutWrittenTo *ContainerStdOutWrittenTo `json:"containerStdOutWrittenTo,omitempty"`
-	OpPullProgress           *OpPullProgress           `json:"opPullProgress,omitempty"`
 	Timestamp                time.Time                 `json:"timestamp"`
 }
 
@@ -68,20 +67,6 @@ func (e CallStarted) Ref() string {
 // CallEndedError represents an error associated w/ an ended call
 type CallEndedError struct {
 	Message string `json:"message"`
-}
-
-type OpPullProgress struct {
-	Data        []byte `json:"data"`
-	ContainerID string `json:"containerId"`
-	OpRef       string `json:"opRef"`
-}
-
-func (e OpPullProgress) Id() string {
-	return e.ContainerID
-}
-
-func (e OpPullProgress) Ref() string {
-	return e.OpRef
 }
 
 // ContainerStdErrWrittenTo represents a single write to a containers std err.

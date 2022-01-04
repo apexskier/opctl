@@ -35,8 +35,6 @@ func (gp *_git) Label() string {
 
 func (gp *_git) TryResolve(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	dataRef string,
 ) (model.DataHandle, error) {
 	// attempt to resolve within singleFlight.Group to ensure concurrent resolves don't race
@@ -61,7 +59,7 @@ func (gp *_git) TryResolve(
 			}
 
 			// attempt clone
-			if err := gp.Clone(ctx, eventChannel, callID, dataRef); err != nil {
+			if err := gp.Clone(ctx, dataRef); err != nil {
 				return nil, err
 			}
 

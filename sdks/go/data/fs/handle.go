@@ -23,8 +23,6 @@ type handle struct {
 
 func (lh handle) GetContent(
 	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
 	contentPath string,
 ) (
 	model.ReadSeekCloser,
@@ -33,11 +31,7 @@ func (lh handle) GetContent(
 	return os.Open(filepath.Join(lh.path, contentPath))
 }
 
-func (lh handle) ListDescendants(
-	ctx context.Context,
-	eventChannel chan model.Event,
-	callID string,
-) (
+func (lh handle) ListDescendants(ctx context.Context) (
 	[]*model.DirEntry,
 	error,
 ) {
