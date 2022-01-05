@@ -21,10 +21,12 @@ import (
 
 func New(
 	ctx context.Context,
+	dockerConfigPath string,
 	waitUntilReady bool,
 ) (containerruntime.ContainerRuntime, error) {
 	cr := _containerRuntime{
-		vm: lima.New(host.New()),
+		vm:               lima.New(host.New()),
+		dockerConfigPath: dockerConfigPath,
 	}
 
 	if err := host.IsInstalled(cr.vm); err != nil {
@@ -42,7 +44,8 @@ func New(
 }
 
 type _containerRuntime struct {
-	vm environment.VM
+	vm               environment.VM
+	dockerConfigPath string
 }
 
 func (cr _containerRuntime) Delete(
@@ -129,5 +132,5 @@ func (cr _containerRuntime) getDockerContainerRuntime(
 			return nil, fmt.Errorf("error adding VM user to docker group: %w", err)
 		}
 	}
-	return docker.New(ctx, fmt.Sprintf("unix://%s", colimadocker.HostSocketFile()), "")
+	return docker.New(ctx, fmt.Sprintf("unix://%s", colimadocker.HostSocketFile()), cr.dockerConfigPath)
 }

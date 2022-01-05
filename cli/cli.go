@@ -109,7 +109,14 @@ func newCli(
 	if *containerRuntime == "k8s" {
 		cr, err = k8s.New()
 	} else if *containerRuntime == "qemu" {
-		cr, err = qemu.New(ctx, false)
+		dockerConfigPath := cli.String(
+			mow.StringOpt{
+				Desc:   "Docker configuration file path, if using the docker container runtime",
+				EnvVar: "OPCTL_DOCKER_CONFIG",
+				Name:   "docker-config",
+			},
+		)
+		cr, err = qemu.New(ctx, *dockerConfigPath, false)
 	} else {
 		dockerConfigPath := cli.String(
 			mow.StringOpt{
