@@ -124,12 +124,21 @@ func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFor
 	if call.Container != nil {
 		desc = muted.Sprint(call.Container.ContainerID[:8]) + " "
 		if call.Container.Name != nil {
-			desc += highlighted.Sprint(*call.Container.Name)
+			// don't print container name if it's the same as the op call's name,
+			// since it'll look duplicated
+			if call.Name == nil || *call.Name != *call.Container.Name {
+				desc += highlighted.Sprint(*call.Container.Name)
+			}
 		} else {
 			desc += *call.Container.Image.Ref
 		}
 	} else if call.Op != nil {
-		desc = highlighted.Sprint(opFormatter.FormatOpRef(call.Op.OpPath))
+		opName := opFormatter.FormatOpRef(call.Op.OpPath)
+		// don't print op name if it's the same as the op call's name,
+		// since it'll look duplicated
+		if call.Name == nil || *call.Name != opName {
+			desc = highlighted.Sprint(opName)
+		}
 	} else if call.Parallel != nil {
 		desc = "parallel"
 	} else if call.ParallelLoop != nil {
