@@ -70,7 +70,6 @@ func (cr _containerRuntime) RunContainer(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	req *model.ContainerCall,
-	rootCallID string,
 	stdout io.WriteCloser,
 	stderr io.WriteCloser,
 ) (*int64, error) {

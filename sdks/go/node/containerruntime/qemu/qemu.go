@@ -94,8 +94,6 @@ func (cr _containerRuntime) RunContainer(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	req *model.ContainerCall,
-	// @TODO: get rid of in combination with eventPublisher
-	rootCallID string,
 	stdout io.WriteCloser,
 	stderr io.WriteCloser,
 ) (*int64, error) {
@@ -104,7 +102,7 @@ func (cr _containerRuntime) RunContainer(
 		return nil, err
 	}
 
-	return dockerCR.RunContainer(ctx, eventChannel, req, rootCallID, stdout, stderr)
+	return dockerCR.RunContainer(ctx, eventChannel, req, stdout, stderr)
 }
 
 func (cr _containerRuntime) getDockerContainerRuntime(

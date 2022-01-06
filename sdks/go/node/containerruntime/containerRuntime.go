@@ -34,8 +34,6 @@ type ContainerRuntime interface {
 		ctx context.Context,
 		eventChannel chan model.Event,
 		req *model.ContainerCall,
-		// @TODO: get rid of in combination with eventPublisher
-		rootCallID string,
 		stdout io.WriteCloser,
 		stderr io.WriteCloser,
 	) (*int64, error)

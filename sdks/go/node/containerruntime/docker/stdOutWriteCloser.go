@@ -11,7 +11,6 @@ import (
 func NewStdOutWriteCloser(
 	eventChannel chan model.Event,
 	containerCall *model.ContainerCall,
-	rootCallID string,
 ) io.WriteCloser {
 	pr, pw := io.Pipe()
 	go func() {

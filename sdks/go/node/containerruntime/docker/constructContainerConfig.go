@@ -15,14 +15,12 @@ func constructContainerConfig(
 	portBindings nat.PortMap,
 	workDir string,
 	opctlContainerID string,
-	opctlRootCallID string,
 ) *container.Config {
 	containerConfig := &container.Config{
 		Image:      imageRef,
 		WorkingDir: workDir,
 		Tty:        true,
 		Labels: map[string]string{
-			"opctl__root_call_id": opctlRootCallID,
 			"opctl__container_id": opctlContainerID,
 		},
 		ExposedPorts: nat.PortSet{},

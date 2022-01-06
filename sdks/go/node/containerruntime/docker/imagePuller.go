@@ -20,7 +20,6 @@ type imagePuller interface {
 	Pull(
 		ctx context.Context,
 		containerCall *model.ContainerCall,
-		rootCallID string,
 		eventChannel chan model.Event,
 	) error
 }
@@ -43,7 +42,6 @@ type _imagePuller struct {
 func (ip _imagePuller) Pull(
 	ctx context.Context,
 	containerCall *model.ContainerCall,
-	rootCallID string,
 	eventChannel chan model.Event,
 ) error {
 	imageRef := *containerCall.Image.Ref
@@ -97,7 +95,7 @@ func (ip _imagePuller) Pull(
 	}
 	defer imagePullResp.Close()
 
-	stdOutWriter := NewStdOutWriteCloser(eventChannel, containerCall, rootCallID)
+	stdOutWriter := NewStdOutWriteCloser(eventChannel, containerCall)
 	defer stdOutWriter.Close()
 
 	dec := json.NewDecoder(imagePullResp)

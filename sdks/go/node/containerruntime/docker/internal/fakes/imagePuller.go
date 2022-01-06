@@ -9,13 +9,12 @@ import (
 )
 
 type FakeImagePuller struct {
-	PullStub        func(context.Context, *model.ContainerCall, string, chan model.Event) error
+	PullStub        func(context.Context, *model.ContainerCall, chan model.Event) error
 	pullMutex       sync.RWMutex
 	pullArgsForCall []struct {
 		arg1 context.Context
 		arg2 *model.ContainerCall
-		arg3 string
-		arg4 chan model.Event
+		arg3 chan model.Event
 	}
 	pullReturns struct {
 		result1 error
@@ -27,19 +26,18 @@ type FakeImagePuller struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeImagePuller) Pull(arg1 context.Context, arg2 *model.ContainerCall, arg3 string, arg4 chan model.Event) error {
+func (fake *FakeImagePuller) Pull(arg1 context.Context, arg2 *model.ContainerCall, arg3 chan model.Event) error {
 	fake.pullMutex.Lock()
 	ret, specificReturn := fake.pullReturnsOnCall[len(fake.pullArgsForCall)]
 	fake.pullArgsForCall = append(fake.pullArgsForCall, struct {
 		arg1 context.Context
 		arg2 *model.ContainerCall
-		arg3 string
-		arg4 chan model.Event
-	}{arg1, arg2, arg3, arg4})
-	fake.recordInvocation("Pull", []interface{}{arg1, arg2, arg3, arg4})
+		arg3 chan model.Event
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("Pull", []interface{}{arg1, arg2, arg3})
 	fake.pullMutex.Unlock()
 	if fake.PullStub != nil {
-		return fake.PullStub(arg1, arg2, arg3, arg4)
+		return fake.PullStub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
@@ -54,17 +52,17 @@ func (fake *FakeImagePuller) PullCallCount() int {
 	return len(fake.pullArgsForCall)
 }
 
-func (fake *FakeImagePuller) PullCalls(stub func(context.Context, *model.ContainerCall, string, chan model.Event) error) {
+func (fake *FakeImagePuller) PullCalls(stub func(context.Context, *model.ContainerCall, chan model.Event) error) {
 	fake.pullMutex.Lock()
 	defer fake.pullMutex.Unlock()
 	fake.PullStub = stub
 }
 
-func (fake *FakeImagePuller) PullArgsForCall(i int) (context.Context, *model.ContainerCall, string, chan model.Event) {
+func (fake *FakeImagePuller) PullArgsForCall(i int) (context.Context, *model.ContainerCall, chan model.Event) {
 	fake.pullMutex.RLock()
 	defer fake.pullMutex.RUnlock()
 	argsForCall := fake.pullArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
 func (fake *FakeImagePuller) PullReturns(result1 error) {

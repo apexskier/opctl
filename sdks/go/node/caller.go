@@ -159,7 +159,6 @@ func (clr _caller) Call(
 			call.Container,
 			scope,
 			callSpec.Container,
-			rootCallID,
 		)
 	case callSpec.Op != nil:
 		outputs, err = clr.opCaller.Call(

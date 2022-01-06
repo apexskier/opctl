@@ -21,7 +21,6 @@ type containerCaller interface {
 		containerCall *model.ContainerCall,
 		inboundScope map[string]*model.Value,
 		containerCallSpec *model.ContainerCallSpec,
-		rootCallID string,
 	) (
 		map[string]*model.Value,
 		error,
@@ -46,7 +45,6 @@ func (cc _containerCaller) Call(
 	containerCall *model.ContainerCall,
 	inboundScope map[string]*model.Value,
 	containerCallSpec *model.ContainerCallSpec,
-	rootCallID string,
 ) (
 	map[string]*model.Value,
 	error,
@@ -65,7 +63,6 @@ func (cc _containerCaller) Call(
 			logStdOutPR,
 			logStdErrPR,
 			containerCall,
-			rootCallID,
 		)
 	}()
 
@@ -78,7 +75,6 @@ func (cc _containerCaller) Call(
 		ctx,
 		eventChannel,
 		containerCall,
-		rootCallID,
 		logStdOutPW,
 		logStdErrPW,
 	)
@@ -106,7 +102,6 @@ func (this _containerCaller) interpretLogs(
 	stdOutReader io.Reader,
 	stdErrReader io.Reader,
 	containerCall *model.ContainerCall,
-	rootCallID string,
 ) error {
 	stdOutLogChan := make(chan error, 1)
 	go func() {

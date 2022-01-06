@@ -21,7 +21,6 @@ type runContainer interface {
 		ctx context.Context,
 		eventChannel chan model.Event,
 		req *model.ContainerCall,
-		rootCallID string,
 		stdout io.WriteCloser,
 		stderr io.WriteCloser,
 	) (*int64, error)
@@ -56,7 +55,6 @@ func (cr _runContainer) RunContainer(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	req *model.ContainerCall,
-	rootCallID string,
 	stdout io.WriteCloser,
 	stderr io.WriteCloser,
 ) (*int64, error) {
@@ -109,7 +107,6 @@ func (cr _runContainer) RunContainer(
 		imageErr = cr.imagePuller.Pull(
 			ctx,
 			req,
-			rootCallID,
 			eventChannel,
 		)
 		// don't err yet; image might be cached. We allow this to support offline use
@@ -144,7 +141,6 @@ func (cr _runContainer) RunContainer(
 			portBindings,
 			req.WorkDir,
 			req.ContainerID,
-			rootCallID,
 		),
 		constructHostConfig(
 			req.Dirs,
