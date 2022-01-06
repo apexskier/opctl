@@ -15,10 +15,12 @@ func New(
 	ctx context.Context,
 	containerRuntime containerruntime.ContainerRuntime,
 	dataDirPath string,
+	privileged bool,
 ) (Node, error) {
 	caller := newCaller(
 		newContainerCaller(
 			containerRuntime,
+			privileged,
 		),
 		dataDirPath,
 	)

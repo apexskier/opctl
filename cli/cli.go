@@ -133,7 +133,12 @@ func newCli(
 
 	eventChannel := make(chan model.Event)
 
-	opNode, err := node.New(ctx, cr, *datadirPath)
+	privileged := cli.Bool(mow.BoolOpt{
+		Name:   "privileged",
+		Desc:   "Run containers in privileged mode",
+		EnvVar: "OPCTL_PRIVILEGED",
+	})
+	opNode, err := node.New(ctx, cr, *datadirPath, *privileged)
 	if err != nil {
 		return nil, err
 	}

@@ -29,13 +29,16 @@ type containerCaller interface {
 
 func newContainerCaller(
 	containerRuntime containerruntime.ContainerRuntime,
+	privileged bool,
 ) containerCaller {
 	return _containerCaller{
 		containerRuntime: containerRuntime,
+		privileged:       privileged,
 	}
 }
 
 type _containerCaller struct {
+	privileged       bool
 	containerRuntime containerruntime.ContainerRuntime
 }
 
@@ -77,6 +80,7 @@ func (cc _containerCaller) Call(
 		containerCall,
 		logStdOutPW,
 		logStdErrPW,
+		cc.privileged,
 	)
 
 	// @TODO: handle no exit code

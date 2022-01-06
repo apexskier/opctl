@@ -23,6 +23,7 @@ type runContainer interface {
 		req *model.ContainerCall,
 		stdout io.WriteCloser,
 		stderr io.WriteCloser,
+		privileged bool, // This should be in ContainerCall, but requires non-compatible opspec changes
 	) (*int64, error)
 }
 
@@ -57,6 +58,7 @@ func (cr _runContainer) RunContainer(
 	req *model.ContainerCall,
 	stdout io.WriteCloser,
 	stderr io.WriteCloser,
+	privileged bool,
 ) (*int64, error) {
 	defer stdout.Close()
 	defer stderr.Close()
@@ -147,6 +149,7 @@ func (cr _runContainer) RunContainer(
 			req.Files,
 			req.Sockets,
 			portBindings,
+			privileged,
 		),
 		networkingConfig,
 		// platform requires API v1.41 so set to nil to avoid version errors

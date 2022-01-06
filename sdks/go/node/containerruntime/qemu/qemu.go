@@ -96,13 +96,14 @@ func (cr _containerRuntime) RunContainer(
 	req *model.ContainerCall,
 	stdout io.WriteCloser,
 	stderr io.WriteCloser,
+	privileged bool,
 ) (*int64, error) {
 	dockerCR, err := cr.getDockerContainerRuntime(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return dockerCR.RunContainer(ctx, eventChannel, req, stdout, stderr)
+	return dockerCR.RunContainer(ctx, eventChannel, req, stdout, stderr, privileged)
 }
 
 func (cr _containerRuntime) getDockerContainerRuntime(

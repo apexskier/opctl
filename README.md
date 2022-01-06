@@ -39,6 +39,10 @@ state doesn't need to be written to disk.
 Now, someone on my local network can't read any file from my computer opctl has
 access to over the HTTP api.
 
+Opctl also runs all docker containers in privileged mode, which has higher risk.
+This disables that by default, which prevents docker in docker ops without using
+the `--privileged` flag.
+
 ### credentials
 
 Credentials for git and docker use standard credential helper mechanisms,

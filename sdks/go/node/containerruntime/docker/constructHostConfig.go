@@ -13,13 +13,14 @@ func constructHostConfig(
 	containerCallFiles map[string]string,
 	containerCallSockets map[string]string,
 	portBindings nat.PortMap,
+	privileged bool,
 ) *container.HostConfig {
 	hostConfig := &container.HostConfig{
 		PortBindings: portBindings,
 		// support docker in docker
 		// @TODO: reconsider; can we avoid this?
 		// see for similar discussion: https://github.com/kubernetes/kubernetes/issues/391
-		Privileged: true,
+		Privileged: privileged,
 	}
 	for containerFilePath, hostFilePath := range containerCallFiles {
 		hostConfig.Mounts = append(

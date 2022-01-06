@@ -72,6 +72,7 @@ func (cr _containerRuntime) RunContainer(
 	req *model.ContainerCall,
 	stdout io.WriteCloser,
 	stderr io.WriteCloser,
+	privileged bool,
 ) (*int64, error) {
 	defer stdout.Close()
 	defer stderr.Close()

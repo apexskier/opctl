@@ -36,5 +36,6 @@ type ContainerRuntime interface {
 		req *model.ContainerCall,
 		stdout io.WriteCloser,
 		stderr io.WriteCloser,
+		privileged bool,
 	) (*int64, error)
 }
