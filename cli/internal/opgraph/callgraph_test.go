@@ -387,19 +387,19 @@ func TestCallGraph(t *testing.T) {
 ├─◎ oppath2
 │ ├─◉ ⋰ id123456 containerRef 58s ./cmd arg1 arg2 arg3
 │ ├─◉ ☑ id098765 containerRef 1s
-│ └─◎ ⚠ 1s
-│   └─◉ ⋰ id098765 containerRef 57s
+│ ╰─◎ ⚠ 1s
+│   ╰─◉ ⋰ id098765 containerRef 57s
 ├─◎ if skipped
-│ └─◉️ ☒ id098765 named-container 1s
+│ ╰─◉️ ☒ id098765 named-container 1s
 ├─◎ if
 │ │ serial
-│ └─◉ ⋰ Third Child parallel 59s
+│ ╰─◉ ⋰ Third Child parallel 59s
 ├─◉ ⋰ 59s
 ├─◉ ⋰ 51s
 ├─◎ ☑ oppath2 29s (2 children)
 ├─◉ ⋰ parallel loop 51s
 ├─◉ ⋰ serial 51s
-└─◉ ⋰ serial loop 51s
+╰─◉ ⋰ serial loop 51s
 ⚠️  this should show up as a warning`
 	g.Expect(collapsedStr).To(Equal(expectedCollapsedStr))
 
@@ -415,21 +415,21 @@ func TestCallGraph(t *testing.T) {
 ├─◎ oppath2
 │ ├─◉ ⋰ id123456 containerRef 58s ./cmd arg1 arg2 arg3
 │ ├─◉ ☑ id098765 containerRef 1s
-│ └─◎ ⚠ 1s
-│   └─◉ ⋰ id098765 containerRef 57s
+│ ╰─◎ ⚠ 1s
+│   ╰─◉ ⋰ id098765 containerRef 57s
 ├─◎ if skipped
-│ └─◉️ ☒ id098765 named-container 1s
+│ ╰─◉️ ☒ id098765 named-container 1s
 ├─◎ if
 │ │ serial
-│ └─◉ ⋰ Third Child parallel 59s
+│ ╰─◉ ⋰ Third Child parallel 59s
 ├─◉ ⋰ 59s
 ├─◉ ⋰ 51s
 ├─◎ ☑ oppath2 29s
 │ ├─◉ ⋰ id123456 containerRef 58s ./cmd arg1 arg2 arg3
-│ └─◉ ☑ id098765 containerRef 1s
+│ ╰─◉ ☑ id098765 containerRef 1s
 ├─◉ ⋰ parallel loop 51s
 ├─◉ ⋰ serial 51s
-└─◉ ⋰ serial loop 51s
+╰─◉ ⋰ serial loop 51s
 ⚠️  this should show up as a warning`
 	g.Expect(expandedStr).To(Equal(expandedCollapsedStr))
 }

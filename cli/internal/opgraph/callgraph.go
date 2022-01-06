@@ -206,7 +206,7 @@ func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFor
 				if i < childLen-1 {
 					str.WriteString(fmt.Sprintf("\n├─%s", part))
 				} else {
-					str.WriteString(fmt.Sprintf("\n└─%s", part))
+					str.WriteString(fmt.Sprintf("\n╰─%s", part))
 				}
 			} else if i < childLen-1 {
 				str.WriteString(fmt.Sprintf("\n│ %s", part))
