@@ -63,6 +63,8 @@ func (o *OutputManager) Print(str string) error {
 		ruleWidth = w
 	}
 
+	// reset styling to stop intermediate command output messing with graph
+	io.WriteString(o.out, "\033[0m")
 	io.WriteString(o.out, fmt.Sprintln(strings.Repeat("┄", ruleWidth)))
 
 	for i, line := range lines {
