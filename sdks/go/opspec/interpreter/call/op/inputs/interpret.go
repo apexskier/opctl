@@ -38,7 +38,11 @@ func Interpret(
 
 	if len(paramErrMap) > 0 {
 		// return error w/ fancy formatted msg
-		messageBuffer := bytes.NewBufferString("validation error(s):")
+		messageBuffer := bytes.NewBufferString("validation error")
+		if len(paramErrMap) != 1 {
+			messageBuffer.WriteString("s")
+		}
+		messageBuffer.WriteString(":")
 		for paramName, err := range paramErrMap {
 			messageBuffer.WriteString(fmt.Sprintf("\n- %v: %v", paramName, err.Error()))
 		}

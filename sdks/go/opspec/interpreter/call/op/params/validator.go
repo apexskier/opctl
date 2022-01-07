@@ -24,7 +24,11 @@ func Validate(
 
 	if len(paramErrMap) > 0 {
 		// return error w/ fancy formatted msg
-		messageBuffer := bytes.NewBufferString("validation error(s):")
+		messageBuffer := bytes.NewBufferString("validation error")
+		if len(paramErrMap) != 1 {
+			messageBuffer.WriteString("s")
+		}
+		messageBuffer.WriteString(":")
 		for paramName, errs := range paramErrMap {
 			for _, err := range errs {
 				messageBuffer.WriteString(fmt.Sprintf("\n- %v: %v", paramName, err.Error()))
