@@ -24,11 +24,6 @@ type ContainerRuntime interface {
 		containerID string,
 	) error
 
-	// Kill stops/kills opctl managed resources within the container runtime
-	Kill(
-		ctx context.Context,
-	) error
-
 	// RunContainer creates, starts, and waits on a container. ExitCode &/Or an error will be returned
 	RunContainer(
 		ctx context.Context,

@@ -2,39 +2,36 @@ package docker
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	"golang.org/x/net/context"
+	"golang.org/x/sync/errgroup"
 )
 
-func (ctp _containerRuntime) DeleteContainerIfExists(
+func (cr _containerRuntime) DeleteContainerIfExists(
 	ctx context.Context,
-	containerID string,
+	containerID string, // opctl container ID
 ) error {
-	// try to stop the container gracefully prior to deletion
-	stopTimeout := 3 * time.Second
-	err := ctp.dockerClient.ContainerStop(
+	containers, err := cr.dockerClient.ContainerList(
 		ctx,
-		getContainerName(containerID),
-		&stopTimeout,
-	)
-	if err != nil {
-		return fmt.Errorf("unable to stop container: %w", err)
-	}
-
-	// now delete the container post-termination
-	err = ctp.dockerClient.ContainerRemove(
-		ctx,
-		getContainerName(containerID),
-		types.ContainerRemoveOptions{
-			RemoveVolumes: true,
-			Force:         true,
+		types.ContainerListOptions{
+			Filters: filters.NewArgs(
+				filters.KeyValuePair{
+					Key:   "label",
+					Value: fmt.Sprintf("%s=%s", containerIDLabel, containerID),
+				},
+			),
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("unable to delete container: %w", err)
+		return err
 	}
 
-	return nil
+	errGroup, ctx := errgroup.WithContext(ctx)
+	for _, container := range containers {
+		cr.runContainer.stopAndCleanup(ctx, container.ID)
+	}
+
+	return errGroup.Wait()
 }

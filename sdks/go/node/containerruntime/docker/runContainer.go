@@ -16,43 +16,62 @@ import (
 	"github.com/pkg/errors"
 )
 
-type runContainer interface {
-	RunContainer(
-		ctx context.Context,
-		eventChannel chan model.Event,
-		req *model.ContainerCall,
-		stdout io.WriteCloser,
-		stderr io.WriteCloser,
-		privileged bool, // This should be in ContainerCall, but requires non-compatible opspec changes
-	) (*int64, error)
-}
-
 func newRunContainer(
 	ctx context.Context,
+	networkName string,
 	dockerClient dockerClientPkg.CommonAPIClient,
 	dockerConfigPath string,
-) (runContainer, error) {
-	rc := _runContainer{
+) runContainer {
+	return runContainer{
 		containerStdErrStreamer: newContainerStdErrStreamer(dockerClient),
 		containerStdOutStreamer: newContainerStdOutStreamer(dockerClient),
 		dockerClient:            dockerClient,
 		ensureNetworkExistser:   newEnsureNetworkExistser(dockerClient),
 		imagePuller:             newImagePuller(dockerClient, dockerConfigPath),
 		imagePusher:             newImagePusher(),
+		networkName:             networkName,
 	}
-	return rc, nil
 }
 
-type _runContainer struct {
+type runContainer struct {
 	containerStdErrStreamer containerLogStreamer
 	containerStdOutStreamer containerLogStreamer
 	dockerClient            dockerClientPkg.CommonAPIClient
 	ensureNetworkExistser   ensureNetworkExistser
 	imagePuller             imagePuller
 	imagePusher             imagePusher
+	networkName             string
 }
 
-func (cr _runContainer) RunContainer(
+// stopAndCleanup stops and cleans up a single docker container
+func (cr runContainer) stopAndCleanup(
+	ctx context.Context,
+	container string, // docker container name/ID
+) error {
+	// try to stop the container gracefully prior to deletion
+	stopTimeout := 3 * time.Second
+	err := cr.dockerClient.ContainerStop(ctx, container, &stopTimeout)
+	if err != nil {
+		return fmt.Errorf("unable to stop container: %w", err)
+	}
+
+	// now delete the container post-termination
+	err = cr.dockerClient.ContainerRemove(
+		ctx,
+		container,
+		types.ContainerRemoveOptions{
+			RemoveVolumes: true,
+			Force:         true,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("unable to delete container: %w", err)
+	}
+
+	return nil
+}
+
+func (cr runContainer) RunContainer(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	req *model.ContainerCall,
@@ -67,33 +86,10 @@ func (cr _runContainer) RunContainer(
 	// @TODO: remove when socket outputs supported
 	if err := cr.ensureNetworkExistser.EnsureNetworkExists(
 		ctx,
-		networkName,
+		cr.networkName,
 	); err != nil {
 		return nil, err
 	}
-
-	// for docker, we prefix name with opctl_ in order to allow external tools to know it's an opctl managed container
-	// do not change this prefix as it might break external consumers
-	containerName := getContainerName(req.ContainerID)
-	defer func() {
-		// ensure container always cleaned up: gracefully stop then delete it
-		// @TODO: consolidate logic with DeleteContainerIfExists
-		newCtx := context.Background() // always use a fresh context, to clean up after cancellation
-		stopTimeout := 3 * time.Second
-		cr.dockerClient.ContainerStop(
-			newCtx,
-			containerName,
-			&stopTimeout,
-		)
-		cr.dockerClient.ContainerRemove(
-			newCtx,
-			containerName,
-			types.ContainerRemoveOptions{
-				RemoveVolumes: true,
-				Force:         true,
-			},
-		)
-	}()
 
 	var imageErr error
 	if req.Image.Src != nil {
@@ -124,14 +120,22 @@ func (cr _runContainer) RunContainer(
 	// construct networking config
 	networkingConfig := &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
-			networkName: {},
+			cr.networkName: {},
 		},
 	}
 	if req.Name != nil {
-		networkingConfig.EndpointsConfig[networkName].Aliases = []string{
+		networkingConfig.EndpointsConfig[cr.networkName].Aliases = []string{
 			*req.Name,
 		}
 	}
+
+	// for docker, we prefix name in order to allow external tools to know it's an opctl managed container
+	nameParts := []string{"miniopctl"}
+	if req.Name != nil {
+		nameParts = append(nameParts, *req.Name)
+	}
+	nameParts = append(nameParts, req.ContainerID)
+	containerName := strings.Join(nameParts, "_")
 
 	// create container
 	containerCreatedResponse, createErr := cr.dockerClient.ContainerCreate(
@@ -156,6 +160,12 @@ func (cr _runContainer) RunContainer(
 		nil,
 		containerName,
 	)
+
+	defer func() {
+		newCtx := context.Background() // always use a fresh context, to clean up after cancellation
+		cr.stopAndCleanup(newCtx, containerCreatedResponse.ID)
+	}()
+
 	if createErr != nil {
 		select {
 		case <-ctx.Done():
@@ -226,5 +236,4 @@ func (cr _runContainer) RunContainer(
 		err = <-errChan
 	}
 	return &exitCode, err
-
 }

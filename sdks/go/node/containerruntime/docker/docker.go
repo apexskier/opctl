@@ -4,9 +4,6 @@ package docker
 //counterfeiter:generate -o internal/fakes/commonAPIClient.go github.com/docker/docker/client.CommonAPIClient
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	dockerClientPkg "github.com/docker/docker/client"
@@ -15,12 +12,16 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	containerIDLabel = "miniopctl_container_id"
+)
+
 func New(
 	ctx context.Context,
-	host string,
+	networkName,
+	host,
 	dockerConfigPath string,
 ) (containerruntime.ContainerRuntime, error) {
-
 	dockerClient, err := dockerClientPkg.NewClientWithOpts(dockerClientPkg.FromEnv, dockerClientPkg.WithHost(host))
 	if err != nil {
 		return nil, err
@@ -29,18 +30,15 @@ func New(
 	// degrade client version to version of server
 	dockerClient.NegotiateAPIVersion(ctx)
 
-	rc, err := newRunContainer(ctx, dockerClient, dockerConfigPath)
-	if err != nil {
-		return nil, err
-	}
-
 	return _containerRuntime{
-		runContainer: rc,
+		networkName:  networkName,
+		runContainer: newRunContainer(ctx, networkName, dockerClient, dockerConfigPath),
 		dockerClient: dockerClient,
 	}, nil
 }
 
 type _containerRuntime struct {
+	networkName string
 	runContainer
 	dockerClient dockerClientPkg.CommonAPIClient
 }
@@ -53,12 +51,12 @@ func (cr _containerRuntime) Delete(
 		types.ContainerListOptions{
 			Filters: filters.NewArgs(
 				filters.KeyValuePair{
-					Key:   "name",
-					Value: containerNamePrefix,
+					Key:   "label",
+					Value: containerIDLabel,
 				},
 				filters.KeyValuePair{
 					Key:   "network",
-					Value: networkName,
+					Value: cr.networkName,
 				},
 			),
 		},
@@ -69,31 +67,8 @@ func (cr _containerRuntime) Delete(
 
 	errGroup, ctx := errgroup.WithContext(ctx)
 	for _, container := range containers {
-		for _, containerName := range container.Names {
-			containerName := containerName
-			errGroup.Go(func() error {
-				slashPrefix := fmt.Sprintf("/%s", containerNamePrefix)
-				// check if containerName is a conventional opctl container name
-				if strings.HasPrefix(containerName, slashPrefix) {
-					return cr.DeleteContainerIfExists(
-						ctx,
-						// convert containerName to opctl container id as required by cr.DeleteContainerIfExists
-						strings.Replace(containerName, slashPrefix, "", 1),
-					)
-				}
-				return nil
-			})
-		}
+		cr.stopAndCleanup(ctx, container.ID)
 	}
 
 	return errGroup.Wait()
 }
-
-func (cr _containerRuntime) Kill(
-	ctx context.Context,
-) error {
-	return cr.Delete(ctx)
-}
-
-const containerNamePrefix = "opctl_"
-const networkName = "opctl"

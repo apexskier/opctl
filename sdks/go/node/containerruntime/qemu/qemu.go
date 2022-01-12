@@ -21,12 +21,14 @@ import (
 
 func New(
 	ctx context.Context,
+	networkName,
 	dockerConfigPath string,
 	waitUntilReady bool,
 ) (containerruntime.ContainerRuntime, error) {
 	cr := _containerRuntime{
 		vm:               lima.New(host.New()),
 		dockerConfigPath: dockerConfigPath,
+		networkName:      networkName,
 	}
 
 	if err := host.IsInstalled(cr.vm); err != nil {
@@ -46,6 +48,7 @@ func New(
 type _containerRuntime struct {
 	vm               environment.VM
 	dockerConfigPath string
+	networkName      string
 }
 
 func (cr _containerRuntime) Delete(
@@ -68,25 +71,6 @@ func (cr _containerRuntime) DeleteContainerIfExists(
 	}
 
 	return dockerCR.DeleteContainerIfExists(ctx, containerID)
-}
-
-func (cr _containerRuntime) Kill(
-	ctx context.Context,
-) error {
-	if !cr.vm.Running() {
-		return nil
-	}
-
-	dockerCR, err := cr.getDockerContainerRuntime(ctx)
-	if err != nil {
-		return err
-	}
-
-	if err := dockerCR.Kill(ctx); err != nil {
-		return err
-	}
-
-	return cr.vm.Stop()
 }
 
 // RunContainer creates, starts, and waits on a container. ExitCode &/Or an error will be returned
@@ -131,5 +115,10 @@ func (cr _containerRuntime) getDockerContainerRuntime(
 			return nil, fmt.Errorf("error adding VM user to docker group: %w", err)
 		}
 	}
-	return docker.New(ctx, fmt.Sprintf("unix://%s", colimadocker.HostSocketFile()), cr.dockerConfigPath)
+	return docker.New(
+		ctx,
+		cr.networkName,
+		fmt.Sprintf("unix://%s", colimadocker.HostSocketFile()),
+		cr.dockerConfigPath,
+	)
 }

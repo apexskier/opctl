@@ -34,18 +34,7 @@ type FakeContainerRuntime struct {
 	deleteContainerIfExistsReturnsOnCall map[int]struct {
 		result1 error
 	}
-	KillStub        func(context.Context) error
-	killMutex       sync.RWMutex
-	killArgsForCall []struct {
-		arg1 context.Context
-	}
-	killReturns struct {
-		result1 error
-	}
-	killReturnsOnCall map[int]struct {
-		result1 error
-	}
-	RunContainerStub        func(context.Context, chan model.Event, *model.ContainerCall, io.WriteCloser, io.WriteCloser) (*int64, error)
+	RunContainerStub        func(context.Context, chan model.Event, *model.ContainerCall, io.WriteCloser, io.WriteCloser, bool) (*int64, error)
 	runContainerMutex       sync.RWMutex
 	runContainerArgsForCall []struct {
 		arg1 context.Context
@@ -53,6 +42,7 @@ type FakeContainerRuntime struct {
 		arg3 *model.ContainerCall
 		arg4 io.WriteCloser
 		arg5 io.WriteCloser
+		arg6 bool
 	}
 	runContainerReturns struct {
 		result1 *int64
@@ -187,67 +177,7 @@ func (fake *FakeContainerRuntime) DeleteContainerIfExistsReturnsOnCall(i int, re
 	}{result1}
 }
 
-func (fake *FakeContainerRuntime) Kill(arg1 context.Context) error {
-	fake.killMutex.Lock()
-	ret, specificReturn := fake.killReturnsOnCall[len(fake.killArgsForCall)]
-	fake.killArgsForCall = append(fake.killArgsForCall, struct {
-		arg1 context.Context
-	}{arg1})
-	fake.recordInvocation("Kill", []interface{}{arg1})
-	fake.killMutex.Unlock()
-	if fake.KillStub != nil {
-		return fake.KillStub(arg1)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	fakeReturns := fake.killReturns
-	return fakeReturns.result1
-}
-
-func (fake *FakeContainerRuntime) KillCallCount() int {
-	fake.killMutex.RLock()
-	defer fake.killMutex.RUnlock()
-	return len(fake.killArgsForCall)
-}
-
-func (fake *FakeContainerRuntime) KillCalls(stub func(context.Context) error) {
-	fake.killMutex.Lock()
-	defer fake.killMutex.Unlock()
-	fake.KillStub = stub
-}
-
-func (fake *FakeContainerRuntime) KillArgsForCall(i int) context.Context {
-	fake.killMutex.RLock()
-	defer fake.killMutex.RUnlock()
-	argsForCall := fake.killArgsForCall[i]
-	return argsForCall.arg1
-}
-
-func (fake *FakeContainerRuntime) KillReturns(result1 error) {
-	fake.killMutex.Lock()
-	defer fake.killMutex.Unlock()
-	fake.KillStub = nil
-	fake.killReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeContainerRuntime) KillReturnsOnCall(i int, result1 error) {
-	fake.killMutex.Lock()
-	defer fake.killMutex.Unlock()
-	fake.KillStub = nil
-	if fake.killReturnsOnCall == nil {
-		fake.killReturnsOnCall = make(map[int]struct {
-			result1 error
-		})
-	}
-	fake.killReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeContainerRuntime) RunContainer(arg1 context.Context, arg2 chan model.Event, arg3 *model.ContainerCall, arg4 io.WriteCloser, arg5 io.WriteCloser) (*int64, error) {
+func (fake *FakeContainerRuntime) RunContainer(arg1 context.Context, arg2 chan model.Event, arg3 *model.ContainerCall, arg4 io.WriteCloser, arg5 io.WriteCloser, arg6 bool) (*int64, error) {
 	fake.runContainerMutex.Lock()
 	ret, specificReturn := fake.runContainerReturnsOnCall[len(fake.runContainerArgsForCall)]
 	fake.runContainerArgsForCall = append(fake.runContainerArgsForCall, struct {
@@ -256,11 +186,12 @@ func (fake *FakeContainerRuntime) RunContainer(arg1 context.Context, arg2 chan m
 		arg3 *model.ContainerCall
 		arg4 io.WriteCloser
 		arg5 io.WriteCloser
-	}{arg1, arg2, arg3, arg4, arg5})
-	fake.recordInvocation("RunContainer", []interface{}{arg1, arg2, arg3, arg4, arg5})
+		arg6 bool
+	}{arg1, arg2, arg3, arg4, arg5, arg6})
+	fake.recordInvocation("RunContainer", []interface{}{arg1, arg2, arg3, arg4, arg5, arg6})
 	fake.runContainerMutex.Unlock()
 	if fake.RunContainerStub != nil {
-		return fake.RunContainerStub(arg1, arg2, arg3, arg4, arg5)
+		return fake.RunContainerStub(arg1, arg2, arg3, arg4, arg5, arg6)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -275,17 +206,17 @@ func (fake *FakeContainerRuntime) RunContainerCallCount() int {
 	return len(fake.runContainerArgsForCall)
 }
 
-func (fake *FakeContainerRuntime) RunContainerCalls(stub func(context.Context, chan model.Event, *model.ContainerCall, io.WriteCloser, io.WriteCloser) (*int64, error)) {
+func (fake *FakeContainerRuntime) RunContainerCalls(stub func(context.Context, chan model.Event, *model.ContainerCall, io.WriteCloser, io.WriteCloser, bool) (*int64, error)) {
 	fake.runContainerMutex.Lock()
 	defer fake.runContainerMutex.Unlock()
 	fake.RunContainerStub = stub
 }
 
-func (fake *FakeContainerRuntime) RunContainerArgsForCall(i int) (context.Context, chan model.Event, *model.ContainerCall, io.WriteCloser, io.WriteCloser) {
+func (fake *FakeContainerRuntime) RunContainerArgsForCall(i int) (context.Context, chan model.Event, *model.ContainerCall, io.WriteCloser, io.WriteCloser, bool) {
 	fake.runContainerMutex.RLock()
 	defer fake.runContainerMutex.RUnlock()
 	argsForCall := fake.runContainerArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5, argsForCall.arg6
 }
 
 func (fake *FakeContainerRuntime) RunContainerReturns(result1 *int64, result2 error) {
@@ -321,8 +252,6 @@ func (fake *FakeContainerRuntime) Invocations() map[string][][]interface{} {
 	defer fake.deleteMutex.RUnlock()
 	fake.deleteContainerIfExistsMutex.RLock()
 	defer fake.deleteContainerIfExistsMutex.RUnlock()
-	fake.killMutex.RLock()
-	defer fake.killMutex.RUnlock()
 	fake.runContainerMutex.RLock()
 	defer fake.runContainerMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

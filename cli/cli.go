@@ -31,7 +31,7 @@ func newCli(
 ) (cli, error) {
 	cli := mow.App(
 		"opctl",
-		"Opctl is a free and open source distributed operation control system.",
+		"Opctl is a free and open source container execution system.",
 	)
 	cli.Version("v version", version)
 
@@ -108,15 +108,6 @@ func newCli(
 	var cr containerruntime.ContainerRuntime
 	if *containerRuntime == "k8s" {
 		cr, err = k8s.New()
-	} else if *containerRuntime == "qemu" {
-		dockerConfigPath := cli.String(
-			mow.StringOpt{
-				Desc:   "Docker configuration file path, if using the docker container runtime",
-				EnvVar: "OPCTL_DOCKER_CONFIG",
-				Name:   "docker-config",
-			},
-		)
-		cr, err = qemu.New(ctx, *dockerConfigPath, false)
 	} else {
 		dockerConfigPath := cli.String(
 			mow.StringOpt{
@@ -125,7 +116,19 @@ func newCli(
 				Name:   "docker-config",
 			},
 		)
-		cr, err = docker.New(ctx, "unix:///var/run/docker.sock", *dockerConfigPath)
+		networkName := cli.String(
+			mow.StringOpt{
+				Desc:   "Docker network name. Containers in the same network will be able to make network calls using named container hostnames. Containers in different networks will not interfere with each other.",
+				EnvVar: "OPCTL_NETWORK",
+				Name:   "network",
+				Value:  "opctl",
+			},
+		)
+		if *containerRuntime == "qemu" {
+			cr, err = qemu.New(ctx, *networkName, *dockerConfigPath, false)
+		} else {
+			cr, err = docker.New(ctx, *networkName, "unix:///var/run/docker.sock", *dockerConfigPath)
+		}
 	}
 	if nil != err {
 		return nil, err

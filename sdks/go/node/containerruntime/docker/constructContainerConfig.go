@@ -21,7 +21,7 @@ func constructContainerConfig(
 		WorkingDir: workDir,
 		Tty:        true,
 		Labels: map[string]string{
-			"opctl__container_id": opctlContainerID,
+			containerIDLabel: opctlContainerID,
 		},
 		ExposedPorts: nat.PortSet{},
 	}
