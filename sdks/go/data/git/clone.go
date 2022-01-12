@@ -65,6 +65,12 @@ func (gp *_git) Clone(
 		os.Setenv("GCM_INTERACTIVE", "never")
 	}
 
+	destinationPath := parsedPkgRef.ToPath(gp.basePath)
+
+	if err := os.RemoveAll(destinationPath); err != nil {
+		return err
+	}
+
 	cmd := exec.Command(
 		"git",
 		"clone",
@@ -73,7 +79,7 @@ func (gp *_git) Clone(
 		"--single-branch",
 		fmt.Sprintf("--branch=%s", parsedPkgRef.Version),
 		fmt.Sprintf("https://%s", parsedPkgRef.Name),
-		parsedPkgRef.ToPath(gp.basePath),
+		destinationPath,
 	)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		if string(output) != "" {
