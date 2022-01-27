@@ -37,7 +37,8 @@ websocket connection is gone. Long term disk event storage is gone. Any internal
 state doesn't need to be written to disk.
 
 Now, someone on my local network can't read any file from my computer opctl has
-access to over the HTTP api.
+access to over the HTTP api. Opctl doesn't store sensitive data used by my ops
+in plain text, and doesn't store my GitHub credentials in plain text.
 
 Opctl also runs all docker containers in privileged mode, which has higher risk.
 This disables that by default, which prevents docker in docker ops without using
