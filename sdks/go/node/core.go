@@ -4,7 +4,6 @@ package node
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -generate
 
 import (
-	"context"
 	"path/filepath"
 
 	"github.com/opctl/opctl/sdks/go/node/containerruntime"
@@ -12,7 +11,6 @@ import (
 
 // New returns a new Node
 func New(
-	ctx context.Context,
 	containerRuntime containerruntime.ContainerRuntime,
 	dataDirPath string,
 	privileged bool,
@@ -26,20 +24,13 @@ func New(
 	)
 
 	return core{
-		caller:           caller,
-		containerRuntime: containerRuntime,
-		dataCachePath:    filepath.Join(dataDirPath, "ops"),
-		opCaller: newOpCaller(
-			caller,
-			dataDirPath,
-		),
+		caller:        caller,
+		dataCachePath: filepath.Join(dataDirPath, "ops"),
 	}, nil
 }
 
 // core is an Node that supports running ops directly on the host
 type core struct {
-	caller           caller
-	containerRuntime containerruntime.ContainerRuntime
-	dataCachePath    string
-	opCaller         opCaller
+	caller        caller
+	dataCachePath string
 }

@@ -79,18 +79,12 @@ func newCli(
 		// Don't exit here with .Exit to allow container cleanup to happen
 	}
 
-	cliParamSatisfier := cliparamsatisfier.New(cliOutput)
-
-	containerRuntime := cli.String(
-		mow.StringOpt{
-			Desc:   "Runtime for opctl containers. Can be 'docker', 'k8s', or 'qemu' (experimental)",
-			EnvVar: "OPCTL_CONTAINER_RUNTIME",
-			Name:   "container-runtime",
-			Value:  "docker",
-		},
-	)
-
-	noColor := cli.BoolOpt("nc no-color", false, "Disable output coloring")
+	noColor := cli.Bool(mow.BoolOpt{
+		Name:   "nc no-color",
+		Value:  false,
+		Desc:   "Disable output coloring",
+		EnvVar: "NO_COLOR", // https://no-color.org
+	})
 
 	cli.Before = func() {
 		if *noColor {
@@ -102,9 +96,17 @@ func newCli(
 
 	cli.After = func() {
 		cancel()
-		os.RemoveAll(filepath.Join(*datadirPath, "dcg"))
+		_ = os.RemoveAll(filepath.Join(*datadirPath, "dcg"))
 	}
 
+	containerRuntime := cli.String(
+		mow.StringOpt{
+			Desc:   "Runtime for opctl containers. Can be 'docker', 'k8s', or 'qemu' (experimental)",
+			EnvVar: "OPCTL_CONTAINER_RUNTIME",
+			Name:   "container-runtime",
+			Value:  "docker",
+		},
+	)
 	var cr containerruntime.ContainerRuntime
 	if *containerRuntime == "k8s" {
 		cr, err = k8s.New()
@@ -134,14 +136,12 @@ func newCli(
 		return nil, err
 	}
 
-	eventChannel := make(chan model.Event)
-
 	privileged := cli.Bool(mow.BoolOpt{
 		Name:   "privileged",
 		Desc:   "Run containers in privileged mode",
 		EnvVar: "OPCTL_PRIVILEGED",
 	})
-	opNode, err := node.New(ctx, cr, *datadirPath, *privileged)
+	opNode, err := node.New(cr, *datadirPath, *privileged)
 	if err != nil {
 		return nil, err
 	}
@@ -158,15 +158,12 @@ func newCli(
 		opFormatter := clioutput.NewCliOpFormatter(*dirRef, *datadirPath)
 
 		lsCmd.Action = func() {
-			exitWith("", ls(ctx, opFormatter, cliParamSatisfier, opNode, *dirRef))
+			exitWith("", ls(ctx, opFormatter, opNode, *dirRef))
 		}
 	})
 
 	cli.Command("op", "Manage ops", func(opCmd *mow.Cmd) {
-		dataResolver := dataresolver.New(
-			cliParamSatisfier,
-			opNode,
-		)
+		dataResolver := dataresolver.New(opNode)
 
 		opCmd.Command("install", "Install an op", func(installCmd *mow.Cmd) {
 			path := installCmd.StringOpt("path", opspec.DotOpspecDirName, "Path the op will be installed at")
@@ -211,9 +208,9 @@ func newCli(
 			outputs, err := run(
 				ctx,
 				cliOutput,
-				cliParamSatisfier,
+				cliparamsatisfier.New(cliOutput),
 				opFormatter,
-				eventChannel,
+				make(chan model.Event),
 				opNode,
 				*opRef,
 				&RunOpts{Args: *args, ArgFile: *argFile},

@@ -26,5 +26,5 @@ func main() {
 		}
 	}()
 
-	cli.Run(os.Args)
+	_ = cli.Run(os.Args)
 }

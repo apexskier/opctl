@@ -99,10 +99,7 @@ func run(
 		}
 	}
 
-	dataResolver := dataresolver.New(
-		cliParamSatisfier,
-		node,
-	)
+	dataResolver := dataresolver.New(node)
 
 	opHandle, err := dataResolver.Resolve(
 		ctx,

@@ -10,9 +10,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/opctl/opctl/cli/internal/clioutput"
-	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
 	"github.com/opctl/opctl/cli/internal/dataresolver"
-	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
@@ -20,15 +18,9 @@ import (
 func ls(
 	ctx context.Context,
 	opFormatter clioutput.OpFormatter,
-	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
-	node node.Node,
+	dataResolver dataresolver.DataResolver,
 	dirRef string,
 ) error {
-	dataResolver := dataresolver.New(
-		cliParamSatisfier,
-		node,
-	)
-
 	tw := new(tabwriter.Writer)
 	defer tw.Flush()
 	tw.Init(os.Stdout, 0, 8, 1, '\t', 0)

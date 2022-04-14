@@ -5,10 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
 	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/data/fs"
-	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
@@ -20,19 +18,14 @@ type DataResolver interface {
 	) (data.DataHandle, error)
 }
 
-func New(
-	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
-	node node.Node,
-) DataResolver {
+func New(dataProvider data.DataProvider) DataResolver {
 	return _dataResolver{
-		cliParamSatisfier: cliParamSatisfier,
-		node:              node,
+		dataProvider: dataProvider,
 	}
 }
 
 type _dataResolver struct {
-	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier
-	node              node.Node
+	dataProvider data.DataProvider
 }
 
 func (dtr _dataResolver) Resolve(
@@ -53,7 +46,7 @@ func (dtr _dataResolver) Resolve(
 		ctx,
 		dataRef,
 		fsProvider,
-		dtr.node,
+		dtr.dataProvider,
 	)
 
 	return opDirHandle, err
