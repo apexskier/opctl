@@ -99,51 +99,58 @@ func newCli(
 		_ = os.RemoveAll(filepath.Join(*datadirPath, "dcg"))
 	}
 
+	// "global" parameters like this must be dereferenced _after_ cli.Run(args) is called
 	containerRuntime := cli.String(
 		mow.StringOpt{
+			Name:   "container-runtime",
 			Desc:   "Runtime for opctl containers. Can be 'docker', 'k8s', or 'qemu' (experimental)",
 			EnvVar: "OPCTL_CONTAINER_RUNTIME",
-			Name:   "container-runtime",
 			Value:  "docker",
 		},
 	)
-	var cr containerruntime.ContainerRuntime
-	if *containerRuntime == "k8s" {
-		cr, err = k8s.New()
-	} else {
-		dockerConfigPath := cli.String(
-			mow.StringOpt{
-				Desc:   "Docker configuration file path, if using the docker container runtime",
-				EnvVar: "OPCTL_DOCKER_CONFIG",
-				Name:   "docker-config",
-			},
-		)
-		networkName := cli.String(
-			mow.StringOpt{
-				Desc:   "Docker network name. Containers in the same network will be able to make network calls using named container hostnames. Containers in different networks will not interfere with each other.",
-				EnvVar: "OPCTL_NETWORK",
-				Name:   "network",
-				Value:  "opctl",
-			},
-		)
-		if *containerRuntime == "qemu" {
-			cr, err = qemu.New(ctx, *networkName, *dockerConfigPath, false)
-		} else {
-			cr, err = docker.New(ctx, *networkName, "unix:///var/run/docker.sock", *dockerConfigPath)
-		}
-	}
-	if nil != err {
-		return nil, err
-	}
+	dockerConfigPath := cli.String(
+		mow.StringOpt{
+			Name:   "docker-config",
+			Desc:   "Docker configuration file path, if using the docker container runtime",
+			EnvVar: "OPCTL_DOCKER_CONFIG",
+		},
+	)
+	networkName := cli.String(
+		mow.StringOpt{
+			Name:   "network",
+			Desc:   "Docker network name. Containers in the same network will be able to make network calls using named container hostnames. Containers in different networks will not interfere with each other.",
+			EnvVar: "OPCTL_NETWORK",
+			Value:  "opctl",
+		},
+	)
+	privileged := cli.Bool(
+		mow.BoolOpt{
+			Name:   "privileged",
+			Desc:   "Run containers in privileged mode",
+			EnvVar: "OPCTL_PRIVILEGED",
+		},
+	)
 
-	privileged := cli.Bool(mow.BoolOpt{
-		Name:   "privileged",
-		Desc:   "Run containers in privileged mode",
-		EnvVar: "OPCTL_PRIVILEGED",
-	})
-	opNode, err := node.New(cr, *datadirPath, *privileged)
-	if err != nil {
-		return nil, err
+	// these are shared utility functions to lazy-dereference global flags
+	getContainerRuntime := func() (containerruntime.ContainerRuntime, error) {
+		if *containerRuntime == "k8s" {
+			return k8s.New()
+		}
+		if *containerRuntime == "qemu" {
+			return qemu.New(ctx, *networkName, *dockerConfigPath, false)
+		}
+		return docker.New(ctx, *networkName, "unix:///var/run/docker.sock", *dockerConfigPath)
+	}
+	getOpNode := func() node.Node {
+		cr, err := getContainerRuntime()
+		if err != nil {
+			exitWith("", err)
+		}
+		opNode, err := node.New(cr, *datadirPath, *privileged)
+		if err != nil {
+			exitWith("", err)
+		}
+		return opNode
 	}
 
 	cli.Command("ls", "List operations", func(lsCmd *mow.Cmd) {
@@ -156,15 +163,12 @@ func newCli(
 		)
 
 		opFormatter := clioutput.NewCliOpFormatter(*dirRef, *datadirPath)
-
 		lsCmd.Action = func() {
-			exitWith("", ls(ctx, opFormatter, opNode, *dirRef))
+			exitWith("", ls(ctx, opFormatter, dataresolver.New(getOpNode()), *dirRef))
 		}
 	})
 
 	cli.Command("op", "Manage ops", func(opCmd *mow.Cmd) {
-		dataResolver := dataresolver.New(opNode)
-
 		opCmd.Command("install", "Install an op", func(installCmd *mow.Cmd) {
 			path := installCmd.StringOpt("path", opspec.DotOpspecDirName, "Path the op will be installed at")
 			opRef := installCmd.StringArg("OP_REF", "", "Op reference (either `relative/path`, `/absolute/path`, `host/path/repo#tag`, or `host/path/repo#tag/path`)")
@@ -174,7 +178,7 @@ func newCli(
 					"",
 					opInstall(
 						ctx,
-						dataResolver,
+						dataresolver.New(getOpNode()),
 						*opRef,
 						*path,
 					),
@@ -190,7 +194,7 @@ func newCli(
 					fmt.Sprintf("%v is valid", *opRef),
 					opValidate(
 						ctx,
-						dataResolver,
+						dataresolver.New(getOpNode()),
 						*opRef,
 					),
 				)
@@ -211,7 +215,7 @@ func newCli(
 				cliparamsatisfier.New(cliOutput),
 				opFormatter,
 				make(chan model.Event),
-				opNode,
+				getOpNode(),
 				*opRef,
 				&RunOpts{Args: *args, ArgFile: *argFile},
 				*noProgress,
