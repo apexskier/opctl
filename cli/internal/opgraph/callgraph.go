@@ -17,31 +17,34 @@ type CallGraph struct {
 }
 
 type callGraphNode struct {
-	call      *model.Call
-	startTime *time.Time
-	endTime   *time.Time
-	state     model.OpOutcome
-	children  []*callGraphNode
+	call         *model.Call
+	startTime    *time.Time
+	endTime      *time.Time
+	state        model.OpOutcome
+	cursorActive bool
+	children     []*callGraphNode
+	parent       *callGraphNode
 }
 
-func newCallGraphNode(call *model.Call, timestamp time.Time) *callGraphNode {
+func newCallGraphNode(call *model.Call, parent *callGraphNode, timestamp time.Time) *callGraphNode {
 	return &callGraphNode{
 		call:      call,
 		startTime: &timestamp,
 		children:  []*callGraphNode{},
+		parent:    parent,
 	}
 }
 
 var errNotFoundInGraph = errors.New("not found in graph")
 
-const skippedState = "skipped"
+const skippedState model.OpOutcome = "skipped"
 
 func (n *callGraphNode) insert(call *model.Call, startTime time.Time, initialState model.OpOutcome) error {
 	if call.ParentID == nil {
 		return fmt.Errorf("missing parent ID for %s", call.ID)
 	}
 	if n.call.ID == *call.ParentID {
-		node := newCallGraphNode(call, startTime)
+		node := newCallGraphNode(call, n, startTime)
 		node.state = initialState
 		n.children = append(n.children, node)
 		return nil
@@ -86,6 +89,11 @@ func (n *callGraphNode) countChildren() int {
 func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFormatter, now time.Time, collapseCompleted bool) string {
 	var str strings.Builder
 
+	//// cursor indicator
+	//if n.cursorActive {
+	//	str.WriteString("≫")
+	//}
+	//
 	// Graph node indicator
 	if n.isLeaf() {
 		str.WriteString("◉")
@@ -237,7 +245,7 @@ func (g *CallGraph) HandleEvent(event *model.Event) error {
 	if event.CallStarted != nil {
 		if event.CallStarted.Call.ParentID == nil {
 			if g.rootNode == nil {
-				g.rootNode = newCallGraphNode(&event.CallStarted.Call, event.Timestamp)
+				g.rootNode = newCallGraphNode(&event.CallStarted.Call, nil, event.Timestamp)
 				return nil
 			}
 			return errors.New("parent node already set")
