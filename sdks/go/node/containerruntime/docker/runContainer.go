@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -49,10 +50,11 @@ func (cr runContainer) stopAndCleanup(
 	container string, // docker container name/ID
 ) error {
 	// try to stop the container gracefully prior to deletion
-	stopTimeout := 3 * time.Second
+	stopTimeout := 10 * time.Second
 	err := cr.dockerClient.ContainerStop(ctx, container, &stopTimeout)
 	if err != nil {
-		return fmt.Errorf("unable to stop container: %w", err)
+		fmt.Fprintf(os.Stderr, "unable to stop container: %w", err)
+		return nil // fmt.Errorf("unable to stop container: %w", err)
 	}
 
 	// now delete the container post-termination
@@ -65,7 +67,8 @@ func (cr runContainer) stopAndCleanup(
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("unable to delete container: %w", err)
+		fmt.Fprintf(os.Stderr, "unable to delete container: %w", err)
+		return nil // fmt.Errorf("unable to delete container: %w", err)
 	}
 
 	return nil
