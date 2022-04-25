@@ -24,11 +24,11 @@ func (err ErrAggregate) Error() string {
 	messageBuffer := bytes.NewBufferString("")
 
 	for _, err := range err.errs {
-		parts := strings.Split(err.Error(), "\n")
-		messageBuffer.WriteString("\n")
+		parts := strings.Split(err.Error(), "\r\n")
+		messageBuffer.WriteString("\r\n")
 		if len(parts) > 1 {
 			for j, part := range parts {
-				prefix := "\n "
+				prefix := "\r\n "
 				if j == 0 {
 					prefix = "-"
 				}

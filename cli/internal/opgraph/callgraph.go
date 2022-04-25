@@ -89,16 +89,19 @@ func (n *callGraphNode) countChildren() int {
 func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFormatter, now time.Time, collapseCompleted bool) string {
 	var str strings.Builder
 
-	//// cursor indicator
-	//if n.cursorActive {
-	//	str.WriteString("≫")
-	//}
-	//
 	// Graph node indicator
 	if n.isLeaf() {
-		str.WriteString("◉")
+		if n.cursorActive {
+			str.WriteString("◉")
+		} else {
+			str.WriteString("◎")
+		}
 	} else {
-		str.WriteString("◎")
+		if n.cursorActive {
+			str.WriteString("◌")
+		} else {
+			str.WriteString("○")
+		}
 	}
 
 	// Leading "status"
@@ -165,7 +168,7 @@ func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFor
 		if desc == "" {
 			str.WriteString(" " + muted.Sprint("skipped"))
 		} else {
-			str.WriteString("\n")
+			str.WriteString("\r\n")
 			if n.isLeaf() || collapsed {
 				str.WriteString(" ")
 			} else {
@@ -190,7 +193,10 @@ func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFor
 
 	// Add the command invoked by a container if it's not named
 	if call.Container != nil && call.Container.Name == nil && len(call.Container.Cmd) > 0 {
-		str.WriteString(" " + muted.Sprint(strings.ReplaceAll(strings.Join(call.Container.Cmd, " "), "\n", "\\n")))
+		cmdStr := strings.Join(call.Container.Cmd, " ")
+		cmdStr = strings.ReplaceAll(cmdStr, "\n", "\\n")
+		cmdStr = strings.ReplaceAll(cmdStr, "\r", "\\r")
+		str.WriteString(" " + muted.Sprint(cmdStr))
 	}
 
 	// Collapsed nodes
@@ -208,18 +214,18 @@ func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFor
 	// Children
 	childLen := len(n.children)
 	for i, child := range n.children {
-		childLines := strings.Split(child.String(loader, opFormatter, now, collapseCompleted), "\n")
+		childLines := strings.Split(child.String(loader, opFormatter, now, collapseCompleted), "\r\n")
 		for j, part := range childLines {
 			if j == 0 {
 				if i < childLen-1 {
-					str.WriteString(fmt.Sprintf("\n├─%s", part))
+					str.WriteString(fmt.Sprintf("\r\n├─%s", part))
 				} else {
-					str.WriteString(fmt.Sprintf("\n╰─%s", part))
+					str.WriteString(fmt.Sprintf("\r\n╰─%s", part))
 				}
 			} else if i < childLen-1 {
-				str.WriteString(fmt.Sprintf("\n│ %s", part))
+				str.WriteString(fmt.Sprintf("\r\n│ %s", part))
 			} else {
-				str.WriteString(fmt.Sprintf("\n  %s", part))
+				str.WriteString(fmt.Sprintf("\r\n  %s", part))
 			}
 		}
 	}
@@ -235,7 +241,7 @@ func (g CallGraph) String(loader LoadingSpinner, opFormatter clioutput.OpFormatt
 	}
 	str.WriteString(g.rootNode.String(loader, opFormatter, now, collapseCompleted))
 	for _, err := range g.errors {
-		str.WriteString("\n" + warning.Sprint("⚠️  ") + err.Error())
+		str.WriteString("\r\n" + warning.Sprint("⚠️  ") + err.Error())
 	}
 	return str.String()
 }
@@ -246,6 +252,7 @@ func (g *CallGraph) HandleEvent(event *model.Event) error {
 		if event.CallStarted.Call.ParentID == nil {
 			if g.rootNode == nil {
 				g.rootNode = newCallGraphNode(&event.CallStarted.Call, nil, event.Timestamp)
+				g.rootNode.cursorActive = true
 				return nil
 			}
 			return errors.New("parent node already set")

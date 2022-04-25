@@ -142,8 +142,6 @@ var _ = Context("Clone", func() {
 						},
 					)
 
-					fmt.Println(actualError.Error())
-
 					/* assert */
 					Expect(actualError).To(MatchError(fmt.Sprintf(`unexpected client error: unexpected requesting "%s/info/refs?service=git-upload-pack" status code: 500`, testServer.URL)))
 				})

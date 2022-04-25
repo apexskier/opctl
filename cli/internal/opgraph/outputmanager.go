@@ -50,7 +50,7 @@ func (o *OutputManager) Print(str string) error {
 	if err != nil {
 		return err
 	}
-	lines := strings.Split(str, "\n")
+	lines := strings.Split(str, "\r\n")
 
 	ruleWidth := 0
 	for _, line := range lines {
@@ -65,7 +65,7 @@ func (o *OutputManager) Print(str string) error {
 
 	// reset styling to stop intermediate command output messing with graph
 	io.WriteString(o.out, "\033[0m")
-	io.WriteString(o.out, fmt.Sprintln(strings.Repeat("┄", ruleWidth)))
+	io.WriteString(o.out, strings.Repeat("┄", ruleWidth)+"\r\n")
 
 	for i, line := range lines {
 		withoutAnsi := stripAnsi(line)
@@ -79,7 +79,7 @@ func (o *OutputManager) Print(str string) error {
 			io.WriteString(o.out, line)
 		}
 		if i < len(lines)-1 {
-			io.WriteString(o.out, "\n")
+			io.WriteString(o.out, "\r\n")
 		}
 	}
 

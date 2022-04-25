@@ -20,6 +20,12 @@ type Input struct {
 	Events     chan InputEvent
 }
 
+func NewInput() *Input {
+	return &Input{
+		Events: make(chan InputEvent, 1),
+	}
+}
+
 var (
 	// ErrCtlC is returned when the user typed ctl-c, the program should handle SIGINT
 	ErrCtlC = errors.New("ctl-c")
@@ -42,6 +48,7 @@ func (i *Input) Consume(b byte) error {
 		case 68: // left
 			i.Events <- LeftInputEvent
 		}
+		i.processing = nil
 		return nil
 	}
 	switch b {

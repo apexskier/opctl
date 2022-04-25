@@ -44,7 +44,7 @@ func Interpret(
 		}
 		messageBuffer.WriteString(":")
 		for paramName, err := range paramErrMap {
-			messageBuffer.WriteString(fmt.Sprintf("\n- %v: %v", paramName, err.Error()))
+			messageBuffer.WriteString(fmt.Sprintf("\r\n- %v: %v", paramName, err.Error()))
 		}
 		return nil, fmt.Errorf(messageBuffer.String())
 	}

@@ -89,7 +89,7 @@ func (this cliPromptInputSrc) ReadString(
 
 		if description != "" {
 			this.cliOutput.Attention(
-				fmt.Sprintf("input: '%s'\n%s", inputName, description),
+				fmt.Sprintf("input: '%s'\r\n%s", inputName, description),
 			)
 		} else {
 			this.cliOutput.Attention(

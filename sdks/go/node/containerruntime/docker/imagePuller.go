@@ -54,7 +54,7 @@ func (ip _imagePuller) Pull(
 		eventChannel <- model.Event{
 			Timestamp: time.Now().UTC(),
 			ContainerStdOutWrittenTo: &model.ContainerStdOutWrittenTo{
-				Data:        []byte(fmt.Sprintf("Skipping image pull: %s\n", imageRef)),
+				Data:        []byte(fmt.Sprintf("Skipping image pull: %s\r\n", imageRef)),
 				OpRef:       containerCall.OpPath,
 				ContainerID: containerCall.ContainerID,
 			},

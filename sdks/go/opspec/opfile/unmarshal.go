@@ -16,10 +16,11 @@ func Unmarshal(
 	// 1) ensure valid
 	errs := Validate(opFileBytes)
 	if len(errs) > 0 {
-		messageBuffer := bytes.NewBufferString("opspec syntax error:\n")
+		messageBuffer := bytes.NewBufferString("opspec syntax error:\r\n")
 		messageBuffer.WriteString(opRef)
 		for _, validationError := range errs {
-			messageBuffer.WriteString(fmt.Sprintf("\n- %v", validationError.Error()))
+
+			messageBuffer.WriteString(fmt.Sprintf("\r\n- %v", validationError.Error()))
 		}
 		return nil, fmt.Errorf("%v", messageBuffer.String())
 	}

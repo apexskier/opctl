@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"golang.org/x/term"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -81,10 +82,11 @@ func run(
 	var state opgraph.CallGraph
 	var loadingSpinner opgraph.DotLoadingSpinner
 	output := opgraph.NewOutputManager()
+	input := opgraph.NewInput()
 
 	defer func() {
 		output.Print(state.String(loadingSpinner, opFormatter, time.Now(), false))
-		fmt.Println()
+		fmt.Print("\r\n")
 	}()
 
 	clearGraph := func() {
@@ -172,6 +174,38 @@ func run(
 		}
 	}()
 
+	ttyBytes := make(chan byte)
+
+	tty, err := os.Open("/dev/tty")
+	if err != nil {
+		fmt.Printf("can't open /dev/tty: %v", err)
+		os.Exit(1)
+	}
+
+	ttyFd := int(tty.Fd())
+	oldState, err := term.MakeRaw(ttyFd)
+	if err != nil {
+		panic(err)
+	}
+	defer term.Restore(ttyFd, oldState)
+
+	go func() {
+		for {
+			bs := make([]byte, 3)
+			n, err := tty.Read(bs)
+			if err != nil {
+				panic(err)
+			}
+			for i := 0; i < n; i++ {
+				ttyBytes <- bs[i]
+			}
+		}
+	}()
+
+	wipeLine := func() {
+		fmt.Print("\r\033[K")
+	}
+
 	for {
 		select {
 		case <-sigIntChannel:
@@ -219,11 +253,39 @@ func run(
 				cliOutput.Error(fmt.Sprintf("%v", err))
 			}
 
+			wipeLine()
 			cliOutput.Event(&event)
 			displayGraph()
+
 		case <-animationFrame:
 			clearGraph()
+			displayGraph()
+
+		case b := <-ttyBytes:
+			if err := input.Consume(b); err != nil {
+				if errors.Is(err, opgraph.ErrCtlC) || errors.Is(err, opgraph.ErrCtlD) {
+					fmt.Printf("\r\nexiting\r\n")
+					sigIntChannel <- fakeSignal{}
+				} else {
+					panic(err)
+				}
+			}
+
+		case e := <-input.Events:
+			clearGraph()
+			if !state.HandleInput(e) {
+				fmt.Printf("\a")
+			}
 			displayGraph()
 		}
 	}
 }
+
+type fakeSignal struct {
+}
+
+func (fakeSignal) String() string {
+	return "fake signal"
+}
+
+func (fakeSignal) Signal() {}

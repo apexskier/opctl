@@ -1,22 +1,20 @@
 package opgraph
 
-func (g *CallGraph) HandleInput(event InputEvent) error {
+func (g *CallGraph) HandleInput(event InputEvent) bool {
 	switch event {
 	case UpInputEvent:
-		return g.cursorUp()
+		return g.moveCursorUp()
 	case DownInputEvent:
-		return g.cursorDown()
+		return g.moveCursorDown()
 	case LeftInputEvent:
-		return g.cursorLeft()
+		return g.moveCursorLeft()
 	case RightInputEvent:
-		return g.cursorRight()
+		return g.moveCursorRight()
 	case ClearInputEvent:
-		n := g.findSelected()
-		if n != nil {
-			n.cursorActive = false
-		}
+		g.resetSelection()
+		return true
 	}
-	return nil
+	return false
 }
 
 func (g *CallGraph) findSelected() *callGraphNode {
@@ -35,31 +33,46 @@ func (n *callGraphNode) findSelected() *callGraphNode {
 	return nil
 }
 
+func (n *callGraphNode) hasSelected() bool {
+	if n == nil {
+		return false
+	}
+	if n.cursorActive {
+		return true
+	}
+	for _, c := range n.children {
+		if c.hasSelected() {
+			return true
+		}
+	}
+	return false
+}
+
 func (n *callGraphNode) priorSibling() *callGraphNode {
-	if n.parent == nil {
+	if n == nil || n.parent == nil {
 		return nil
 	}
 	siblings := n.parent.children
 	for i, s := range siblings {
 		if s == n {
 			if i == 0 {
-				return n.parent.priorSibling()
+				return nil
 			}
 			return siblings[i-1]
 		}
 	}
-	return nil
+	return n.parent
 }
 
 func (n *callGraphNode) nextSibling() *callGraphNode {
-	if n.parent == nil {
+	if n == nil || n.parent == nil {
 		return nil
 	}
 	siblings := n.parent.children
 	for i, s := range siblings {
 		if s == n {
 			if i == len(siblings)-1 {
-				return n.parent.nextSibling()
+				return nil
 			}
 			return siblings[i+1]
 		}
@@ -67,48 +80,46 @@ func (n *callGraphNode) nextSibling() *callGraphNode {
 	return nil
 }
 
-func swapCursor(next, prior *callGraphNode) {
-	if next == nil {
-		return
+func swapCursor(prior, next *callGraphNode) bool {
+	if prior == nil || next == nil {
+		return false
 	}
-	next.cursorActive = true
 	prior.cursorActive = false
+	next.cursorActive = true
+	return true
 }
 
-func (g *CallGraph) cursorUp() error {
+func (g *CallGraph) moveCursorUp() bool {
 	n := g.findSelected()
-	if n == nil {
-		g.rootNode.cursorActive = true
-	}
-	swapCursor(n.priorSibling(), n)
-	return nil
+	return swapCursor(n, n.priorSibling())
 }
 
-func (g *CallGraph) cursorDown() error {
+func (g *CallGraph) moveCursorDown() bool {
 	n := g.findSelected()
-	if n == nil {
-		g.rootNode.cursorActive = true
-	}
-	swapCursor(n.nextSibling(), n)
-	return nil
+	return swapCursor(n, n.nextSibling())
 }
 
-func (g *CallGraph) cursorLeft() error {
+func (g *CallGraph) moveCursorLeft() bool {
 	n := g.findSelected()
-	if n == nil {
-		g.rootNode.cursorActive = true
-	}
-	swapCursor(n.parent, n)
-	return nil
+	return swapCursor(n, n.parent)
 }
 
-func (g *CallGraph) cursorRight() error {
+func (g *CallGraph) moveCursorRight() bool {
 	n := g.findSelected()
 	if n == nil {
+		return false
+	} else if len(n.children) > 0 {
+		return swapCursor(n, n.children[0])
+	}
+	return false
+}
+
+func (g *CallGraph) resetSelection() {
+	n := g.findSelected()
+	if n != nil {
+		n.cursorActive = false
+	}
+	if g.rootNode != nil {
 		g.rootNode.cursorActive = true
 	}
-	if len(n.children) > 0 {
-		swapCursor(n.children[0], n)
-	}
-	return nil
 }

@@ -1,6 +1,7 @@
 package clioutput
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -59,27 +60,21 @@ func (clio _cliOutput) DisableColor() {
 func (clio _cliOutput) Attention(s string) {
 	io.WriteString(
 		clio.stdWriter,
-		fmt.Sprintln(
-			clio.cliColorer.Attention(s),
-		),
+		clio.cliColorer.Attention(s)+"\r\n",
 	)
 }
 
 func (clio _cliOutput) Warning(s string) {
 	io.WriteString(
 		clio.stdWriter,
-		fmt.Sprintln(
-			clio.cliColorer.Error(s),
-		),
+		clio.cliColorer.Error(s)+"\r\n",
 	)
 }
 
 func (clio _cliOutput) Error(s string) {
 	io.WriteString(
 		clio.errWriter,
-		fmt.Sprintln(
-			clio.cliColorer.Error(s),
-		),
+		clio.cliColorer.Error(s)+"\r\n",
 	)
 }
 
@@ -137,7 +132,7 @@ func (clio _cliOutput) containerExited(event *model.Event) {
 	io.WriteString(
 		writer,
 		fmt.Sprintf(
-			"%s%s\n",
+			"%s%s\r\n",
 			clio.outputPrefix(event.CallEnded),
 			message,
 		),
@@ -155,7 +150,7 @@ func (clio _cliOutput) containerStarted(event *model.Event) {
 	io.WriteString(
 		clio.stdWriter,
 		fmt.Sprintf(
-			"%s%s\n",
+			"%s%s\r\n",
 			clio.outputPrefix(event.CallStarted),
 			clio.cliColorer.Info(message),
 		),
@@ -179,7 +174,7 @@ func (clio _cliOutput) containerStdErrWrittenTo(event *model.ContainerStdErrWrit
 		fmt.Sprintf(
 			"%s%s",
 			clio.outputPrefix(event),
-			event.Data,
+			bytes.ReplaceAll(event.Data, []byte("\n"), []byte("\r\n")),
 		),
 	)
 }
@@ -190,7 +185,7 @@ func (clio _cliOutput) containerStdOutWrittenTo(event *model.ContainerStdOutWrit
 		fmt.Sprintf(
 			"%s%s",
 			clio.outputPrefix(event),
-			event.Data,
+			bytes.ReplaceAll(event.Data, []byte("\n"), []byte("\r\n")),
 		),
 	)
 }
@@ -222,7 +217,7 @@ func (clio _cliOutput) opEnded(event *model.Event) {
 	io.WriteString(
 		writer,
 		fmt.Sprintf(
-			"%s%s\n",
+			"%s%s\r\n",
 			clio.outputPrefix(event.CallEnded),
 			message,
 		),
@@ -233,7 +228,7 @@ func (clio _cliOutput) opStarted(event *model.CallStarted) {
 	io.WriteString(
 		clio.stdWriter,
 		fmt.Sprintf(
-			"%s%s\n",
+			"%s%s\r\n",
 			clio.outputPrefix(event),
 			clio.cliColorer.Info("started op"),
 		),
@@ -243,8 +238,6 @@ func (clio _cliOutput) opStarted(event *model.CallStarted) {
 func (clio _cliOutput) Success(s string) {
 	io.WriteString(
 		clio.stdWriter,
-		fmt.Sprintln(
-			clio.cliColorer.Success(s),
-		),
+		clio.cliColorer.Success(s)+"\r\n",
 	)
 }

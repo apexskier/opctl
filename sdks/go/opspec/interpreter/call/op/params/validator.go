@@ -31,7 +31,7 @@ func Validate(
 		messageBuffer.WriteString(":")
 		for paramName, errs := range paramErrMap {
 			for _, err := range errs {
-				messageBuffer.WriteString(fmt.Sprintf("\n- %v: %v", paramName, err.Error()))
+				messageBuffer.WriteString(fmt.Sprintf("\r\n- %v: %v", paramName, err.Error()))
 			}
 		}
 		return fmt.Errorf(messageBuffer.String())
