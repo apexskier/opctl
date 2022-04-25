@@ -28,9 +28,9 @@ func (cr _containerRuntime) DeleteContainerIfExists(
 		return err
 	}
 
-	errGroup, ctx := errgroup.WithContext(ctx)
+	errGroup, _ := errgroup.WithContext(ctx)
 	for _, container := range containers {
-		cr.runContainer.stopAndCleanup(ctx, container.ID)
+		errGroup.Go(func() error { return cr.runContainer.stopAndCleanup(ctx, container.ID) })
 	}
 
 	return errGroup.Wait()

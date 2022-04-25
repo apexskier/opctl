@@ -65,9 +65,9 @@ func (cr _containerRuntime) Delete(
 		return err
 	}
 
-	errGroup, ctx := errgroup.WithContext(ctx)
+	errGroup, _ := errgroup.WithContext(ctx)
 	for _, container := range containers {
-		cr.stopAndCleanup(ctx, container.ID)
+		errGroup.Go(func() error { return cr.stopAndCleanup(ctx, container.ID) })
 	}
 
 	return errGroup.Wait()
