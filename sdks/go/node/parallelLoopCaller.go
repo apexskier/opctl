@@ -24,6 +24,7 @@ type parallelLoopCaller interface {
 		opPath string,
 		parentCallID *string,
 		rootCallID string,
+		scratchPath string,
 	) (
 		map[string]*model.Value,
 		error,
@@ -49,6 +50,7 @@ func (plpr _parallelLoopCaller) Call(
 	opPath string,
 	parentCallID *string,
 	rootCallID string,
+	scratchPath string,
 ) (
 	map[string]*model.Value,
 	error,
@@ -115,6 +117,7 @@ func (plpr _parallelLoopCaller) Call(
 				opPath,
 				parentCallID,
 				rootCallID,
+				scratchPath,
 			)
 			if parallelLoopCtx.Err() != nil {
 				// context has been cancelled, so skip reporting results

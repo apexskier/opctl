@@ -3,7 +3,6 @@ package node
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"time"
 
 	"github.com/opctl/opctl/sdks/go/model"
@@ -22,6 +21,7 @@ type caller interface {
 		opPath string,
 		parentCallID *string,
 		rootCallID string,
+		scratchPath string,
 	) (
 		map[string]*model.Value,
 		error,
@@ -31,14 +31,12 @@ type caller interface {
 func newCaller(
 	containerCaller containerCaller,
 	gitOpsDir string,
-	dataDirPath string,
 ) caller {
 	instance := &_caller{
 		containerCaller: containerCaller,
 		gitOpsDir:       gitOpsDir,
-		dataDirPath:     dataDirPath,
 	}
-	instance.opCaller = newOpCaller(instance, dataDirPath)
+	instance.opCaller = newOpCaller(instance)
 	instance.parallelCaller = newParallelCaller(instance)
 	instance.parallelLoopCaller = newParallelLoopCaller(instance)
 	instance.serialCaller = newSerialCaller(instance)
@@ -55,8 +53,7 @@ type _caller struct {
 	serialCaller       serialCaller
 	serialLoopCaller   serialLoopCaller
 
-	gitOpsDir   string
-	dataDirPath string
+	gitOpsDir string
 }
 
 func (clr _caller) Call(
@@ -68,6 +65,7 @@ func (clr _caller) Call(
 	opPath string,
 	parentCallID *string,
 	rootCallID string,
+	scratchPath string,
 ) (
 	map[string]*model.Value,
 	error,
@@ -136,7 +134,7 @@ func (clr _caller) Call(
 		parentCallID,
 		rootCallID,
 		clr.gitOpsDir,
-		filepath.Join(clr.dataDirPath, "dcg", id),
+		scratchPath,
 	)
 	if err != nil {
 		return nil, err
@@ -173,6 +171,7 @@ func (clr _caller) Call(
 			call.Op,
 			rootCallID,
 			callSpec.Op,
+			scratchPath,
 		)
 	case callSpec.Parallel != nil:
 		outputs, err = clr.parallelCaller.Call(
@@ -183,6 +182,7 @@ func (clr _caller) Call(
 			rootCallID,
 			opPath,
 			*callSpec.Parallel,
+			scratchPath,
 		)
 	case callSpec.ParallelLoop != nil:
 		outputs, err = clr.parallelLoopCaller.Call(
@@ -194,6 +194,7 @@ func (clr _caller) Call(
 			opPath,
 			parentCallID,
 			rootCallID,
+			scratchPath,
 		)
 	case callSpec.Serial != nil:
 		outputs, err = clr.serialCaller.Call(
@@ -204,6 +205,7 @@ func (clr _caller) Call(
 			rootCallID,
 			opPath,
 			*callSpec.Serial,
+			scratchPath,
 		)
 	case callSpec.SerialLoop != nil:
 		outputs, err = clr.serialLoopCaller.Call(
@@ -215,6 +217,7 @@ func (clr _caller) Call(
 			opPath,
 			parentCallID,
 			rootCallID,
+			scratchPath,
 		)
 	default:
 		err = fmt.Errorf("invalid call graph '%+v'", callSpec)

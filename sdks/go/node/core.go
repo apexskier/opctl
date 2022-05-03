@@ -23,17 +23,18 @@ func New(
 			privileged,
 		),
 		gitOpsDir,
-		dataDirPath,
 	)
 
 	return core{
-		caller:    caller,
-		gitOpsDir: gitOpsDir,
+		caller:      caller,
+		gitOpsDir:   gitOpsDir,
+		dataDirPath: dataDirPath,
 	}, nil
 }
 
 // core is an Node that supports running ops directly on the host
 type core struct {
-	caller    caller
-	gitOpsDir string
+	caller      caller
+	gitOpsDir   string
+	dataDirPath string
 }

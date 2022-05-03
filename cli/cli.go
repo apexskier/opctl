@@ -96,7 +96,6 @@ func newCli(
 
 	cli.After = func() {
 		cancel()
-		_ = os.RemoveAll(filepath.Join(*dataDirPath, "dcg"))
 	}
 
 	// "global" parameters like this must be dereferenced _after_ cli.Run(args) is called

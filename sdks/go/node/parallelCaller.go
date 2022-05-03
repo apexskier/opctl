@@ -20,6 +20,7 @@ type parallelCaller interface {
 		rootCallID string,
 		opPath string,
 		callSpecParallelCall []*model.CallSpec,
+		scratchPath string,
 	) (
 		map[string]*model.Value,
 		error,
@@ -44,6 +45,7 @@ func (pc _parallelCaller) Call(
 	rootCallID string,
 	opPath string,
 	callSpecParallelCall []*model.CallSpec,
+	scratchPath string,
 ) (
 	map[string]*model.Value,
 	error,
@@ -106,6 +108,7 @@ func (pc _parallelCaller) Call(
 				opPath,
 				&callID,
 				rootCallID,
+				scratchPath,
 			)
 			if childCtx.Err() != nil {
 				// context has been cancelled, so skip reporting results

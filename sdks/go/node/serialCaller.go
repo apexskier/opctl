@@ -18,6 +18,7 @@ type serialCaller interface {
 		rootCallID string,
 		opPath string,
 		callSpecSerialCall []*model.CallSpec,
+		scratchPath string,
 	) (
 		map[string]*model.Value,
 		error,
@@ -42,6 +43,7 @@ func (sc _serialCaller) Call(
 	rootCallID string,
 	opPath string,
 	callSpecSerialCall []*model.CallSpec,
+	scratchPath string,
 ) (
 	map[string]*model.Value,
 	error,
@@ -65,6 +67,7 @@ func (sc _serialCaller) Call(
 			opPath,
 			&callID,
 			rootCallID,
+			scratchPath,
 		)
 		if err != nil {
 			return nil, err

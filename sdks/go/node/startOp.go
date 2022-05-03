@@ -2,6 +2,8 @@ package node
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 
 	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/data/fs"
@@ -15,7 +17,7 @@ func (this core) StartOp(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	req model.StartOpReq,
-) (map[string]*model.Value, error) {
+) (outputs map[string]*model.Value, err error) {
 	callID, err := uniquestring.Construct()
 	if err != nil {
 		// end run immediately on any error
@@ -56,6 +58,11 @@ func (this core) StartOp(
 		opCallSpec.Outputs[name] = ""
 	}
 
+	scratchPath := filepath.Join(this.dataDirPath, "scratch", callID)
+	defer func() {
+		err = os.RemoveAll(scratchPath)
+	}()
+
 	return this.caller.Call(
 		ctx,
 		eventChannel,
@@ -67,5 +74,6 @@ func (this core) StartOp(
 		*opHandle.Path(),
 		nil,
 		callID,
+		scratchPath,
 	)
 }

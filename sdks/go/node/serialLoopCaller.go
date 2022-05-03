@@ -23,6 +23,7 @@ type serialLoopCaller interface {
 		opPath string,
 		parentCallID *string,
 		rootCallID string,
+		scratchPath string,
 	) (
 		map[string]*model.Value,
 		error,
@@ -50,6 +51,7 @@ func (lpr _serialLoopCaller) Call(
 	opPath string,
 	parentCallID *string,
 	rootCallID string,
+	scratchPath string,
 ) (
 	map[string]*model.Value,
 	error,
@@ -90,6 +92,7 @@ func (lpr _serialLoopCaller) Call(
 			opPath,
 			parentCallID,
 			rootCallID,
+			scratchPath,
 		)
 		if err != nil {
 			return nil, err

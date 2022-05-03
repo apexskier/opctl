@@ -20,6 +20,7 @@ type opCaller interface {
 		opCall *model.OpCall,
 		rootCallID string,
 		opCallSpec *model.OpCallSpec,
+		scratchPath string,
 	) (
 		map[string]*model.Value,
 		error,
@@ -28,17 +29,14 @@ type opCaller interface {
 
 func newOpCaller(
 	caller caller,
-	dataDirPath string,
 ) opCaller {
 	return _opCaller{
-		caller:         caller,
-		callScratchDir: filepath.Join(dataDirPath, "call"),
+		caller: caller,
 	}
 }
 
 type _opCaller struct {
-	caller         caller
-	callScratchDir string
+	caller caller
 }
 
 func (oc _opCaller) Call(
@@ -47,6 +45,7 @@ func (oc _opCaller) Call(
 	opCall *model.OpCall,
 	rootCallID string,
 	opCallSpec *model.OpCallSpec,
+	scratchPath string,
 ) (
 	map[string]*model.Value,
 	error,
@@ -80,6 +79,7 @@ func (oc _opCaller) Call(
 		opCall.OpPath,
 		&opCall.OpID,
 		rootCallID,
+		scratchPath,
 	)
 	if err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func (oc _opCaller) Call(
 		opFile.Outputs,
 		opCallSpec.Outputs,
 		opCall.OpPath,
-		filepath.Join(oc.callScratchDir, opCall.OpID),
+		filepath.Join(scratchPath, "call", opCall.OpID),
 	)
 
 	outboundScope := map[string]*model.Value{}
