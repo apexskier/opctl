@@ -84,14 +84,14 @@ var _ = Context("core", func() {
 					}
 
 					fakeCaller := new(FakeCaller)
-					dataCachePath, err := os.MkdirTemp("", "")
+					gitOpsDir, err := os.MkdirTemp("", "")
 					if err != nil {
 						panic(err)
 					}
 
 					objectUnderTest := core{
-						caller:        fakeCaller,
-						dataCachePath: dataCachePath,
+						caller:    fakeCaller,
+						gitOpsDir: gitOpsDir,
 					}
 
 					/* act */

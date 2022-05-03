@@ -21,6 +21,7 @@ func Interpret(
 	opPath string,
 	parentID *string,
 	rootCallID string,
+	gitOpsDir string,
 	dataDirPath string,
 ) (*model.Call, error) {
 	call := &model.Call{
@@ -56,6 +57,7 @@ func Interpret(
 			callSpec.Container,
 			id,
 			opPath,
+			gitOpsDir,
 			dataDirPath,
 		)
 		return call, err
@@ -66,6 +68,7 @@ func Interpret(
 			callSpec.Op,
 			id,
 			opPath,
+			gitOpsDir,
 			dataDirPath,
 		)
 		return call, err

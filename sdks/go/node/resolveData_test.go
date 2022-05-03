@@ -13,7 +13,7 @@ var _ = Context("core", func() {
 	Context("ResolveData", func() {
 		It("should call data.Resolve w/ expected args", func() {
 			/* arrange */
-			dataCachePath, err := os.MkdirTemp("", "")
+			gitOpsDir, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}
@@ -23,7 +23,7 @@ var _ = Context("core", func() {
 			providedOpRef := "github.com/opspec-pkgs/_.op.create#3.3.1"
 
 			objectUnderTest := core{
-				dataCachePath: dataCachePath,
+				gitOpsDir: gitOpsDir,
 			}
 
 			/* act */
@@ -34,7 +34,7 @@ var _ = Context("core", func() {
 
 			/* assert */
 			Expect(actualErr).To(BeNil())
-			Expect(*actualOp.Path()).To(Equal(filepath.Join(dataCachePath, providedOpRef)))
+			Expect(*actualOp.Path()).To(Equal(filepath.Join(gitOpsDir, providedOpRef)))
 		})
 	})
 })

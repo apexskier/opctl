@@ -25,6 +25,6 @@ func (cr core) ResolveData(
 		ctx,
 		dataRef,
 		fs.New(),
-		git.New(cr.dataCachePath),
+		git.New(cr.gitOpsDir),
 	)
 }

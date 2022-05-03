@@ -29,10 +29,12 @@ type caller interface {
 
 func newCaller(
 	containerCaller containerCaller,
+	gitOpsDir string,
 	dataDirPath string,
 ) caller {
 	instance := &_caller{
 		containerCaller: containerCaller,
+		gitOpsDir:       gitOpsDir,
 		dataDirPath:     dataDirPath,
 	}
 	instance.opCaller = newOpCaller(instance, dataDirPath)
@@ -46,12 +48,14 @@ func newCaller(
 
 type _caller struct {
 	containerCaller    containerCaller
-	dataDirPath        string
 	opCaller           opCaller
 	parallelCaller     parallelCaller
 	parallelLoopCaller parallelLoopCaller
 	serialCaller       serialCaller
 	serialLoopCaller   serialLoopCaller
+
+	gitOpsDir   string
+	dataDirPath string
 }
 
 func (clr _caller) Call(
@@ -130,6 +134,7 @@ func (clr _caller) Call(
 		opPath,
 		parentCallID,
 		rootCallID,
+		clr.gitOpsDir,
 		clr.dataDirPath,
 	)
 	if err != nil {

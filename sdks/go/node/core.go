@@ -15,22 +15,25 @@ func New(
 	dataDirPath string,
 	privileged bool,
 ) (Node, error) {
+	gitOpsDir := filepath.Join(dataDirPath, "ops")
+
 	caller := newCaller(
 		newContainerCaller(
 			containerRuntime,
 			privileged,
 		),
+		gitOpsDir,
 		dataDirPath,
 	)
 
 	return core{
-		caller:        caller,
-		dataCachePath: filepath.Join(dataDirPath, "ops"),
+		caller:    caller,
+		gitOpsDir: gitOpsDir,
 	}, nil
 }
 
 // core is an Node that supports running ops directly on the host
 type core struct {
-	caller        caller
-	dataCachePath string
+	caller    caller
+	gitOpsDir string
 }

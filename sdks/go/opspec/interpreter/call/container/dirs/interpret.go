@@ -16,7 +16,7 @@ func Interpret(
 	scope map[string]*model.Value,
 	containerCallSpecDirs map[string]interface{},
 	scratchDirPath string,
-	dataCachePath string,
+	gitOpsDir string,
 ) (map[string]string, error) {
 	containerCallDirs := map[string]string{}
 dirLoop:
@@ -37,8 +37,8 @@ dirLoop:
 			return nil, fmt.Errorf("unable to bind directory %v to %v: %w", callSpecContainerDirPath, dirExpression, err)
 		}
 
-		if *dirValue.Dir != "" && !strings.HasPrefix(*dirValue.Dir, dataCachePath) {
-			// bound to non dataCachePath
+		if *dirValue.Dir != "" && !strings.HasPrefix(*dirValue.Dir, gitOpsDir) {
+			// bound to non gitOpsDir
 			containerCallDirs[callSpecContainerDirPath] = *dirValue.Dir
 			continue dirLoop
 		}

@@ -20,6 +20,7 @@ func Interpret(
 	containerCallSpec *model.ContainerCallSpec,
 	containerID string,
 	opPath string,
+	gitOpsDir string,
 	dataDirPath string,
 ) (*model.ContainerCall, error) {
 
@@ -46,8 +47,6 @@ func Interpret(
 		return nil, err
 	}
 
-	dataCachePath := filepath.Join(dataDirPath, "ops")
-
 	// construct dcg container path
 	scratchDirPath := filepath.Join(dataDirPath, "dcg", containerID, "fs")
 	if err := os.MkdirAll(scratchDirPath, 0700); err != nil {
@@ -59,7 +58,7 @@ func Interpret(
 		scope,
 		containerCallSpec.Dirs,
 		scratchDirPath,
-		dataCachePath,
+		gitOpsDir,
 	)
 	if err != nil {
 		return nil, err
@@ -79,7 +78,7 @@ func Interpret(
 		scope,
 		containerCallSpec.Files,
 		scratchDirPath,
-		dataCachePath,
+		gitOpsDir,
 	)
 	if err != nil {
 		return nil, err

@@ -23,6 +23,7 @@ func Interpret(
 	opCallSpec *model.OpCallSpec,
 	opID string,
 	parentOpPath string,
+	gitOpsDir string,
 	dataDirPath string,
 ) (*model.OpCall, error) {
 	scratchDirPath := filepath.Join(dataDirPath, "dcg", opID)
@@ -45,7 +46,7 @@ func Interpret(
 			ctx,
 			opCallSpec.Ref,
 			fs.New(parentOpPath, filepath.Dir(parentOpPath)),
-			git.New(filepath.Join(dataDirPath, "ops")),
+			git.New(gitOpsDir),
 		)
 		if err != nil {
 			return nil, err

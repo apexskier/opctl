@@ -18,7 +18,7 @@ func Interpret(
 	scope map[string]*model.Value,
 	containerCallSpecFiles map[string]interface{},
 	scratchDirPath string,
-	dataCachePath string,
+	gitOpsDir string,
 ) (map[string]string, error) {
 	containerCallFiles := map[string]string{}
 fileLoop:
@@ -39,8 +39,8 @@ fileLoop:
 			return nil, fmt.Errorf("unable to bind file %v to %v: %w", callSpecContainerFilePath, fileExpression, err)
 		}
 
-		if !strings.HasPrefix(*fileValue.File, dataCachePath) {
-			// bound to non dataCachePath
+		if !strings.HasPrefix(*fileValue.File, gitOpsDir) {
+			// bound to non gitOpsDir
 			containerCallFiles[callSpecContainerFilePath] = *fileValue.File
 			continue fileLoop
 		}

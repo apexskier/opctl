@@ -26,7 +26,7 @@ func (this core) StartOp(
 		ctx,
 		req.Op.Ref,
 		fs.New(),
-		git.New(this.dataCachePath),
+		git.New(this.gitOpsDir),
 	)
 	if err != nil {
 		return nil, err
