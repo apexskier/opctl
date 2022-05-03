@@ -160,12 +160,11 @@ func (clr _caller) Call(
 			callSpec.Container,
 		)
 	case callSpec.Op != nil:
+		// note: scope is passed via call inputs instead of the scope object
 		outputs, err = clr.opCaller.Call(
 			callCtx,
 			eventChannel,
 			call.Op,
-			scope,
-			parentCallID,
 			rootCallID,
 			callSpec.Op,
 		)

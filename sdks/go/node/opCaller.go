@@ -13,13 +13,11 @@ import (
 
 //counterfeiter:generate -o internal/fakes/opCaller.go . opCaller
 type opCaller interface {
-	// Executes an op call
+	// Call executes an op call
 	Call(
 		ctx context.Context,
 		eventChannel chan model.Event,
 		opCall *model.OpCall,
-		inboundScope map[string]*model.Value,
-		parentCallID *string,
 		rootCallID string,
 		opCallSpec *model.OpCallSpec,
 	) (
@@ -47,8 +45,6 @@ func (oc _opCaller) Call(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	opCall *model.OpCall,
-	inboundScope map[string]*model.Value,
-	parentCallID *string,
 	rootCallID string,
 	opCallSpec *model.OpCallSpec,
 ) (
