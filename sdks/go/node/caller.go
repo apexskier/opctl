@@ -124,7 +124,6 @@ func (clr _caller) Call(
 
 	call, err = callpkg.Interpret(
 		ctx,
-		eventChannel,
 		scope,
 		callSpec,
 		id,
