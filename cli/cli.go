@@ -40,7 +40,7 @@ func newCli(
 		return nil, err
 	}
 
-	datadirPath := cli.String(
+	dataDirPath := cli.String(
 		mow.StringOpt{
 			Desc:   "Path of dir used to store opctl data",
 			EnvVar: "OPCTL_DATA_DIR",
@@ -53,7 +53,7 @@ func newCli(
 	if err != nil {
 		return nil, err
 	}
-	opFormatter := clioutput.NewCliOpFormatter(cwd, *datadirPath)
+	opFormatter := clioutput.NewCliOpFormatter(cwd, *dataDirPath)
 
 	cliOutput, err := clioutput.New(clicolorer.New(), opFormatter, os.Stderr, os.Stdout)
 	if err != nil {
@@ -96,7 +96,7 @@ func newCli(
 
 	cli.After = func() {
 		cancel()
-		_ = os.RemoveAll(filepath.Join(*datadirPath, "dcg"))
+		_ = os.RemoveAll(filepath.Join(*dataDirPath, "dcg"))
 	}
 
 	// "global" parameters like this must be dereferenced _after_ cli.Run(args) is called
@@ -146,7 +146,7 @@ func newCli(
 		if err != nil {
 			exitWith("", err)
 		}
-		opNode, err := node.New(cr, *datadirPath, *privileged)
+		opNode, err := node.New(cr, *dataDirPath, *privileged)
 		if err != nil {
 			exitWith("", err)
 		}
@@ -162,7 +162,7 @@ func newCli(
 			"Reference to dir ops will be listed from",
 		)
 
-		opFormatter := clioutput.NewCliOpFormatter(*dirRef, *datadirPath)
+		opFormatter := clioutput.NewCliOpFormatter(*dirRef, *dataDirPath)
 		lsCmd.Action = func() {
 			exitWith("", ls(ctx, opFormatter, dataresolver.New(getOpNode()), *dirRef))
 		}

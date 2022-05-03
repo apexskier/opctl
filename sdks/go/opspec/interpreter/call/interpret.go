@@ -3,6 +3,7 @@ package call
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container"
@@ -22,7 +23,7 @@ func Interpret(
 	parentID *string,
 	rootCallID string,
 	gitOpsDir string,
-	dataDirPath string,
+	scratchPath string,
 ) (*model.Call, error) {
 	call := &model.Call{
 		ID:       id,
@@ -58,7 +59,7 @@ func Interpret(
 			id,
 			opPath,
 			gitOpsDir,
-			dataDirPath,
+			filepath.Join(scratchPath, "fs"),
 		)
 		return call, err
 	case callSpec.Op != nil:
@@ -69,7 +70,7 @@ func Interpret(
 			id,
 			opPath,
 			gitOpsDir,
-			dataDirPath,
+			scratchPath,
 		)
 		return call, err
 	case callSpec.Parallel != nil:

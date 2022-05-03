@@ -1,9 +1,6 @@
 package container
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container/cmd"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container/dirs"
@@ -12,6 +9,7 @@ import (
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container/image"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container/sockets"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/str"
+	"os"
 )
 
 // Interpret a container
@@ -21,7 +19,7 @@ func Interpret(
 	containerID string,
 	opPath string,
 	gitOpsDir string,
-	dataDirPath string,
+	scratchDirPath string,
 ) (*model.ContainerCall, error) {
 
 	containerCall := &model.ContainerCall{
@@ -48,7 +46,6 @@ func Interpret(
 	}
 
 	// construct dcg container path
-	scratchDirPath := filepath.Join(dataDirPath, "dcg", containerID, "fs")
 	if err := os.MkdirAll(scratchDirPath, 0700); err != nil {
 		return nil, err
 	}

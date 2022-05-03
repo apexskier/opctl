@@ -3,6 +3,7 @@ package node
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/opctl/opctl/sdks/go/model"
@@ -135,7 +136,7 @@ func (clr _caller) Call(
 		parentCallID,
 		rootCallID,
 		clr.gitOpsDir,
-		clr.dataDirPath,
+		filepath.Join(clr.dataDirPath, "dcg", id),
 	)
 	if err != nil {
 		return nil, err

@@ -17,14 +17,14 @@ type OpFormatter interface {
 // CliOpFormatter formats an op ref in the context of a CLI run
 type CliOpFormatter struct {
 	workingDirPath string
-	datadirPath    string
+	dataDirPath    string
 }
 
 var localOpPrefix = "." + string(os.PathSeparator) + opspec.DotOpspecDirName + string(os.PathSeparator)
 
 // NewCliOpFormatter creates a new CliOpFormatter
-func NewCliOpFormatter(workingDirPath, datadirPath string) CliOpFormatter {
-	return CliOpFormatter{workingDirPath, datadirPath}
+func NewCliOpFormatter(workingDirPath, dataDirPath string) CliOpFormatter {
+	return CliOpFormatter{workingDirPath, dataDirPath}
 }
 
 // FormatOpRef gives a more appropriate description of an op's reference
@@ -36,7 +36,7 @@ func (of CliOpFormatter) FormatOpRef(opRef string) string {
 		if err != nil {
 			return opRef
 		}
-		dataDirPath := of.datadirPath
+		dataDirPath := of.dataDirPath
 		if strings.HasPrefix(opRef, dataDirPath) {
 			return opRef[len(filepath.Join(dataDirPath, "ops")+string(os.PathSeparator)):]
 		}

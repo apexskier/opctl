@@ -24,10 +24,8 @@ func Interpret(
 	opID string,
 	parentOpPath string,
 	gitOpsDir string,
-	dataDirPath string,
+	scratchDirPath string,
 ) (*model.OpCall, error) {
-	scratchDirPath := filepath.Join(dataDirPath, "dcg", opID)
-
 	var opPath string
 	if reference.ReferenceRegexp.MatchString(opCallSpec.Ref) {
 		// attempt to process as a variable reference since its variable reference like.
