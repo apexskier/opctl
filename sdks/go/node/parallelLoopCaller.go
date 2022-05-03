@@ -18,7 +18,6 @@ type parallelLoopCaller interface {
 	Call(
 		ctx context.Context,
 		eventChannel chan model.Event,
-		id string,
 		inboundScope map[string]*model.Value,
 		callSpecParallelLoop model.ParallelLoopCallSpec,
 		opPath string,
@@ -44,7 +43,6 @@ type _parallelLoopCaller struct {
 func (plpr _parallelLoopCaller) Call(
 	parentCtx context.Context,
 	eventChannel chan model.Event,
-	id string,
 	inboundScope map[string]*model.Value,
 	callSpecParallelLoop model.ParallelLoopCallSpec,
 	opPath string,

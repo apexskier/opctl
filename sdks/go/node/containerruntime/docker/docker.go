@@ -32,7 +32,7 @@ func New(
 
 	return _containerRuntime{
 		networkName:  networkName,
-		runContainer: newRunContainer(ctx, networkName, dockerClient, dockerConfigPath),
+		runContainer: newRunContainer(networkName, dockerClient, dockerConfigPath),
 		dockerClient: dockerClient,
 	}, nil
 }

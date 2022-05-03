@@ -46,7 +46,7 @@ func (ip _imagePuller) Pull(
 ) error {
 	imageRef := *containerCall.Image.Ref
 
-	needsPull, err := ip.doesImageNeedPull(ctx, imageRef, eventChannel)
+	needsPull, err := ip.doesImageNeedPull(ctx, imageRef)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,6 @@ func (ip _imagePuller) Pull(
 func (ip _imagePuller) doesImageNeedPull(
 	ctx context.Context,
 	imageRef string,
-	eventChannel chan model.Event,
 ) (bool, error) {
 	// Skip pulling for non-tagged images that already are present
 	// This reduces the chance of hitting docker rate limiting errors

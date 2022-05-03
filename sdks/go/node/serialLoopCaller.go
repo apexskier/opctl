@@ -17,7 +17,6 @@ type serialLoopCaller interface {
 	Call(
 		ctx context.Context,
 		eventChannel chan model.Event,
-		id string,
 		inboundScope map[string]*model.Value,
 		callSpecSerialLoop model.SerialLoopCallSpec,
 		opPath string,
@@ -45,7 +44,6 @@ type _serialLoopCaller struct {
 func (lpr _serialLoopCaller) Call(
 	ctx context.Context,
 	eventChannel chan model.Event,
-	id string,
 	inboundScope map[string]*model.Value,
 	callSpecSerialLoop model.SerialLoopCallSpec,
 	opPath string,

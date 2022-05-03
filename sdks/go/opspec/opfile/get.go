@@ -1,7 +1,6 @@
 package opfile
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 
@@ -10,7 +9,6 @@ import (
 
 // Get gets the validated, deserialized representation of an "op.yml" file
 func Get(
-	ctx context.Context,
 	opPath string,
 ) (
 	*model.OpSpec,

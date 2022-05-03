@@ -156,11 +156,11 @@ func (clr _caller) Call(
 
 	switch {
 	case callSpec.Container != nil:
+		// note: scope is effectively passed via files/dirs/env, etc
 		outputs, err = clr.containerCaller.Call(
 			callCtx,
 			eventChannel,
 			call.Container,
-			scope,
 			callSpec.Container,
 		)
 	case callSpec.Op != nil:
@@ -188,7 +188,6 @@ func (clr _caller) Call(
 		outputs, err = clr.parallelLoopCaller.Call(
 			callCtx,
 			eventChannel,
-			id,
 			scope,
 			*callSpec.ParallelLoop,
 			opPath,
@@ -211,7 +210,6 @@ func (clr _caller) Call(
 		outputs, err = clr.serialLoopCaller.Call(
 			callCtx,
 			eventChannel,
-			id,
 			scope,
 			*callSpec.SerialLoop,
 			opPath,

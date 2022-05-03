@@ -52,10 +52,7 @@ func Interpret(
 		opPath = *opHandle.Path()
 	}
 
-	opFile, err := opfile.Get(
-		ctx,
-		opPath,
-	)
+	opFile, err := opfile.Get(opPath)
 	if err != nil {
 		return nil, err
 	}

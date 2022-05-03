@@ -18,7 +18,6 @@ import (
 )
 
 func newRunContainer(
-	ctx context.Context,
 	networkName string,
 	dockerClient dockerClientPkg.CommonAPIClient,
 	dockerConfigPath string,

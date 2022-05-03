@@ -20,8 +20,5 @@ func opValidate(
 		return err
 	}
 
-	return opspec.Validate(
-		ctx,
-		*opDirHandle.Path(),
-	)
+	return opspec.Validate(*opDirHandle.Path())
 }

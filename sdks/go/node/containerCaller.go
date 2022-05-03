@@ -19,7 +19,6 @@ type containerCaller interface {
 		ctx context.Context,
 		eventChannel chan model.Event,
 		containerCall *model.ContainerCall,
-		inboundScope map[string]*model.Value,
 		containerCallSpec *model.ContainerCallSpec,
 	) (
 		map[string]*model.Value,
@@ -46,7 +45,6 @@ func (cc _containerCaller) Call(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	containerCall *model.ContainerCall,
-	inboundScope map[string]*model.Value,
 	containerCallSpec *model.ContainerCallSpec,
 ) (
 	map[string]*model.Value,

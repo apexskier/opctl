@@ -46,10 +46,7 @@ func (this core) StartOp(
 		opCallSpec.Inputs[name] = ""
 	}
 
-	opFile, err := opfile.Get(
-		ctx,
-		*opHandle.Path(),
-	)
+	opFile, err := opfile.Get(*opHandle.Path())
 	if err != nil {
 		return nil, err
 	}

@@ -86,10 +86,7 @@ func (oc _opCaller) Call(
 	}
 
 	var opFile *model.OpSpec
-	opFile, err = opfile.Get(
-		ctx,
-		opCall.OpPath,
-	)
+	opFile, err = opfile.Get(opCall.OpPath)
 	if err != nil {
 		return nil, err
 	}
