@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/opctl/opctl/sdks/go/data"
 	"path/filepath"
 	"strings"
 
+	"github.com/opctl/opctl/cli/internal/dataresolver"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
 // opInstall implements "op install" sub command
 func opInstall(
 	ctx context.Context,
-	dataResolver data.DataProvider,
+	dataResolver dataresolver.DataResolver,
 	opRef string,
 	path string,
 ) error {

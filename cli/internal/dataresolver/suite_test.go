@@ -1,4 +1,4 @@
-package node
+package dataresolver
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -9,5 +9,5 @@ import (
 
 func Test(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "opctl/cli/internal/node")
+	RunSpecs(t, "opctl/cli/internal/dataresolver")
 }

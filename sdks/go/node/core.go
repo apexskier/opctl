@@ -1,4 +1,4 @@
-// Package core defines the core interface for an opctl node
+// Package node defines the core interface for an opctl node
 package node
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -generate
@@ -9,7 +9,7 @@ import (
 	"github.com/opctl/opctl/sdks/go/node/containerruntime"
 )
 
-// New returns a new core Node
+// New returns a new Node
 func New(
 	containerRuntime containerruntime.ContainerRuntime,
 	dataDirPath string,
@@ -32,13 +32,9 @@ func New(
 	}, nil
 }
 
-// core is a Node that supports running ops directly on the host
+// core is an Node that supports running ops directly on the host
 type core struct {
 	caller      caller
 	gitOpsDir   string
 	dataDirPath string
-}
-
-func (core) Label() string {
-	return "opctl node"
 }

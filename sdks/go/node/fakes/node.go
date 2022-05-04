@@ -3,11 +3,11 @@ package fakes
 
 import (
 	"context"
-	"github.com/opctl/opctl/sdks/go/node"
 	"sync"
 
 	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/model"
+	"github.com/opctl/opctl/sdks/go/node"
 )
 
 type FakeNode struct {

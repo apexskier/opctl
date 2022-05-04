@@ -2,13 +2,15 @@ package node
 
 import (
 	"context"
+
 	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/data/fs"
 	"github.com/opctl/opctl/sdks/go/data/git"
 )
 
-// resolveData attempts to resolve data via local filesystem or git
-func (c core) resolveData(
+// Resolve attempts to resolve data via local filesystem or git
+// nil pullCreds will be ignored
+func (cr core) ResolveData(
 	ctx context.Context,
 	dataRef string,
 ) (
@@ -19,6 +21,6 @@ func (c core) resolveData(
 		ctx,
 		dataRef,
 		fs.New(),
-		git.New(c.gitOpsDir),
+		git.New(cr.gitOpsDir),
 	)
 }

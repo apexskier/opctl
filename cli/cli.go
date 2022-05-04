@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	coreNode "github.com/opctl/opctl/sdks/go/node"
 	"os"
 	"path/filepath"
 
@@ -12,8 +11,9 @@ import (
 	"github.com/opctl/opctl/cli/internal/clicolorer"
 	"github.com/opctl/opctl/cli/internal/clioutput"
 	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
-	cliNode "github.com/opctl/opctl/cli/internal/node"
+	"github.com/opctl/opctl/cli/internal/dataresolver"
 	"github.com/opctl/opctl/sdks/go/model"
+	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime/docker"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime/k8s"
@@ -140,16 +140,16 @@ func newCli(
 		}
 		return docker.New(ctx, *networkName, "unix:///var/run/docker.sock", *dockerConfigPath)
 	}
-	getNode := func() coreNode.Node {
+	getOpNode := func() node.Node {
 		cr, err := getContainerRuntime()
 		if err != nil {
 			exitWith("", err)
 		}
-		opNode, err := coreNode.New(cr, *dataDirPath, *privileged)
+		opNode, err := node.New(cr, *dataDirPath, *privileged)
 		if err != nil {
 			exitWith("", err)
 		}
-		return cliNode.New(opNode, cwd)
+		return opNode
 	}
 
 	cli.Command("ls", "List operations", func(lsCmd *mow.Cmd) {
@@ -163,7 +163,7 @@ func newCli(
 
 		opFormatter := clioutput.NewCliOpFormatter(*dirRef, *dataDirPath)
 		lsCmd.Action = func() {
-			exitWith("", ls(ctx, opFormatter, getNode(), *dirRef))
+			exitWith("", ls(ctx, opFormatter, dataresolver.New(getOpNode(), cwd), *dirRef))
 		}
 	})
 
@@ -177,7 +177,7 @@ func newCli(
 					"",
 					opInstall(
 						ctx,
-						getNode(),
+						dataresolver.New(getOpNode(), cwd),
 						*opRef,
 						*path,
 					),
@@ -193,7 +193,7 @@ func newCli(
 					fmt.Sprintf("%v is valid", *opRef),
 					opValidate(
 						ctx,
-						getNode(),
+						dataresolver.New(getOpNode(), cwd),
 						*opRef,
 					),
 				)
@@ -202,12 +202,10 @@ func newCli(
 	})
 
 	cli.Command("run", "Start and wait on an op", func(runCmd *mow.Cmd) {
-		opts := RunOpts{
-			Args:       *runCmd.StringsOpt("a", []string{}, "Explicitly pass args to op in format `-a NAME1=VALUE1 -a NAME2=VALUE2`"),
-			ArgFile:    *runCmd.StringOpt("arg-file", filepath.Join(opspec.DotOpspecDirName, "args.yml"), "Read in a file of args in yml format"),
-			NoProgress: *runCmd.BoolOpt("no-progress", !term.IsTerminal(int(os.Stdout.Fd())), "Disable live call graph for the op"),
-			OpRef:      *runCmd.StringArg("OP_REF", "", "Op reference (either `relative/path`, `/absolute/path`, `host/path/repo#tag`, or `host/path/repo#tag/path`)"),
-		}
+		args := runCmd.StringsOpt("a", []string{}, "Explicitly pass args to op in format `-a NAME1=VALUE1 -a NAME2=VALUE2`")
+		argFile := runCmd.StringOpt("arg-file", filepath.Join(opspec.DotOpspecDirName, "args.yml"), "Read in a file of args in yml format")
+		noProgress := runCmd.BoolOpt("no-progress", !term.IsTerminal(int(os.Stdout.Fd())), "Disable live call graph for the op")
+		opRef := runCmd.StringArg("OP_REF", "", "Op reference (either `relative/path`, `/absolute/path`, `host/path/repo#tag`, or `host/path/repo#tag/path`)")
 
 		runCmd.Action = func() {
 			outputs, err := run(
@@ -215,8 +213,12 @@ func newCli(
 				cliOutput,
 				cliparamsatisfier.New(cliOutput),
 				opFormatter,
-				getNode(),
-				&opts,
+				make(chan model.Event),
+				getOpNode(),
+				cwd,
+				*opRef,
+				&RunOpts{Args: *args, ArgFile: *argFile},
+				*noProgress,
 			)
 			if err != nil {
 				exitWith("", err)

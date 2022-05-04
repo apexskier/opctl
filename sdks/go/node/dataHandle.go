@@ -8,11 +8,15 @@ import (
 	"github.com/opctl/opctl/sdks/go/data"
 )
 
-func (c core) Resolve(
+func (core) Label() string {
+	return "opctl node"
+}
+
+func (np core) Resolve(
 	ctx context.Context,
 	dataRef string,
 ) (data.DataHandle, error) {
-	h := newHandle(c, dataRef)
+	h := newHandle(np, dataRef)
 	if _, err := h.ListDescendants(ctx); err != nil {
 		return nil, err
 	}
@@ -48,7 +52,7 @@ func (nh handle) GetContent(
 		return nil, fmt.Errorf(`"" not a valid data ref`)
 	}
 
-	dataHandle, err := nh.node.resolveData(ctx, dataRef)
+	dataHandle, err := nh.node.ResolveData(ctx, dataRef)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +70,7 @@ func (nh handle) ListDescendants(
 		return []*data.DirEntry{}, fmt.Errorf(`"" not a valid data ref`)
 	}
 
-	dataHandle, err := nh.node.resolveData(ctx, nh.dataRef)
+	dataHandle, err := nh.node.ResolveData(ctx, nh.dataRef)
 	if err != nil {
 		return nil, err
 	}
