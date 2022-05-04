@@ -37,8 +37,7 @@ var _ = Context("constructContainerConfig", func() {
 			WorkingDir:   providedWorkDir,
 			Tty:          true,
 			Labels: map[string]string{
-				"opctl__container_id": "dummyContainerID",
-				"opctl__root_call_id": "rootCallID",
+				"miniopctl_container_id": "dummyContainerID",
 			},
 		}
 
@@ -58,7 +57,6 @@ var _ = Context("constructContainerConfig", func() {
 			providedPortBindings,
 			providedWorkDir,
 			"dummyContainerID",
-			"rootCallID",
 		)
 
 		/* assert */

@@ -12,7 +12,7 @@ import (
 )
 
 var _ = Context("_git", func() {
-	Context("TryResolve", func() {
+	Context("Resolve", func() {
 		Context("repo exists but completion marker doesn't", func() {
 			Context("invalid git ref", func() {
 
@@ -24,10 +24,10 @@ var _ = Context("_git", func() {
 				}
 				opRef := filepath.Join(wd, "../testdata/testop")
 
-				objectUnderTest := New(filepath.Dir(opRef), nil)
+				objectUnderTest := New(filepath.Dir(opRef))
 
 				/* act */
-				actualHandle, actualErr := objectUnderTest.TryResolve(
+				actualHandle, actualErr := objectUnderTest.Resolve(
 					context.Background(),
 					opRef,
 				)
@@ -42,10 +42,10 @@ var _ = Context("_git", func() {
 					if err != nil {
 						panic(err)
 					}
-					objectUnderTest := New(dataDir, nil)
+					objectUnderTest := New(dataDir)
 
 					/* act */
-					_, actualErr := objectUnderTest.TryResolve(
+					_, actualErr := objectUnderTest.Resolve(
 						context.Background(),
 						"not/exists",
 					)
@@ -66,10 +66,8 @@ var _ = Context("_git", func() {
 						expectedHandle := newHandle(filepath.Join(basePath, providedRef), providedRef)
 
 						/* act */
-						actualHandle, actualError := objectUnderTest.TryResolve(
+						actualHandle, actualError := objectUnderTest.Resolve(
 							context.Background(),
-							make(chan model.Event),
-							"callID",
 							providedRef,
 						)
 
@@ -108,10 +106,8 @@ var _ = Context("_git", func() {
 				var wg sync.WaitGroup
 				wg.Add(1)
 				go func() {
-					actualResult1, actualErr1 = objectUnderTest.TryResolve(
+					actualResult1, actualErr1 = objectUnderTest.Resolve(
 						context.Background(),
-						make(chan model.Event),
-						"callID",
 						providedRef,
 					)
 					wg.Done()
@@ -119,10 +115,8 @@ var _ = Context("_git", func() {
 
 				wg.Add(1)
 				go func() {
-					actualResult2, actualErr2 = objectUnderTest.TryResolve(
+					actualResult2, actualErr2 = objectUnderTest.Resolve(
 						context.Background(),
-						make(chan model.Event),
-						"callID",
 						providedRef,
 					)
 					wg.Done()
@@ -167,10 +161,8 @@ var _ = Context("_git", func() {
 				var wg sync.WaitGroup
 				wg.Add(1)
 				go func() {
-					actualResult1, actualErr1 = objectUnderTest.TryResolve(
+					actualResult1, actualErr1 = objectUnderTest.Resolve(
 						context.Background(),
-						make(chan model.Event),
-						"callID",
 						providedRef1,
 					)
 					wg.Done()
@@ -178,10 +170,8 @@ var _ = Context("_git", func() {
 
 				wg.Add(1)
 				go func() {
-					actualResult2, actualErr2 = objectUnderTest.TryResolve(
+					actualResult2, actualErr2 = objectUnderTest.Resolve(
 						context.Background(),
-						make(chan model.Event),
-						"callID",
 						providedRef2,
 					)
 					wg.Done()

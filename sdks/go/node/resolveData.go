@@ -10,10 +10,6 @@ import (
 
 // Resolve attempts to resolve data via local filesystem or git
 // nil pullCreds will be ignored
-//
-// expected errs:
-//  - ErrDataProviderAuthentication on authentication failure
-//  - ErrDataProviderAuthorization on authorization failure
 func (cr core) ResolveData(
 	ctx context.Context,
 	dataRef string,

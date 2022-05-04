@@ -33,7 +33,7 @@ func (gp *_git) Label() string {
 	return "git"
 }
 
-func (gp *_git) TryResolve(
+func (gp *_git) Resolve(
 	ctx context.Context,
 	dataRef string,
 ) (data.DataHandle, error) {

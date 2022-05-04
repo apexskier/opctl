@@ -8,12 +8,8 @@ import (
 type DataProvider interface {
 	Label() string
 
-	// TryResolve resolves a package from the source.
-	//
-	// expected errs:
-	//  - ErrDataProviderAuthentication on authentication failure
-	//  - ErrDataProviderAuthorization on authorization failure
-	TryResolve(
+	// Resolve resolves a package from the source.
+	Resolve(
 		ctx context.Context,
 		dataRef string,
 	) (DataHandle, error)

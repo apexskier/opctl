@@ -2,7 +2,6 @@ package dataresolver
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 
 	"github.com/opctl/opctl/sdks/go/data"
@@ -18,28 +17,25 @@ type DataResolver interface {
 	) (data.DataHandle, error)
 }
 
-func New(dataProvider data.DataProvider) DataResolver {
+func New(dataProvider data.DataProvider, basePath string) DataResolver {
 	return _dataResolver{
 		dataProvider: dataProvider,
+		basePath:     basePath,
 	}
 }
 
 type _dataResolver struct {
 	dataProvider data.DataProvider
+	basePath     string
 }
 
 func (dtr _dataResolver) Resolve(
 	ctx context.Context,
 	dataRef string,
 ) (data.DataHandle, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
 	fsProvider := fs.New(
-		filepath.Join(cwd, opspec.DotOpspecDirName),
-		cwd,
+		filepath.Join(dtr.basePath, opspec.DotOpspecDirName),
+		dtr.basePath,
 	)
 
 	opDirHandle, err := data.Resolve(

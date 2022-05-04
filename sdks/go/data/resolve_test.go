@@ -14,7 +14,7 @@ import (
 )
 
 var _ = Context("Resolve", func() {
-	Context("providers[0].TryResolve errs", func() {
+	Context("providers[0].Resolve errs", func() {
 		It("should return error", func() {
 			/* arrange */
 			provider0 := fs.New()
@@ -34,7 +34,7 @@ var _ = Context("Resolve", func() {
 			Expect(actualErr).To(MatchError(fmt.Errorf("unable to resolve op '\\not/exist': %w", expected)))
 		})
 	})
-	Context("providers[0].TryResolve doesn't err", func() {
+	Context("providers[0].Resolve doesn't err", func() {
 		It("should return expected results", func() {
 			wd, err := os.Getwd()
 			if err != nil {

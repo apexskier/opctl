@@ -12,7 +12,7 @@ func (core) Label() string {
 	return "opctl node"
 }
 
-func (np core) TryResolve(
+func (np core) Resolve(
 	ctx context.Context,
 	dataRef string,
 ) (data.DataHandle, error) {

@@ -7,14 +7,7 @@ import (
 	"os/exec"
 )
 
-// Clone 'dataRef' to 'path'
-// nil pullCreds will be ignored
-//
-// expected errs:
-//  - ErrDataProviderAuthentication on authentication failure
-//  - ErrDataProviderAuthorization on authorization failure
-//
-// NOTE
+// Clone clones a git repository referenced by an opctl dataRef
 func (gp *_git) Clone(
 	ctx context.Context,
 	dataRef string,
@@ -35,7 +28,9 @@ func (gp *_git) Clone(
 	// prompting.
 	// See golang.org/issue/9341 and golang.org/issue/12706.
 	if os.Getenv("GIT_TERMINAL_PROMPT") == "" {
-		os.Setenv("GIT_TERMINAL_PROMPT", "0")
+		if err := os.Setenv("GIT_TERMINAL_PROMPT", "0"); err != nil {
+			return err
+		}
 	}
 
 	// Also disable prompting for passwords by the 'ssh' subprocess spawned by
@@ -55,14 +50,18 @@ func (gp *_git) Clone(
 	// assume they know what they are doing and don't step on it.
 	// But default to turning off ControlMaster.
 	if os.Getenv("GIT_SSH") == "" && os.Getenv("GIT_SSH_COMMAND") == "" {
-		os.Setenv("GIT_SSH_COMMAND", "ssh -o ControlMaster=no -o BatchMode=yes")
+		if err := os.Setenv("GIT_SSH_COMMAND", "ssh -o ControlMaster=no -o BatchMode=yes"); err != nil {
+			return err
+		}
 	}
 
 	// And one more source of Git prompts: the Git Credential Manager Core for Windows.
 	//
 	// See https://github.com/microsoft/Git-Credential-Manager-Core/blob/master/docs/environment.md#gcm_interactive.
 	if os.Getenv("GCM_INTERACTIVE") == "" {
-		os.Setenv("GCM_INTERACTIVE", "never")
+		if err := os.Setenv("GCM_INTERACTIVE", "never"); err != nil {
+			return err
+		}
 	}
 
 	destinationPath := parsedPkgRef.ToPath(gp.basePath)
@@ -71,7 +70,8 @@ func (gp *_git) Clone(
 		return err
 	}
 
-	cmd := exec.Command(
+	cmd := exec.CommandContext(
+		ctx,
 		"git",
 		"clone",
 		"--quiet",

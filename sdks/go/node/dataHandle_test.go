@@ -17,7 +17,7 @@ var _ = Context("DataHandle Resolution", func() {
 				/* arrange */
 				ctx := context.Background()
 				c := core{}
-				objectUnderTest, err := c.TryResolve(ctx, "")
+				objectUnderTest, err := c.Resolve(ctx, "")
 				Expect(err).To(BeNil())
 
 				/* act */
@@ -35,7 +35,7 @@ var _ = Context("DataHandle Resolution", func() {
 				/* arrange */
 				ctx := context.Background()
 				c := core{}
-				objectUnderTest, err := c.TryResolve(ctx, "")
+				objectUnderTest, err := c.Resolve(ctx, "")
 				Expect(err).To(BeNil())
 
 				/* act */
@@ -58,7 +58,7 @@ var _ = Context("DataHandle Resolution", func() {
 				providedDataRef := path.Join(wd, "testdata/listDescendants")
 				ctx := context.Background()
 				c := core{}
-				objectUnderTest, err := c.TryResolve(ctx, providedDataRef)
+				objectUnderTest, err := c.Resolve(ctx, providedDataRef)
 				Expect(err).To(BeNil())
 
 				expectedDescendants := []*data.DirEntry{

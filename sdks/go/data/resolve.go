@@ -8,10 +8,6 @@ import (
 )
 
 // Resolve "dataRef" from "providers" in order
-//
-// expected errs:
-//  - ErrDataProviderAuthentication on authentication failure
-//  - ErrDataProviderAuthorization on authorization failure
 func Resolve(
 	ctx context.Context,
 	dataRef string,
@@ -23,7 +19,7 @@ func Resolve(
 	var agg aggregateError.ErrAggregate
 
 	for _, src := range providers {
-		handle, err := src.TryResolve(ctx, dataRef)
+		handle, err := src.Resolve(ctx, dataRef)
 		if err != nil {
 			agg.AddError(fmt.Errorf("%s: %w", src.Label(), err))
 		} else if handle != nil {

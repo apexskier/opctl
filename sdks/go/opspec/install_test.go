@@ -99,7 +99,7 @@ var _ = Context("Install", func() {
 							/* arrange */
 							fsDataSource := fs.New("")
 							ref := "testdata/testop"
-							handle, err := fsDataSource.TryResolve(providedCtx, ref)
+							handle, err := fsDataSource.Resolve(providedCtx, ref)
 							if err != nil {
 								panic(err)
 							}

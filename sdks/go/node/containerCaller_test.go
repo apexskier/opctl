@@ -3,37 +3,20 @@ package node
 import (
 	"context"
 	"errors"
-	"io"
-	"os"
-
-	"github.com/dgraph-io/badger/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
 	. "github.com/opctl/opctl/sdks/go/node/containerruntime/fakes"
-	. "github.com/opctl/opctl/sdks/go/node/internal/fakes"
+	"io"
 )
 
 var _ = Context("containerCaller", func() {
-	dbDir, err := os.MkdirTemp("", "")
-	if err != nil {
-		panic(err)
-	}
-
-	db, err := badger.Open(
-		badger.DefaultOptions(dbDir).WithLogger(nil),
-	)
-	if err != nil {
-		panic(err)
-	}
-
 	Context("newContainerCaller", func() {
 		It("should return containerCaller", func() {
 			/* arrange/act/assert */
 			Expect(newContainerCaller(
 				new(FakeContainerRuntime),
-				make(chan model.Event),
-				new(FakeStateStore),
+				false,
 			)).To(Not(BeNil()))
 		})
 	})
@@ -55,10 +38,9 @@ var _ = Context("containerCaller", func() {
 			/* act */
 			objectUnderTest.Call(
 				providedCtx,
-				providedContainerCall,
-				map[string]*model.Value{},
+				eventChannel,
+				&model.ContainerCall{},
 				&model.ContainerCallSpec{},
-				providedRootCallID,
 			)
 
 			/* assert */
@@ -80,10 +62,11 @@ var _ = Context("containerCaller", func() {
 
 				fakeContainerRuntime.RunContainerStub = func(
 					ctx context.Context,
+					c chan model.Event,
 					req *model.ContainerCall,
-					rootCallID string,
 					stdOut io.WriteCloser,
 					stdErr io.WriteCloser,
+					privileged bool,
 				) (*int64, error) {
 
 					stdErr.Close()
@@ -99,13 +82,12 @@ var _ = Context("containerCaller", func() {
 				/* act */
 				actualOutputs, actualErr := objectUnderTest.Call(
 					context.Background(),
+					eventChannel,
 					&model.ContainerCall{
 						BaseCall: model.BaseCall{},
 						Image:    &model.ContainerCallImage{},
 					},
-					map[string]*model.Value{},
 					&model.ContainerCallSpec{},
-					"rootCallID",
 				)
 
 				/* assert */
@@ -133,10 +115,11 @@ var _ = Context("containerCaller", func() {
 		expectedErr := errors.New("io: read/write on closed pipe")
 		fakeContainerRuntime.RunContainerStub = func(
 			ctx context.Context,
+			c chan model.Event,
 			req *model.ContainerCall,
-			rootCallID string,
 			stdOut io.WriteCloser,
 			stdErr io.WriteCloser,
+			privileged bool,
 		) (*int64, error) {
 
 			stdErr.Close()
@@ -152,10 +135,9 @@ var _ = Context("containerCaller", func() {
 		/* act */
 		actualOutputs, actualErr := objectUnderTest.Call(
 			context.Background(),
+			eventChannel,
 			providedContainerCall,
-			providedInboundScope,
 			providedContainerCallSpec,
-			"rootCallID",
 		)
 
 		/* assert */

@@ -32,6 +32,8 @@ var _ = Context("constructHostConfig", func() {
 			"8081/tcp": []nat.PortBinding{{HostPort: "9091"}},
 		}
 
+		privileged := false
+
 		expectedHostConfig := &container.HostConfig{
 			Mounts: []mount.Mount{
 				{
@@ -70,7 +72,7 @@ var _ = Context("constructHostConfig", func() {
 				},
 			},
 			PortBindings: providedPortBindings,
-			Privileged:   true,
+			Privileged:   privileged,
 		}
 
 		/* act */
@@ -79,6 +81,7 @@ var _ = Context("constructHostConfig", func() {
 			providedContainerFiles,
 			providedContainerSockets,
 			providedPortBindings,
+			privileged,
 		)
 
 		/* assert */

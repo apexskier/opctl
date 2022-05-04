@@ -38,6 +38,7 @@ func run(
 	opFormatter clioutput.OpFormatter,
 	eventChannel chan model.Event,
 	node node.Node,
+	cwd string,
 	opRef string,
 	opts *RunOpts,
 	noProgress bool,
@@ -99,7 +100,7 @@ func run(
 		}
 	}
 
-	dataResolver := dataresolver.New(node)
+	dataResolver := dataresolver.New(node, cwd)
 
 	opHandle, err := dataResolver.Resolve(
 		ctx,

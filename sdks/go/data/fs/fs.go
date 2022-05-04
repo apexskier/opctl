@@ -30,7 +30,7 @@ func (fp _fs) Label() string {
 	return "filesystem"
 }
 
-func (fp _fs) TryResolve(
+func (fp _fs) Resolve(
 	ctx context.Context,
 	dataRef string,
 ) (data.DataHandle, error) {

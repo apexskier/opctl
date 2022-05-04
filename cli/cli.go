@@ -163,7 +163,7 @@ func newCli(
 
 		opFormatter := clioutput.NewCliOpFormatter(*dirRef, *dataDirPath)
 		lsCmd.Action = func() {
-			exitWith("", ls(ctx, opFormatter, dataresolver.New(getOpNode()), *dirRef))
+			exitWith("", ls(ctx, opFormatter, dataresolver.New(getOpNode(), cwd), *dirRef))
 		}
 	})
 
@@ -177,7 +177,7 @@ func newCli(
 					"",
 					opInstall(
 						ctx,
-						dataresolver.New(getOpNode()),
+						dataresolver.New(getOpNode(), cwd),
 						*opRef,
 						*path,
 					),
@@ -193,7 +193,7 @@ func newCli(
 					fmt.Sprintf("%v is valid", *opRef),
 					opValidate(
 						ctx,
-						dataresolver.New(getOpNode()),
+						dataresolver.New(getOpNode(), cwd),
 						*opRef,
 					),
 				)
@@ -215,6 +215,7 @@ func newCli(
 				opFormatter,
 				make(chan model.Event),
 				getOpNode(),
+				cwd,
 				*opRef,
 				&RunOpts{Args: *args, ArgFile: *argFile},
 				*noProgress,

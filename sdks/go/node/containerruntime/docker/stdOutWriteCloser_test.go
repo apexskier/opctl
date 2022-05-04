@@ -31,27 +31,23 @@ func TestStdOutWriteCloser(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	/* arrange */
-	eventPublisher := &mockPublisher{}
+	eventPublisher := make(chan model.Event, 2)
+	containerId := "containerID"
 
 	objectUnderTest := NewStdOutWriteCloser(
 		eventPublisher,
-		"containerId",
-		"rootCallId",
+		&model.ContainerCall{ContainerID: containerId},
 	)
-
-	expectedEventLen := 2
-
-	eventPublisher.wg.Add(expectedEventLen)
 
 	/* act */
 	_, err := objectUnderTest.Write([]byte("testing 1\ntesting 2"))
 	if err != nil {
 		panic(err)
 	}
-	objectUnderTest.Close()
+	err = objectUnderTest.Close()
+	g.Expect(err).To(BeNil())
 
 	/* assert */
-	eventPublisher.wg.Wait()
-	eventPublisher.wg.Wait()
-	g.Expect(eventPublisher.events).To(HaveLen(2))
+	g.Expect((<-eventPublisher).ContainerStdOutWrittenTo).To(Equal(&model.ContainerStdOutWrittenTo{ContainerID: containerId, Data: []byte("testing 1\n")}))
+	g.Expect((<-eventPublisher).ContainerStdOutWrittenTo).To(Equal(&model.ContainerStdOutWrittenTo{ContainerID: containerId, Data: []byte("testing 2")}))
 }

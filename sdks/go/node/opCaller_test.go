@@ -17,7 +17,6 @@ var _ = Context("opCaller", func() {
 			/* arrange/act/assert */
 			Expect(newOpCaller(
 				new(FakeCaller),
-				"",
 			)).To(Not(BeNil()))
 		})
 	})

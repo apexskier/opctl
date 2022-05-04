@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/opctl/opctl/sdks/go/model"
 )
 
 func TestAggregateError(t *testing.T) {
@@ -19,7 +18,7 @@ func TestAggregateError(t *testing.T) {
 			fmt.Errorf("container: %w", ErrAggregate{
 				errs: []error{
 					errors.New("nested"),
-					model.ErrDataProviderAuthorization{},
+					errors.New("another"),
 				},
 			}),
 			internalErr,
@@ -31,7 +30,7 @@ func TestAggregateError(t *testing.T) {
 	g.Expect(err.Error()).To(Equal(`
 - container:` + " " + `
   - nested
-  - unauthorized
+  - another
 - testing`))
 	g.Expect(err.Is(internalErr)).To(BeTrue())
 	g.Expect(err.Is(errors.New("garbage"))).To(BeFalse())
