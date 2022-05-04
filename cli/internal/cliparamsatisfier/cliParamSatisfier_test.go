@@ -23,7 +23,8 @@ var _ = Context("parameterSatisfier", func() {
 		panic(err)
 	}
 
-	cliOutput := clioutput.New(clicolorer.New(), io.Discard, io.Discard)
+	cliOutput, err := clioutput.New(clicolorer.New(), clioutput.SimpleOpFormatter{}, io.Discard, io.Discard)
+	Expect(err).To(BeNil())
 
 	Context("New", func() {
 		It("should return truthy result", func() {

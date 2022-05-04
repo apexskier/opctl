@@ -9,16 +9,15 @@ import (
 )
 
 type FakeOpCaller struct {
-	CallStub        func(context.Context, chan model.Event, *model.OpCall, map[string]*model.Value, *string, string, *model.OpCallSpec) (map[string]*model.Value, error)
+	CallStub        func(context.Context, chan model.Event, *model.OpCall, string, *model.OpCallSpec, string) (map[string]*model.Value, error)
 	callMutex       sync.RWMutex
 	callArgsForCall []struct {
 		arg1 context.Context
 		arg2 chan model.Event
 		arg3 *model.OpCall
-		arg4 map[string]*model.Value
-		arg5 *string
+		arg4 string
+		arg5 *model.OpCallSpec
 		arg6 string
-		arg7 *model.OpCallSpec
 	}
 	callReturns struct {
 		result1 map[string]*model.Value
@@ -32,22 +31,21 @@ type FakeOpCaller struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeOpCaller) Call(arg1 context.Context, arg2 chan model.Event, arg3 *model.OpCall, arg4 map[string]*model.Value, arg5 *string, arg6 string, arg7 *model.OpCallSpec) (map[string]*model.Value, error) {
+func (fake *FakeOpCaller) Call(arg1 context.Context, arg2 chan model.Event, arg3 *model.OpCall, arg4 string, arg5 *model.OpCallSpec, arg6 string) (map[string]*model.Value, error) {
 	fake.callMutex.Lock()
 	ret, specificReturn := fake.callReturnsOnCall[len(fake.callArgsForCall)]
 	fake.callArgsForCall = append(fake.callArgsForCall, struct {
 		arg1 context.Context
 		arg2 chan model.Event
 		arg3 *model.OpCall
-		arg4 map[string]*model.Value
-		arg5 *string
+		arg4 string
+		arg5 *model.OpCallSpec
 		arg6 string
-		arg7 *model.OpCallSpec
-	}{arg1, arg2, arg3, arg4, arg5, arg6, arg7})
-	fake.recordInvocation("Call", []interface{}{arg1, arg2, arg3, arg4, arg5, arg6, arg7})
+	}{arg1, arg2, arg3, arg4, arg5, arg6})
+	fake.recordInvocation("Call", []interface{}{arg1, arg2, arg3, arg4, arg5, arg6})
 	fake.callMutex.Unlock()
 	if fake.CallStub != nil {
-		return fake.CallStub(arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+		return fake.CallStub(arg1, arg2, arg3, arg4, arg5, arg6)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -62,17 +60,17 @@ func (fake *FakeOpCaller) CallCallCount() int {
 	return len(fake.callArgsForCall)
 }
 
-func (fake *FakeOpCaller) CallCalls(stub func(context.Context, chan model.Event, *model.OpCall, map[string]*model.Value, *string, string, *model.OpCallSpec) (map[string]*model.Value, error)) {
+func (fake *FakeOpCaller) CallCalls(stub func(context.Context, chan model.Event, *model.OpCall, string, *model.OpCallSpec, string) (map[string]*model.Value, error)) {
 	fake.callMutex.Lock()
 	defer fake.callMutex.Unlock()
 	fake.CallStub = stub
 }
 
-func (fake *FakeOpCaller) CallArgsForCall(i int) (context.Context, chan model.Event, *model.OpCall, map[string]*model.Value, *string, string, *model.OpCallSpec) {
+func (fake *FakeOpCaller) CallArgsForCall(i int) (context.Context, chan model.Event, *model.OpCall, string, *model.OpCallSpec, string) {
 	fake.callMutex.RLock()
 	defer fake.callMutex.RUnlock()
 	argsForCall := fake.callArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5, argsForCall.arg6, argsForCall.arg7
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5, argsForCall.arg6
 }
 
 func (fake *FakeOpCaller) CallReturns(result1 map[string]*model.Value, result2 error) {

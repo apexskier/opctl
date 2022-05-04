@@ -169,7 +169,7 @@ var _ = Context("output", func() {
 								ID: "acontainerID",
 							},
 							Outcome: model.OpOutcomeSucceeded,
-							Ref:     "ref",
+							OpRef:   "ref",
 						},
 						Timestamp: time.Now(),
 					}
@@ -210,7 +210,7 @@ var _ = Context("output", func() {
 								Error: &model.CallEndedError{
 									Message: "message",
 								},
-								Ref:     "ref",
+								OpRef:   "ref",
 								Outcome: "FAILED",
 							},
 							Timestamp: time.Now(),
@@ -247,7 +247,7 @@ var _ = Context("output", func() {
 										},
 									},
 								},
-								Ref:     "ref",
+								OpRef:   "ref",
 								Outcome: "SUCCEEDED",
 							},
 							Timestamp: time.Now(),
@@ -284,7 +284,7 @@ var _ = Context("output", func() {
 										},
 									},
 								},
-								Ref:     "ref",
+								OpRef:   "ref",
 								Outcome: "KILLED",
 							},
 							Timestamp: time.Now(),
@@ -325,7 +325,7 @@ var _ = Context("output", func() {
 							Error: &model.CallEndedError{
 								Message: "message",
 							},
-							Ref: "ref",
+							OpRef: "ref",
 						},
 						Timestamp: time.Now(),
 					}
@@ -364,7 +364,7 @@ var _ = Context("output", func() {
 									},
 								},
 							},
-							Ref: "ref",
+							OpRef: "ref",
 						},
 						Timestamp: time.Now(),
 					}
@@ -400,7 +400,7 @@ var _ = Context("output", func() {
 									},
 								},
 							},
-							Ref: "ref",
+							OpRef: "ref",
 						},
 						Timestamp: time.Now(),
 					}

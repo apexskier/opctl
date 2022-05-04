@@ -9,16 +9,16 @@ import (
 )
 
 type FakeSerialLoopCaller struct {
-	CallStub        func(context.Context, chan model.Event, string, map[string]*model.Value, model.SerialLoopCallSpec, string, *string, string) (map[string]*model.Value, error)
+	CallStub        func(context.Context, chan model.Event, map[string]*model.Value, model.SerialLoopCallSpec, string, *string, string, string) (map[string]*model.Value, error)
 	callMutex       sync.RWMutex
 	callArgsForCall []struct {
 		arg1 context.Context
 		arg2 chan model.Event
-		arg3 string
-		arg4 map[string]*model.Value
-		arg5 model.SerialLoopCallSpec
-		arg6 string
-		arg7 *string
+		arg3 map[string]*model.Value
+		arg4 model.SerialLoopCallSpec
+		arg5 string
+		arg6 *string
+		arg7 string
 		arg8 string
 	}
 	callReturns struct {
@@ -33,17 +33,17 @@ type FakeSerialLoopCaller struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeSerialLoopCaller) Call(arg1 context.Context, arg2 chan model.Event, arg3 string, arg4 map[string]*model.Value, arg5 model.SerialLoopCallSpec, arg6 string, arg7 *string, arg8 string) (map[string]*model.Value, error) {
+func (fake *FakeSerialLoopCaller) Call(arg1 context.Context, arg2 chan model.Event, arg3 map[string]*model.Value, arg4 model.SerialLoopCallSpec, arg5 string, arg6 *string, arg7 string, arg8 string) (map[string]*model.Value, error) {
 	fake.callMutex.Lock()
 	ret, specificReturn := fake.callReturnsOnCall[len(fake.callArgsForCall)]
 	fake.callArgsForCall = append(fake.callArgsForCall, struct {
 		arg1 context.Context
 		arg2 chan model.Event
-		arg3 string
-		arg4 map[string]*model.Value
-		arg5 model.SerialLoopCallSpec
-		arg6 string
-		arg7 *string
+		arg3 map[string]*model.Value
+		arg4 model.SerialLoopCallSpec
+		arg5 string
+		arg6 *string
+		arg7 string
 		arg8 string
 	}{arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8})
 	fake.recordInvocation("Call", []interface{}{arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8})
@@ -64,13 +64,13 @@ func (fake *FakeSerialLoopCaller) CallCallCount() int {
 	return len(fake.callArgsForCall)
 }
 
-func (fake *FakeSerialLoopCaller) CallCalls(stub func(context.Context, chan model.Event, string, map[string]*model.Value, model.SerialLoopCallSpec, string, *string, string) (map[string]*model.Value, error)) {
+func (fake *FakeSerialLoopCaller) CallCalls(stub func(context.Context, chan model.Event, map[string]*model.Value, model.SerialLoopCallSpec, string, *string, string, string) (map[string]*model.Value, error)) {
 	fake.callMutex.Lock()
 	defer fake.callMutex.Unlock()
 	fake.CallStub = stub
 }
 
-func (fake *FakeSerialLoopCaller) CallArgsForCall(i int) (context.Context, chan model.Event, string, map[string]*model.Value, model.SerialLoopCallSpec, string, *string, string) {
+func (fake *FakeSerialLoopCaller) CallArgsForCall(i int) (context.Context, chan model.Event, map[string]*model.Value, model.SerialLoopCallSpec, string, *string, string, string) {
 	fake.callMutex.RLock()
 	defer fake.callMutex.RUnlock()
 	argsForCall := fake.callArgsForCall[i]

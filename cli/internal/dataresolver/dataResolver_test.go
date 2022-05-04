@@ -15,10 +15,7 @@ import (
 
 var _ = Context("dataResolver", func() {
 	It("Can be constructed", func() {
-		Expect(New(
-			new(cliparamsatisfierFakes.FakeCLIParamSatisfier),
-			new(nodeFakes.FakeNode),
-		)).NotTo(BeNil())
+		Expect(New(new(nodeFakes.FakeNode))).NotTo(BeNil())
 	})
 	Context("Resolve", func() {
 		Context("data.Resolve errs", func() {

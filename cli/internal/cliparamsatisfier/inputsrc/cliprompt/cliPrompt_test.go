@@ -11,7 +11,8 @@ import (
 )
 
 var _ = Describe("cliPromptInputSrc", func() {
-	cliOutput := clioutput.New(clicolorer.New(), io.Discard, io.Discard)
+	cliOutput, err := clioutput.New(clicolorer.New(), clioutput.SimpleOpFormatter{}, io.Discard, io.Discard)
+	Expect(err).To(BeNil())
 
 	Context("ReadString()", func() {
 		Context("inputs contains entry for inputName", func() {
