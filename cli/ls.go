@@ -4,13 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/opctl/opctl/sdks/go/data"
 	"os"
 	"sort"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/opctl/opctl/cli/internal/clioutput"
-	"github.com/opctl/opctl/cli/internal/dataresolver"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
@@ -18,7 +18,7 @@ import (
 func ls(
 	ctx context.Context,
 	opFormatter clioutput.OpFormatter,
-	dataResolver dataresolver.DataResolver,
+	dataResolver data.DataProvider,
 	dirRef string,
 ) error {
 	tw := new(tabwriter.Writer)

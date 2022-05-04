@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/opctl/opctl/sdks/go/node"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -12,18 +13,18 @@ import (
 
 	"github.com/opctl/opctl/cli/internal/clioutput"
 	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
-	"github.com/opctl/opctl/cli/internal/dataresolver"
 	"github.com/opctl/opctl/cli/internal/opgraph"
 	"github.com/opctl/opctl/sdks/go/model"
-	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/opspec/opfile"
 	"github.com/pkg/errors"
 )
 
 // RunOpts are options to run a given op through the CLI
 type RunOpts struct {
-	ArgFile string
-	Args    []string
+	ArgFile    string
+	Args       []string
+	OpRef      string
+	NoProgress bool
 }
 
 type runResults struct {
@@ -36,12 +37,8 @@ func run(
 	cliOutput clioutput.CliOutput,
 	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
 	opFormatter clioutput.OpFormatter,
-	eventChannel chan model.Event,
 	node node.Node,
-	cwd string,
-	opRef string,
 	opts *RunOpts,
-	noProgress bool,
 ) (map[string]*model.Value, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -70,7 +67,7 @@ func run(
 
 	// "request animation frame" like loop to force refresh of display loading spinners
 	animationFrame := make(chan bool)
-	if !noProgress {
+	if !opts.NoProgress {
 		go func() {
 			for {
 				time.Sleep(time.Second / 10)
@@ -84,27 +81,25 @@ func run(
 	output := opgraph.NewOutputManager()
 
 	defer func() {
-		output.Print(state.String(loadingSpinner, opFormatter, time.Now(), false))
+		_ = output.Print(state.String(loadingSpinner, opFormatter, time.Now(), false))
 		fmt.Println()
 	}()
 
 	clearGraph := func() {
-		if !noProgress {
-			output.Clear()
+		if !opts.NoProgress {
+			_ = output.Clear()
 		}
 	}
 
 	displayGraph := func() {
-		if !noProgress {
-			output.Print(state.String(loadingSpinner, opFormatter, time.Now(), true))
+		if !opts.NoProgress {
+			_ = output.Print(state.String(loadingSpinner, opFormatter, time.Now(), true))
 		}
 	}
 
-	dataResolver := dataresolver.New(node, cwd)
-
-	opHandle, err := dataResolver.Resolve(
+	opHandle, err := node.Resolve(
 		ctx,
-		opRef,
+		opts.OpRef,
 	)
 	if err != nil {
 		return nil, err
@@ -153,6 +148,8 @@ func run(
 	if err != nil {
 		return nil, err
 	}
+
+	eventChannel := make(chan model.Event)
 
 	// listen for op end on a channel, to not block output streaming
 	done := make(chan runResults, 1)

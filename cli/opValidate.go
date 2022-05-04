@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
+	"github.com/opctl/opctl/sdks/go/data"
 
-	"github.com/opctl/opctl/cli/internal/dataresolver"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
 func opValidate(
 	ctx context.Context,
-	dataResolver dataresolver.DataResolver,
+	dataResolver data.DataProvider,
 	opRef string,
 ) error {
 	opDirHandle, err := dataResolver.Resolve(

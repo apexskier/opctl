@@ -5,15 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/opctl/opctl/sdks/go/data"
-	"github.com/opctl/opctl/sdks/go/data/fs"
-	"github.com/opctl/opctl/sdks/go/data/git"
 	"github.com/opctl/opctl/sdks/go/internal/uniquestring"
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec/opfile"
 )
 
-func (this core) StartOp(
+func (c core) StartOp(
 	ctx context.Context,
 	eventChannel chan model.Event,
 	req model.StartOpReq,
@@ -24,12 +21,7 @@ func (this core) StartOp(
 		return nil, err
 	}
 
-	opHandle, err := data.Resolve(
-		ctx,
-		req.Op.Ref,
-		fs.New(),
-		git.New(this.gitOpsDir),
-	)
+	opHandle, err := c.resolveData(ctx, req.Op.Ref)
 	if err != nil {
 		return nil, err
 	}
@@ -55,12 +47,12 @@ func (this core) StartOp(
 		opCallSpec.Outputs[name] = ""
 	}
 
-	scratchPath := filepath.Join(this.dataDirPath, "scratch", callID)
+	scratchPath := filepath.Join(c.dataDirPath, "scratch", callID)
 	defer func() {
 		err = os.RemoveAll(scratchPath)
 	}()
 
-	return this.caller.Call(
+	return c.caller.Call(
 		ctx,
 		eventChannel,
 		callID,

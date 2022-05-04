@@ -10,7 +10,7 @@ import (
 )
 
 var _ = Context("core", func() {
-	Context("ResolveData", func() {
+	Context("resolveData", func() {
 		It("should call data.Resolve w/ expected args", func() {
 			/* arrange */
 			gitOpsDir, err := os.MkdirTemp("", "")
@@ -27,7 +27,7 @@ var _ = Context("core", func() {
 			}
 
 			/* act */
-			actualOp, actualErr := objectUnderTest.ResolveData(
+			actualOp, actualErr := objectUnderTest.resolveData(
 				providedCtx,
 				providedOpRef,
 			)
