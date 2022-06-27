@@ -179,7 +179,7 @@ func run(
 		case <-sigIntChannel:
 			clearGraph()
 			if !aSigIntWasReceivedAlready {
-				cliOutput.Warning("Gracefully stopping... (signal Control-C again to force)")
+				cliOutput.Warning("gracefully stopping... (ctl-c again to force)")
 				aSigIntWasReceivedAlready = true
 				// events will continue to stream in, make sure we continue to display the graph while this happens
 				displayGraph()
@@ -187,7 +187,7 @@ func run(
 			} else {
 				return nil, &RunError{
 					ExitCode: 130,
-					message:  "Terminated by Control-C",
+					message:  "force terminated with ctl-c",
 				}
 			}
 
@@ -200,14 +200,34 @@ func run(
 
 		case <-sigTermChannel:
 			clearGraph()
-			cliOutput.Error("Gracefully stopping...")
+			cliOutput.Error("gracefully stopping...")
 			displayGraph()
 			cancel()
 
 		case results := <-done:
 			clearGraph()
-			if results.err != nil && !errors.Is(results.err, context.Canceled) {
-				return nil, results.err
+			if results.err != nil {
+				if errors.Is(results.err, context.Canceled) {
+					if aSigIntWasReceivedAlready {
+						return nil, &RunError{
+							ExitCode: 130,
+							message:  "gracefully terminated with ctl-c",
+						}
+					} else {
+						return nil, &RunError{
+							ExitCode: 1,
+							message:  "unexpectedly cancelled",
+						}
+					}
+				} else {
+					return nil, results.err
+				}
+			}
+			if aSigIntWasReceivedAlready {
+				return nil, &RunError{
+					ExitCode: 130,
+					message:  "gracefully terminated with ctl-c",
+				}
 			}
 			return results.outputs, nil
 
