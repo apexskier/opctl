@@ -213,12 +213,14 @@ func newCli(
 				cliOutput,
 				cliparamsatisfier.New(cliOutput),
 				opFormatter,
-				make(chan model.Event),
 				getOpNode(),
 				cwd,
-				*opRef,
-				&RunOpts{Args: *args, ArgFile: *argFile},
-				*noProgress,
+				&RunOpts{
+					ArgFile:    *argFile,
+					Args:       *args,
+					NoProgress: *noProgress,
+					OpRef:      *opRef,
+				},
 			)
 			if err != nil {
 				exitWith("", err)

@@ -22,8 +22,10 @@ import (
 
 // RunOpts are options to run a given op through the CLI
 type RunOpts struct {
-	ArgFile string
-	Args    []string
+	ArgFile    string
+	Args       []string
+	NoProgress bool
+	OpRef      string
 }
 
 type runResults struct {
@@ -36,15 +38,14 @@ func run(
 	cliOutput clioutput.CliOutput,
 	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
 	opFormatter clioutput.OpFormatter,
-	eventChannel chan model.Event,
 	node node.Node,
 	cwd string,
-	opRef string,
 	opts *RunOpts,
-	noProgress bool,
 ) (map[string]*model.Value, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	eventChannel := make(chan model.Event)
 
 	aSigIntWasReceivedAlready := false
 	sigIntChannel := make(chan os.Signal, 1)
@@ -70,7 +71,7 @@ func run(
 
 	// "request animation frame" like loop to force refresh of display loading spinners
 	animationFrame := make(chan bool)
-	if !noProgress {
+	if !opts.NoProgress {
 		go func() {
 			for {
 				time.Sleep(time.Second / 10)
@@ -89,13 +90,13 @@ func run(
 	}()
 
 	clearGraph := func() {
-		if !noProgress {
+		if !opts.NoProgress {
 			output.Clear()
 		}
 	}
 
 	displayGraph := func() {
-		if !noProgress {
+		if !opts.NoProgress {
 			output.Print(state.String(loadingSpinner, opFormatter, time.Now(), true))
 		}
 	}
@@ -104,7 +105,7 @@ func run(
 
 	opHandle, err := dataResolver.Resolve(
 		ctx,
-		opRef,
+		opts.OpRef,
 	)
 	if err != nil {
 		return nil, err
