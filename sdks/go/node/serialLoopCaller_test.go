@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/dgraph-io/badger/v3"
 	containerRuntimeFakes "github.com/opctl/opctl/sdks/go/node/containerruntime/fakes"
 	. "github.com/opctl/opctl/sdks/go/node/internal/fakes"
 	. "github.com/onsi/ginkgo"
@@ -95,13 +94,6 @@ var _ = Context("serialLoopCaller", func() {
 						panic(err)
 					}
 
-					db, err := badger.Open(
-						badger.DefaultOptions(dbDir).WithLogger(nil),
-					)
-					if err != nil {
-						panic(err)
-					}
-
 					providedCtx := context.Background()
 					providedScope := map[string]*model.Value{}
 
@@ -147,13 +139,6 @@ var _ = Context("serialLoopCaller", func() {
 			It("should start each child as expected", func() {
 				/* arrange */
 				dbDir, err := os.MkdirTemp("", "")
-				if err != nil {
-					panic(err)
-				}
-
-				db, err := badger.Open(
-					badger.DefaultOptions(dbDir).WithLogger(nil),
-				)
 				if err != nil {
 					panic(err)
 				}

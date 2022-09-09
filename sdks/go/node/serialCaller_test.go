@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dgraph-io/badger/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
@@ -56,13 +55,6 @@ var _ = Context("serialCaller", func() {
 					panic(err)
 				}
 
-				db, err := badger.Open(
-					badger.DefaultOptions(dbDir).WithLogger(nil),
-				)
-				if err != nil {
-					panic(err)
-				}
-
 				expectedErr := errors.New("expectedErr")
 
 				fakeCaller := new(FakeCaller)
@@ -103,13 +95,6 @@ var _ = Context("serialCaller", func() {
 		It("should start each child as expected", func() {
 			/* arrange */
 			dbDir, err := os.MkdirTemp("", "")
-			if err != nil {
-				panic(err)
-			}
-
-			db, err := badger.Open(
-				badger.DefaultOptions(dbDir).WithLogger(nil),
-			)
 			if err != nil {
 				panic(err)
 			}

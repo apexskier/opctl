@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/dgraph-io/badger/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
@@ -29,10 +28,11 @@ var _ = Context("parallelLoopCaller", func() {
 				/* arrange */
 				fakeCaller := new(FakeCaller)
 
-				objectUnderTest := _parallelLoopCaller{
+				_, _ = _parallelLoopCaller{
 					caller: fakeCaller,
+				}.Call(
 					context.Background(),
-					"id",
+					make(chan model.Event),
 					map[string]*model.Value{},
 					model.ParallelLoopCallSpec{
 						Range: []interface{}{},
@@ -40,6 +40,7 @@ var _ = Context("parallelLoopCaller", func() {
 					"dummyOpPath",
 					nil,
 					"rootCallID",
+					"",
 				)
 
 				/* assert */
@@ -56,23 +57,13 @@ var _ = Context("parallelLoopCaller", func() {
 					panic(err)
 				}
 
-				db, err := badger.Open(
-					badger.DefaultOptions(dbDir).WithLogger(nil),
-				)
-				if err != nil {
-					panic(err)
-				}
-
 				providedCtx := context.Background()
 				providedScope := map[string]*model.Value{}
 
 				caller := newCaller(
 					newContainerCaller(
 						new(containerRuntimeFakes.FakeContainerRuntime),
-						newStateStore(
-							providedCtx,
-							db,
-						),
+						false,
 					),
 					dbDir,
 				)
@@ -108,13 +99,6 @@ var _ = Context("parallelLoopCaller", func() {
 		It("should start each child as expected", func() {
 			/* arrange */
 			dbDir, err := os.MkdirTemp("", "")
-			if err != nil {
-				panic(err)
-			}
-
-			db, err := badger.Open(
-				badger.DefaultOptions(dbDir).WithLogger(nil),
-			)
 			if err != nil {
 				panic(err)
 			}

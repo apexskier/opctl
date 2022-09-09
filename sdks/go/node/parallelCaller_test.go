@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dgraph-io/badger/v3"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
@@ -34,17 +33,11 @@ var _ = Context("parallelCaller", func() {
 					panic(err)
 				}
 
-				db, err := badger.Open(
-					badger.DefaultOptions(dbDir).WithLogger(nil),
-				)
-				if err != nil {
-					panic(err)
-				}
-
 				objectUnderTest := _parallelCaller{
 					caller: newCaller(
 						newContainerCaller(
 							new(containerRuntimeFakes.FakeContainerRuntime),
+							false,
 						),
 						dbDir,
 					),
@@ -74,13 +67,6 @@ var _ = Context("parallelCaller", func() {
 
 			/* arrange */
 			dbDir, err := os.MkdirTemp("", "")
-			if err != nil {
-				panic(err)
-			}
-
-			db, err := badger.Open(
-				badger.DefaultOptions(dbDir).WithLogger(nil),
-			)
 			if err != nil {
 				panic(err)
 			}
