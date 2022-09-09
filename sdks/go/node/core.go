@@ -4,9 +4,8 @@ package node
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -generate
 
 import (
-	"path/filepath"
-
 	"github.com/opctl/opctl/sdks/go/node/containerruntime"
+	"path/filepath"
 )
 
 // New returns a new Node
@@ -32,7 +31,7 @@ func New(
 	}, nil
 }
 
-// core is an Node that supports running ops directly on the host
+// core is a Node that supports running ops directly on the host
 type core struct {
 	caller      caller
 	gitOpsDir   string

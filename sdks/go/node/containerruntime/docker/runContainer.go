@@ -53,7 +53,7 @@ func (cr runContainer) stopAndCleanup(
 	err := cr.dockerClient.ContainerStop(ctx, container, &stopTimeout)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to stop container: %v", err)
-		return nil // fmt.Errorf("unable to stop container: %w", err)
+		return nil
 	}
 
 	// now delete the container post-termination
@@ -67,7 +67,7 @@ func (cr runContainer) stopAndCleanup(
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to delete container: %v", err)
-		return nil // fmt.Errorf("unable to delete container: %w", err)
+		return nil
 	}
 
 	return nil

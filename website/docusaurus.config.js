@@ -6,15 +6,16 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'opctl', // Usually your GitHub org/user name.
   projectName: 'opctl', // Usually your repo name.
+  trailingSlash: false,
   themeConfig: {
     algolia: {
+      appId: 'E19H3NL09D',
       apiKey: '247689f43002ed0c3902fbd034630a7a',
       indexName: 'opctl'
     },
-    disableDarkMode: true,
-    googleAnalytics: {
-      trackingID: 'UA-94109316-1',
-    },
+    colorMode: {
+      disableSwitch: true
+    }, 
     navbar: {
       title: 'Opctl',
       logo: {
@@ -85,6 +86,9 @@ module.exports = {
           showLastUpdateAuthor: true,
           // Equivalent to `enableUpdateTime`.
           showLastUpdateTime: true,
+        },
+        googleAnalytics: {
+          trackingID: 'UA-94109316-1',
         }
       },
     ],
