@@ -17,7 +17,7 @@ var _ = Context("DataHandle Resolution", func() {
 				/* arrange */
 				ctx := context.Background()
 				c := core{}
-				objectUnderTest, err := c.Resolve(ctx, "")
+				objectUnderTest, err := c.Resolve(ctx, "test")
 				Expect(err).To(BeNil())
 
 				/* act */

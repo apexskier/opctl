@@ -2,15 +2,14 @@ package node
 
 import (
 	"context"
-	"io/ioutil"
 	"io"
 	"os"
 
-	containerRuntimeFakes "github.com/opctl/opctl/sdks/go/node/containerruntime/fakes"
-	. "github.com/opctl/opctl/sdks/go/node/internal/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
+	containerRuntimeFakes "github.com/opctl/opctl/sdks/go/node/containerruntime/fakes"
+	. "github.com/opctl/opctl/sdks/go/node/internal/fakes"
 )
 
 var _ = Context("serialLoopCaller", func() {
@@ -36,7 +35,7 @@ var _ = Context("serialLoopCaller", func() {
 				/* act */
 				objectUnderTest.Call(
 					context.Background(),
-					"id",
+					make(chan model.Event, 10),
 					map[string]*model.Value{},
 					model.SerialLoopCallSpec{
 						Until: []*model.PredicateSpec{
@@ -51,6 +50,7 @@ var _ = Context("serialLoopCaller", func() {
 					"dummyOpPath",
 					nil,
 					"rootCallID",
+					"",
 				)
 
 				/* assert */
@@ -69,7 +69,7 @@ var _ = Context("serialLoopCaller", func() {
 				/* act */
 				objectUnderTest.Call(
 					context.Background(),
-					"id",
+					make(chan model.Event, 10),
 					map[string]*model.Value{},
 					model.SerialLoopCallSpec{
 						Range: []interface{}{},
@@ -77,6 +77,7 @@ var _ = Context("serialLoopCaller", func() {
 					"dummyOpPath",
 					nil,
 					"rootCallID",
+					"",
 				)
 
 				/* assert */
@@ -100,10 +101,7 @@ var _ = Context("serialLoopCaller", func() {
 					caller := newCaller(
 						newContainerCaller(
 							new(containerRuntimeFakes.FakeContainerRuntime),
-							newStateStore(
-								context.Background(),
-								db,
-							),
+							false,
 						),
 						dbDir,
 					)
@@ -115,7 +113,7 @@ var _ = Context("serialLoopCaller", func() {
 					/* act */
 					actualOutputs, actualErr := objectUnderTest.Call(
 						providedCtx,
-						"id",
+						make(chan model.Event, 10),
 						providedScope,
 						model.SerialLoopCallSpec{
 							Run: model.CallSpec{
@@ -128,6 +126,7 @@ var _ = Context("serialLoopCaller", func() {
 						"opPath",
 						new(string),
 						"rootCallID",
+						"",
 					)
 
 					/* assert */
@@ -147,16 +146,18 @@ var _ = Context("serialLoopCaller", func() {
 				providedParentID := "providedParentID"
 				providedRootID := "providedRootID"
 				imageRef := "docker.io/library/alpine"
+				eventChannel := make(chan model.Event, 10)
 
 				ctx := context.Background()
 
 				fakeContainerRuntime := new(containerRuntimeFakes.FakeContainerRuntime)
 				fakeContainerRuntime.RunContainerStub = func(
 					ctx context.Context,
+					eventChannel chan model.Event,
 					req *model.ContainerCall,
-					rootCallID string,
 					stdOut io.WriteCloser,
 					stdErr io.WriteCloser,
+					privileged bool,
 				) (*int64, error) {
 
 					stdErr.Close()
@@ -169,29 +170,30 @@ var _ = Context("serialLoopCaller", func() {
 					caller: newCaller(
 						newContainerCaller(
 							fakeContainerRuntime,
-							newStateStore(
-								db,
-							),
+							false,
 						),
+						dbDir,
 					),
 				}
 
 				/* act */
 				_, actualErr := objectUnderTest.Call(
 					ctx,
-					"",
+					eventChannel,
 					map[string]*model.Value{},
 					model.SerialLoopCallSpec{
-						},
 						Run: model.CallSpec{
 							Container: &model.ContainerCallSpec{
 								Image: &model.ContainerCallImageSpec{
 									Ref: imageRef,
+								},
+							},
 						},
 					},
 					providedOpRef,
 					&providedParentID,
 					providedRootID,
+					"",
 				)
 
 				/* assert */
@@ -232,7 +234,7 @@ var _ = Context("serialLoopCaller", func() {
 									ParentID: &providedParentID,
 									RootID:   providedRootID,
 								},
-								Ref: providedOpRef,
+								OpRef: providedOpRef,
 							},
 							{
 								Call: model.Call{
@@ -251,7 +253,7 @@ var _ = Context("serialLoopCaller", func() {
 									ParentID: &providedParentID,
 									RootID:   providedRootID,
 								},
-								Ref: providedOpRef,
+								OpRef: providedOpRef,
 							},
 						},
 					),

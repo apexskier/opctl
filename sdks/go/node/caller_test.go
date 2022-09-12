@@ -2,484 +2,476 @@ package node
 
 import (
 	"context"
-	"os"
-	"path/filepath"
-	"time"
-
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/opctl/opctl/sdks/go/model"
 	. "github.com/opctl/opctl/sdks/go/node/internal/fakes"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
 )
 
-var _ = Context("caller", func() {
-	Context("newCaller", func() {
-		It("should return caller", func() {
-			/* arrange/act/assert */
-			Expect(
-				newCaller(
-					new(FakeContainerCaller),
-					"dummyDataDir",
-				),
-			).To(Not(BeNil()))
-		})
-	})
-	Context("Call", func() {
-		Context("Nil CallSpec", func() {
-			It("should not throw", func() {
-				/* arrange */
-				fakeContainerCaller := new(FakeContainerCaller)
-				dataDir, err := os.MkdirTemp("", "")
-				if err != nil {
-					panic(err)
-				}
+func TestNewCaller(t *testing.T) {
+	g := NewGomegaWithT(t)
+	g.Expect(
+		newCaller(
+			new(FakeContainerCaller),
+			"dummyDataDir",
+		),
+	).To(Not(BeNil()))
+}
 
-				/* act */
-				objectUnderTest := _caller{
-					containerCaller: fakeContainerCaller,
-					gitOpsDir:       dataDir,
-				}
+func TestNilCallSpec(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-				/* assert */
-				_, err = objectUnderTest.Call(
-					context.Background(),
-					make(chan model.Event),
-					"dummyCallID",
-					map[string]*model.Value{},
-					nil,
-					"dummyOpPath",
-					nil,
-					"dummyRootCallID",
-					dataDir,
-				)
+	/* arrange */
+	fakeContainerCaller := new(FakeContainerCaller)
+	dataDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		panic(err)
+	}
 
-				Expect(err).To(BeNil())
-			})
-		})
+	/* act */
+	objectUnderTest := _caller{
+		containerCaller: fakeContainerCaller,
+		gitOpsDir:       dataDir,
+	}
 
-		Context("callInterpreter.Interpret result.If falsy", func() {
-			It("should emit events", func() {
-				/* arrange */
-				providedCallID := "dummyCallID"
-				providedOpPath := "testdata/startOp"
-				providedRootCallID := "dummyRootCallID"
+	/* assert */
+	_, err = objectUnderTest.Call(
+		context.Background(),
+		make(chan model.Event, 10),
+		"dummyCallID",
+		map[string]*model.Value{},
+		nil,
+		"dummyOpPath",
+		nil,
+		"dummyRootCallID",
+		dataDir,
+	)
 
-				predicateSpec := []interface{}{
-					true,
-					true,
-				}
+	g.Expect(err).To(BeNil())
+}
 
-				ifSpec := []*model.PredicateSpec{
-					{
-						Eq: &predicateSpec,
-					},
-				}
+func TestInterpretFalseIf(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-				expectedIf := true
-				expectedEvent := model.Event{
-					CallStarted: &model.CallStarted{
-						Call: model.Call{
-							ID:     providedCallID,
-							If:     &expectedIf,
-							RootID: providedRootCallID,
-							Serial: []*model.CallSpec{},
-						},
-						OpRef: providedOpPath,
-					},
-				}
+	/* arrange */
+	providedCallID := "dummyCallID"
+	providedOpPath := "testdata/startOp"
+	providedRootCallID := "dummyRootCallID"
 
-				fakeSerialCaller := new(FakeSerialCaller)
+	predicateSpec := []interface{}{
+		true,
+		true,
+	}
 
-				dataDir, err := os.MkdirTemp("", "")
-				if err != nil {
-					panic(err)
-				}
+	ifSpec := []*model.PredicateSpec{
+		{
+			Eq: &predicateSpec,
+		},
+	}
 
-				eventChannel := make(chan model.Event, 1)
+	expectedIf := true
+	expectedEvent := model.Event{
+		CallStarted: &model.CallStarted{
+			Call: model.Call{
+				ID:     providedCallID,
+				If:     &expectedIf,
+				RootID: providedRootCallID,
+				Serial: []*model.CallSpec{},
+			},
+			OpRef: providedOpPath,
+		},
+	}
 
-				objectUnderTest := _caller{
-					containerCaller: new(FakeContainerCaller),
-					gitOpsDir:       dataDir,
-					serialCaller:    fakeSerialCaller,
-				}
+	fakeSerialCaller := new(FakeSerialCaller)
 
-				/* act */
-				objectUnderTest.Call(
-					context.Background(),
-					eventChannel,
-					providedCallID,
-					map[string]*model.Value{},
-					&model.CallSpec{
-						If:     &ifSpec,
-						Serial: &[]*model.CallSpec{},
-					},
-					providedOpPath,
-					nil,
-					providedRootCallID,
-					dataDir,
-				)
+	dataDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		panic(err)
+	}
 
-				/* assert */
-				actualEvent := <-eventChannel
+	eventChannel := make(chan model.Event, 10)
 
-				// @TODO: implement/use VTime (similar to IOS & VFS) so we don't need custom assertions on temporal fields
-				Expect(actualEvent.Timestamp).To(BeTemporally("~", time.Now().UTC(), 5*time.Second))
-				// set temporal fields to expected vals since they're already asserted
-				actualEvent.Timestamp = expectedEvent.Timestamp
+	objectUnderTest := _caller{
+		containerCaller: new(FakeContainerCaller),
+		gitOpsDir:       dataDir,
+		serialCaller:    fakeSerialCaller,
+	}
 
-				Expect(actualEvent).To(Equal(expectedEvent))
-			})
-		})
+	/* act */
+	objectUnderTest.Call(
+		context.Background(),
+		eventChannel,
+		providedCallID,
+		map[string]*model.Value{},
+		&model.CallSpec{
+			If:     &ifSpec,
+			Serial: &[]*model.CallSpec{},
+		},
+		providedOpPath,
+		nil,
+		providedRootCallID,
+		dataDir,
+	)
 
-		Context("Container CallSpec", func() {
-			It("should call containerCaller.Call w/ expected args", func() {
-				/* arrange */
-				providedCallID := "providedCallID"
-				providedOpPath := "providedOpPath"
-				fakeContainerCaller := new(FakeContainerCaller)
+	/* assert */
+	actualEvent := <-eventChannel
 
-				providedScope := map[string]*model.Value{}
-				imageSpec := &model.ContainerCallImageSpec{
-					Ref: "docker.io/library/ref",
-				}
-				providedCallSpec := &model.CallSpec{
-					Container: &model.ContainerCallSpec{
-						Image: imageSpec,
-					},
-				}
-				providedRootCallID := "providedRootCallID"
+	// @TODO: implement/use VTime (similar to IOS & VFS) so we don't need custom assertions on temporal fields
+	g.Expect(actualEvent.Timestamp).To(BeTemporally("~", time.Now().UTC(), 5*time.Second))
+	// set temporal fields to expected vals since they're already asserted
+	actualEvent.Timestamp = expectedEvent.Timestamp
 
-				expectedCall := &model.Call{
-					Container: &model.ContainerCall{
-						BaseCall: model.BaseCall{
-							OpPath: providedOpPath,
-						},
-						ContainerID: providedCallID,
-						Cmd:         []string{},
-						Dirs:        map[string]string{},
-						Files:       map[string]string{},
-						Image: &model.ContainerCallImage{
-							Ref: &imageSpec.Ref,
-						},
-						Sockets: map[string]string{},
-					},
-				}
+	g.Expect(actualEvent).To(Equal(expectedEvent))
+}
 
-				dataDir, err := os.MkdirTemp("", "")
-				if err != nil {
-					panic(err)
-				}
+func TestCall(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-				eventChannel := make(chan model.Event)
+	/* arrange */
+	providedCallID := "providedCallID"
+	providedOpPath := "providedOpPath"
+	fakeContainerCaller := new(FakeContainerCaller)
 
-				objectUnderTest := _caller{
-					containerCaller: fakeContainerCaller,
-					gitOpsDir:       dataDir,
-				}
+	providedScope := map[string]*model.Value{}
+	imageSpec := &model.ContainerCallImageSpec{
+		Ref: "docker.io/library/ref",
+	}
+	providedCallSpec := &model.CallSpec{
+		Container: &model.ContainerCallSpec{
+			Image: imageSpec,
+		},
+	}
+	providedRootCallID := "providedRootCallID"
 
-				/* act */
-				_, actualErr := objectUnderTest.Call(
-					context.Background(),
-					eventChannel,
-					providedCallID,
-					providedScope,
-					providedCallSpec,
-					providedOpPath,
-					nil,
-					providedRootCallID,
-					dataDir,
-				)
+	expectedCall := &model.Call{
+		Container: &model.ContainerCall{
+			BaseCall: model.BaseCall{
+				OpPath: providedOpPath,
+			},
+			ContainerID: providedCallID,
+			Cmd:         []string{},
+			Dirs:        map[string]string{},
+			Files:       map[string]string{},
+			Image: &model.ContainerCallImage{
+				Ref: &imageSpec.Ref,
+			},
+			Sockets: map[string]string{},
+		},
+	}
 
-				/* assert */
-				Expect(actualErr).To(BeNil())
-				_,
-					actualContainerCall,
-					actualScope,
-					actualCallSpec := fakeContainerCaller.CallArgsForCall(0)
+	dataDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		panic(err)
+	}
 
-				Expect(actualContainerCall).To(Equal(expectedCall.Container))
-				Expect(actualScope).To(Equal(providedScope))
-				Expect(actualCallSpec).To(Equal(providedCallSpec.Container))
-			})
-		})
+	eventChannel := make(chan model.Event, 10)
 
-		Context("Op CallSpec", func() {
-			It("should call opCaller.Call w/ expected args", func() {
-				/* arrange */
-				fakeOpCaller := new(FakeOpCaller)
+	objectUnderTest := _caller{
+		containerCaller: fakeContainerCaller,
+		gitOpsDir:       dataDir,
+	}
 
-				wd, err := os.Getwd()
-				if err != nil {
-					panic(err)
-				}
-				providedOpPath := filepath.Join(wd, "testdata/caller")
+	/* act */
+	_, actualErr := objectUnderTest.Call(
+		context.Background(),
+		eventChannel,
+		providedCallID,
+		providedScope,
+		providedCallSpec,
+		providedOpPath,
+		nil,
+		providedRootCallID,
+		dataDir,
+	)
 
-				providedCallID := "dummyCallID"
-				providedScope := map[string]*model.Value{}
-				providedCallSpec := &model.CallSpec{
-					Op: &model.OpCallSpec{
-						Ref: providedOpPath,
-					},
-				}
-				providedParentID := "providedParentID"
-				providedRootCallID := "dummyRootCallID"
+	/* assert */
+	g.Expect(actualErr).To(BeNil())
+	_,
+		_,
+		actualContainerCall,
+		actualCallSpec := fakeContainerCaller.CallArgsForCall(0)
 
-				expectedCall := &model.Call{
-					Op: &model.OpCall{
-						BaseCall: model.BaseCall{
-							OpPath: providedOpPath,
-						},
-						OpID:   providedCallID,
-						Inputs: map[string]*model.Value{},
-					},
-				}
+	g.Expect(actualContainerCall).To(Equal(expectedCall.Container))
+	g.Expect(actualCallSpec).To(Equal(providedCallSpec.Container))
+}
 
-				dataDir, err := os.MkdirTemp("", "")
-				if err != nil {
-					panic(err)
-				}
+func TestCall2(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-				eventChannel := make(chan model.Event)
+	/* arrange */
+	fakeOpCaller := new(FakeOpCaller)
 
-				objectUnderTest := _caller{
-					gitOpsDir: dataDir,
-					opCaller:  fakeOpCaller,
-				}
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	providedOpPath := filepath.Join(wd, "testdata/caller")
 
-				/* act */
-				_, actualErr := objectUnderTest.Call(
-					context.Background(),
-					eventChannel,
-					providedCallID,
-					providedScope,
-					providedCallSpec,
-					providedOpPath,
-					&providedParentID,
-					providedRootCallID,
-					dataDir,
-				)
+	providedCallID := "dummyCallID"
+	providedScope := map[string]*model.Value{}
+	providedCallSpec := &model.CallSpec{
+		Op: &model.OpCallSpec{
+			Ref: providedOpPath,
+		},
+	}
+	providedParentID := "providedParentID"
+	providedRootCallID := "dummyRootCallID"
 
-				/* assert */
-				Expect(actualErr).To(BeNil())
-				_,
-					actualOpCall,
-					actualScope,
-					actualParentID,
-					actualRootCallID,
-					actualCallSpec := fakeOpCaller.CallArgsForCall(0)
+	expectedCall := &model.Call{
+		Op: &model.OpCall{
+			BaseCall: model.BaseCall{
+				OpPath: providedOpPath,
+			},
+			OpID:   providedCallID,
+			Inputs: map[string]*model.Value{},
+		},
+	}
 
-				Expect(actualOpCall).To(Equal(*expectedCall.Op))
-				Expect(actualScope).To(Equal(providedScope))
-				Expect(actualParentID).To(Equal(providedParentID))
-				Expect(actualRootCallID).To(Equal(providedRootCallID))
-				Expect(actualCallSpec).To(Equal(providedCallSpec.Op))
-			})
-		})
+	dataDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		panic(err)
+	}
 
-		Context("Parallel CallSpec", func() {
-			It("should call parallelCaller.Call w/ expected args", func() {
-				/* arrange */
-				fakeParallelCaller := new(FakeParallelCaller)
+	eventChannel := make(chan model.Event, 10)
 
-				providedCallID := "dummyCallID"
-				providedScope := map[string]*model.Value{}
-				providedCallSpec := &model.CallSpec{
-					Parallel: &[]*model.CallSpec{
-						{Container: &model.ContainerCallSpec{}},
-					},
-				}
-				providedOpPath := "providedOpPath"
-				providedRootCallID := "dummyRootCallID"
+	objectUnderTest := _caller{
+		gitOpsDir: dataDir,
+		opCaller:  fakeOpCaller,
+	}
 
-				eventChannel := make(chan model.Event, 2)
-				objectUnderTest := _caller{
-					parallelCaller: fakeParallelCaller,
-				}
+	/* act */
+	_, actualErr := objectUnderTest.Call(
+		context.Background(),
+		eventChannel,
+		providedCallID,
+		providedScope,
+		providedCallSpec,
+		providedOpPath,
+		&providedParentID,
+		providedRootCallID,
+		dataDir,
+	)
 
-				/* act */
-				objectUnderTest.Call(
-					context.Background(),
-					eventChannel,
-					providedCallID,
-					providedScope,
-					providedCallSpec,
-					providedOpPath,
-					nil,
-					providedRootCallID,
-					"",
-				)
+	/* assert */
+	g.Expect(actualErr).To(BeNil())
+	_,
+		_,
+		actualOpCall,
+		actualParentID,
+		actualRootCallID,
+		actualCallSpec := fakeOpCaller.CallArgsForCall(0)
 
-				/* assert */
-				_,
-					_,
-					actualCallID,
-					actualScope,
-					actualRootCallID,
-					actualOpPath,
-					actualCallSpec,
-					_ := fakeParallelCaller.CallArgsForCall(0)
+	expectedCall.Op.ChildCallID = actualOpCall.ChildCallID
+	g.Expect(actualOpCall).To(Equal(*expectedCall.Op))
+	g.Expect(actualParentID).To(Equal(providedParentID))
+	g.Expect(actualRootCallID).To(Equal(providedRootCallID))
+	g.Expect(actualCallSpec).To(Equal(providedCallSpec.Op))
+}
 
-				Expect(actualCallID).To(Equal(providedCallID))
-				Expect(actualScope).To(Equal(providedScope))
-				Expect(actualRootCallID).To(Equal(providedRootCallID))
-				Expect(actualOpPath).To(Equal(providedOpPath))
-				Expect(actualCallSpec).To(Equal(*providedCallSpec.Parallel))
-			})
-		})
+func TestParallelCall(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-		Context("ParallelLoop CallSpec", func() {
-			It("should call parallelLoopCaller.Call w/ expected args", func() {
-				/* arrange */
-				fakeParallelLoopCaller := new(FakeParallelLoopCaller)
+	/* arrange */
+	fakeParallelCaller := new(FakeParallelCaller)
 
-				providedCallID := "dummyCallID"
-				providedScope := map[string]*model.Value{}
-				providedCallSpec := &model.CallSpec{
-					ParallelLoop: &model.ParallelLoopCallSpec{},
-				}
-				providedOpPath := "providedOpPath"
-				providedRootCallID := "dummyRootCallID"
-				providedParentID := "providedParentID"
+	providedCallID := "dummyCallID"
+	providedScope := map[string]*model.Value{}
+	providedCallSpec := &model.CallSpec{
+		Parallel: &[]*model.CallSpec{
+			{Container: &model.ContainerCallSpec{}},
+		},
+	}
+	providedOpPath := "providedOpPath"
+	providedRootCallID := "dummyRootCallID"
 
-				eventChannel := make(chan model.Event, 2)
-				objectUnderTest := _caller{
-					parallelLoopCaller: fakeParallelLoopCaller,
-				}
+	eventChannel := make(chan model.Event, 2)
+	objectUnderTest := _caller{
+		parallelCaller: fakeParallelCaller,
+	}
 
-				/* act */
-				objectUnderTest.Call(
-					context.Background(),
-					eventChannel,
-					providedCallID,
-					providedScope,
-					providedCallSpec,
-					providedOpPath,
-					&providedParentID,
-					providedRootCallID,
-					"",
-				)
+	/* act */
+	objectUnderTest.Call(
+		context.Background(),
+		eventChannel,
+		providedCallID,
+		providedScope,
+		providedCallSpec,
+		providedOpPath,
+		nil,
+		providedRootCallID,
+		"",
+	)
 
-				/* assert */
-				_,
-					_,
-					actualScope,
-					actualParallelLoopCallSpec,
-					actualOpPath,
-					actualParentID,
-					actualRootCallID,
-					_ := fakeParallelLoopCaller.CallArgsForCall(0)
+	/* assert */
+	_,
+		_,
+		actualCallID,
+		actualScope,
+		actualRootCallID,
+		actualOpPath,
+		actualCallSpec,
+		_ := fakeParallelCaller.CallArgsForCall(0)
 
-				Expect(actualScope).To(Equal(providedScope))
-				Expect(actualParallelLoopCallSpec).To(Equal(*providedCallSpec.ParallelLoop))
-				Expect(actualOpPath).To(Equal(providedOpPath))
-				Expect(*actualParentID).To(Equal(providedParentID))
-				Expect(actualRootCallID).To(Equal(providedRootCallID))
-			})
-		})
+	g.Expect(actualCallID).To(Equal(providedCallID))
+	g.Expect(actualScope).To(Equal(providedScope))
+	g.Expect(actualRootCallID).To(Equal(providedRootCallID))
+	g.Expect(actualOpPath).To(Equal(providedOpPath))
+	g.Expect(actualCallSpec).To(Equal(*providedCallSpec.Parallel))
+}
 
-		Context("Serial CallSpec", func() {
+func TestParallelLoop(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-			It("should call serialCaller.Call w/ expected args", func() {
-				/* arrange */
-				fakeSerialCaller := new(FakeSerialCaller)
+	/* arrange */
+	fakeParallelLoopCaller := new(FakeParallelLoopCaller)
 
-				providedCallID := "dummyCallID"
-				providedScope := map[string]*model.Value{}
-				providedCallSpec := &model.CallSpec{
-					Serial: &[]*model.CallSpec{
-						{Container: &model.ContainerCallSpec{}},
-					},
-				}
-				providedOpPath := "providedOpPath"
-				providedRootCallID := "dummyRootCallID"
+	providedCallID := "dummyCallID"
+	providedScope := map[string]*model.Value{}
+	providedCallSpec := &model.CallSpec{
+		ParallelLoop: &model.ParallelLoopCallSpec{},
+	}
+	providedOpPath := "providedOpPath"
+	providedRootCallID := "dummyRootCallID"
+	providedParentID := "providedParentID"
 
-				eventChannel := make(chan model.Event, 2)
-				objectUnderTest := _caller{
-					containerCaller: new(FakeContainerCaller),
-					serialCaller:    fakeSerialCaller,
-				}
+	eventChannel := make(chan model.Event, 2)
+	objectUnderTest := _caller{
+		parallelLoopCaller: fakeParallelLoopCaller,
+	}
 
-				/* act */
-				objectUnderTest.Call(
-					context.Background(),
-					eventChannel,
-					providedCallID,
-					providedScope,
-					providedCallSpec,
-					providedOpPath,
-					nil,
-					providedRootCallID,
-					"",
-				)
+	/* act */
+	objectUnderTest.Call(
+		context.Background(),
+		eventChannel,
+		providedCallID,
+		providedScope,
+		providedCallSpec,
+		providedOpPath,
+		&providedParentID,
+		providedRootCallID,
+		"",
+	)
 
-				/* assert */
-				_,
-					_,
-					actualCallID,
-					actualScope,
-					actualRootCallID,
-					actualOpPath,
-					actualCallSpec,
-					_ := fakeSerialCaller.CallArgsForCall(0)
+	/* assert */
+	_,
+		_,
+		actualScope,
+		actualParallelLoopCallSpec,
+		actualOpPath,
+		actualParentID,
+		actualRootCallID,
+		_ := fakeParallelLoopCaller.CallArgsForCall(0)
 
-				Expect(actualCallID).To(Equal(providedCallID))
-				Expect(actualScope).To(Equal(providedScope))
-				Expect(actualRootCallID).To(Equal(providedRootCallID))
-				Expect(actualOpPath).To(Equal(providedOpPath))
-				Expect(actualCallSpec).To(Equal(*providedCallSpec.Serial))
-			})
-		})
+	g.Expect(actualScope).To(Equal(providedScope))
+	g.Expect(actualParallelLoopCallSpec).To(Equal(*providedCallSpec.ParallelLoop))
+	g.Expect(actualOpPath).To(Equal(providedOpPath))
+	g.Expect(*actualParentID).To(Equal(providedParentID))
+	g.Expect(actualRootCallID).To(Equal(providedRootCallID))
+}
 
-		Context("SerialLoop CallSpec", func() {
-			It("should call serialLoopCaller.Call w/ expected args", func() {
-				/* arrange */
-				fakeSerialLoopCaller := new(FakeSerialLoopCaller)
+func TestSerial(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-				providedCallID := "dummyCallID"
-				providedScope := map[string]*model.Value{}
-				providedCallSpec := &model.CallSpec{
-					SerialLoop: &model.SerialLoopCallSpec{
-						Range: []interface{}{},
-					},
-				}
-				providedOpPath := "providedOpPath"
-				providedRootCallID := "dummyRootCallID"
-				providedParentID := "providedParentID"
+	/* arrange */
+	fakeSerialCaller := new(FakeSerialCaller)
 
-				eventChannel := make(chan model.Event, 2)
-				objectUnderTest := _caller{
-					serialLoopCaller: fakeSerialLoopCaller,
-				}
+	providedCallID := "dummyCallID"
+	providedScope := map[string]*model.Value{}
+	providedCallSpec := &model.CallSpec{
+		Serial: &[]*model.CallSpec{
+			{Container: &model.ContainerCallSpec{}},
+		},
+	}
+	providedOpPath := "providedOpPath"
+	providedRootCallID := "dummyRootCallID"
 
-				/* act */
-				objectUnderTest.Call(
-					context.Background(),
-					eventChannel,
-					providedCallID,
-					providedScope,
-					providedCallSpec,
-					providedOpPath,
-					&providedParentID,
-					providedRootCallID,
-					"",
-				)
+	eventChannel := make(chan model.Event, 2)
+	objectUnderTest := _caller{
+		containerCaller: new(FakeContainerCaller),
+		serialCaller:    fakeSerialCaller,
+	}
 
-				/* assert */
-				_,
-					_,
-					actualScope,
-					actualSerialLoopCallSpec,
-					actualOpPath,
-					actualParentID,
-					actualRootCallID,
-					_ := fakeSerialLoopCaller.CallArgsForCall(0)
+	/* act */
+	objectUnderTest.Call(
+		context.Background(),
+		eventChannel,
+		providedCallID,
+		providedScope,
+		providedCallSpec,
+		providedOpPath,
+		nil,
+		providedRootCallID,
+		"",
+	)
 
-				Expect(actualScope).To(Equal(providedScope))
-				Expect(actualSerialLoopCallSpec).To(Equal(*providedCallSpec.SerialLoop))
-				Expect(actualOpPath).To(Equal(providedOpPath))
-				Expect(*actualParentID).To(Equal(providedParentID))
-				Expect(actualRootCallID).To(Equal(providedRootCallID))
-			})
-		})
-	})
-})
+	/* assert */
+	_,
+		_,
+		actualCallID,
+		actualScope,
+		actualRootCallID,
+		actualOpPath,
+		actualCallSpec,
+		_ := fakeSerialCaller.CallArgsForCall(0)
+
+	g.Expect(actualCallID).To(Equal(providedCallID))
+	g.Expect(actualScope).To(Equal(providedScope))
+	g.Expect(actualRootCallID).To(Equal(providedRootCallID))
+	g.Expect(actualOpPath).To(Equal(providedOpPath))
+	g.Expect(actualCallSpec).To(Equal(*providedCallSpec.Serial))
+}
+
+func TestSerialLoop(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	/* arrange */
+	fakeSerialLoopCaller := new(FakeSerialLoopCaller)
+
+	providedCallID := "dummyCallID"
+	providedScope := map[string]*model.Value{}
+	providedCallSpec := &model.CallSpec{
+		SerialLoop: &model.SerialLoopCallSpec{
+			Range: []interface{}{},
+		},
+	}
+	providedOpPath := "providedOpPath"
+	providedRootCallID := "dummyRootCallID"
+	providedParentID := "providedParentID"
+
+	eventChannel := make(chan model.Event, 2)
+	objectUnderTest := _caller{
+		serialLoopCaller: fakeSerialLoopCaller,
+	}
+
+	/* act */
+	objectUnderTest.Call(
+		context.Background(),
+		eventChannel,
+		providedCallID,
+		providedScope,
+		providedCallSpec,
+		providedOpPath,
+		&providedParentID,
+		providedRootCallID,
+		"",
+	)
+
+	/* assert */
+	_,
+		_,
+		actualScope,
+		actualSerialLoopCallSpec,
+		actualOpPath,
+		actualParentID,
+		actualRootCallID,
+		_ := fakeSerialLoopCaller.CallArgsForCall(0)
+
+	g.Expect(actualScope).To(Equal(providedScope))
+	g.Expect(actualSerialLoopCallSpec).To(Equal(*providedCallSpec.SerialLoop))
+	g.Expect(actualOpPath).To(Equal(providedOpPath))
+	g.Expect(*actualParentID).To(Equal(providedParentID))
+	g.Expect(actualRootCallID).To(Equal(providedRootCallID))
+}

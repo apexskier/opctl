@@ -3,9 +3,7 @@ package node
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -26,27 +24,6 @@ var _ = Context("serialCaller", func() {
 		})
 	})
 	Context("Call", func() {
-		It("should call caller for every serialCall w/ expected args", func() {
-			/* arrange */
-			providedCtx := context.Background()
-			providedInboundScope := map[string]*model.Value{}
-			providedRootCallID := "providedRootCallID"
-			providedOpPath := "providedOpPath"
-			providedCallSpecSerialCalls := []*model.CallSpec{
-				{
-					Container: &model.ContainerCallSpec{},
-				},
-				{
-					Op: &model.OpCallSpec{},
-				},
-				{
-					Parallel: &[]*model.CallSpec{},
-				},
-				{
-					Serial: &[]*model.CallSpec{},
-				},
-			}
-
 		Context("caller errors", func() {
 			It("should return expected results", func() {
 				/* arrange */
@@ -64,10 +41,7 @@ var _ = Context("serialCaller", func() {
 					caller: newCaller(
 						newContainerCaller(
 							new(containerRuntimeFakes.FakeContainerRuntime),
-							newStateStore(
-								context.Background(),
-								db,
-							),
+							false,
 						),
 						dbDir,
 					),
@@ -76,6 +50,7 @@ var _ = Context("serialCaller", func() {
 				/* act */
 				_, actualErr := objectUnderTest.Call(
 					context.Background(),
+					make(chan model.Event, 10),
 					"callID",
 					map[string]*model.Value{},
 					"rootCallID",
@@ -86,6 +61,7 @@ var _ = Context("serialCaller", func() {
 							Container: &model.ContainerCallSpec{},
 						},
 					},
+					"",
 				)
 
 				/* assert */
@@ -112,16 +88,18 @@ var _ = Context("serialCaller", func() {
 			childOp1Path := filepath.Join(childOpRef, "op1")
 			childOp2Path := filepath.Join(childOpRef, "op2")
 			input2Key := "input2"
+			eventChannel := make(chan model.Event, 10)
 
 			ctx := context.Background()
 
 			fakeContainerRuntime := new(containerRuntimeFakes.FakeContainerRuntime)
 			fakeContainerRuntime.RunContainerStub = func(
 				ctx context.Context,
+				eventChannel chan model.Event,
 				req *model.ContainerCall,
-				rootCallID string,
 				stdOut io.WriteCloser,
 				stdErr io.WriteCloser,
+				privileged bool,
 			) (*int64, error) {
 
 				stdErr.Close()
@@ -141,10 +119,7 @@ var _ = Context("serialCaller", func() {
 				caller: newCaller(
 					newContainerCaller(
 						fakeContainerRuntime,
-						newStateStore(
-							ctx,
-							db,
-						),
+						false,
 					),
 					dbDir,
 				),
@@ -153,6 +128,7 @@ var _ = Context("serialCaller", func() {
 			/* act */
 			_, actualErr := objectUnderTest.Call(
 				ctx,
+				eventChannel,
 				providedParentID,
 				providedInboundScope,
 				providedRootID,
@@ -178,6 +154,7 @@ var _ = Context("serialCaller", func() {
 						},
 					},
 				},
+				"",
 			)
 
 			/* assert */
@@ -215,7 +192,7 @@ var _ = Context("serialCaller", func() {
 								ParentID: &providedParentID,
 								RootID:   providedRootID,
 							},
-							Ref: providedOpRef,
+							OpRef: providedOpRef,
 						},
 						{
 							Call: model.Call{
@@ -231,7 +208,7 @@ var _ = Context("serialCaller", func() {
 								ParentID: &providedParentID,
 								RootID:   providedRootID,
 							},
-							Ref: providedOpRef,
+							OpRef: providedOpRef,
 						},
 					},
 				),

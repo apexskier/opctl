@@ -32,7 +32,7 @@ var _ = Context("parallelLoopCaller", func() {
 					caller: fakeCaller,
 				}.Call(
 					context.Background(),
-					make(chan model.Event),
+					make(chan model.Event, 10),
 					map[string]*model.Value{},
 					model.ParallelLoopCallSpec{
 						Range: []interface{}{},
@@ -75,7 +75,7 @@ var _ = Context("parallelLoopCaller", func() {
 				/* act */
 				actualOutputs, actualErr := objectUnderTest.Call(
 					providedCtx,
-					"id",
+					make(chan model.Event, 10),
 					providedScope,
 					model.ParallelLoopCallSpec{
 						Range: model.Value{
@@ -88,6 +88,7 @@ var _ = Context("parallelLoopCaller", func() {
 					"opPath",
 					new(string),
 					"rootCallID",
+					"",
 				)
 
 				/* assert */
@@ -107,16 +108,18 @@ var _ = Context("parallelLoopCaller", func() {
 			providedParentID := "providedParentID"
 			providedRootID := "providedRootID"
 			imageRef := "docker.io/library/alpine"
+			eventChannel := make(chan model.Event, 10)
 
 			ctx := context.Background()
 
 			fakeContainerRuntime := new(containerRuntimeFakes.FakeContainerRuntime)
 			fakeContainerRuntime.RunContainerStub = func(
 				ctx context.Context,
+				eventChannel chan model.Event,
 				req *model.ContainerCall,
-				rootCallID string,
 				stdOut io.WriteCloser,
 				stdErr io.WriteCloser,
+				privileged bool,
 			) (*int64, error) {
 
 				stdErr.Close()
@@ -129,10 +132,7 @@ var _ = Context("parallelLoopCaller", func() {
 				caller: newCaller(
 					newContainerCaller(
 						fakeContainerRuntime,
-						newStateStore(
-							ctx,
-							db,
-						),
+						false,
 					),
 					dbDir,
 				),
@@ -141,7 +141,7 @@ var _ = Context("parallelLoopCaller", func() {
 			/* act */
 			_, actualErr := objectUnderTest.Call(
 				ctx,
-				"",
+				eventChannel,
 				map[string]*model.Value{},
 				model.ParallelLoopCallSpec{
 					Range: model.Value{
@@ -158,6 +158,7 @@ var _ = Context("parallelLoopCaller", func() {
 				providedOpRef,
 				&providedParentID,
 				providedRootID,
+				"",
 			)
 
 			/* assert */
@@ -198,7 +199,7 @@ var _ = Context("parallelLoopCaller", func() {
 								ParentID: &providedParentID,
 								RootID:   providedRootID,
 							},
-							Ref: providedOpRef,
+							OpRef: providedOpRef,
 						},
 						{
 							Call: model.Call{
@@ -217,7 +218,7 @@ var _ = Context("parallelLoopCaller", func() {
 								ParentID: &providedParentID,
 								RootID:   providedRootID,
 							},
-							Ref: providedOpRef,
+							OpRef: providedOpRef,
 						},
 					},
 				),

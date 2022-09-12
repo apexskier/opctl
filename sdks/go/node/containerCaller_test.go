@@ -38,7 +38,7 @@ var _ = Context("containerCaller", func() {
 			/* act */
 			objectUnderTest.Call(
 				providedCtx,
-				eventChannel,
+				make(chan model.Event, 10),
 				&model.ContainerCall{},
 				&model.ContainerCallSpec{},
 			)
@@ -82,7 +82,7 @@ var _ = Context("containerCaller", func() {
 				/* act */
 				actualOutputs, actualErr := objectUnderTest.Call(
 					context.Background(),
-					eventChannel,
+					make(chan model.Event, 10),
 					&model.ContainerCall{
 						BaseCall: model.BaseCall{},
 						Image:    &model.ContainerCallImage{},
@@ -107,7 +107,6 @@ var _ = Context("containerCaller", func() {
 			ContainerID: "providedContainerID",
 			Image:       &model.ContainerCallImage{},
 		}
-		providedInboundScope := map[string]*model.Value{}
 		providedContainerCallSpec := &model.ContainerCallSpec{}
 
 		fakeContainerRuntime := new(FakeContainerRuntime)
@@ -135,7 +134,7 @@ var _ = Context("containerCaller", func() {
 		/* act */
 		actualOutputs, actualErr := objectUnderTest.Call(
 			context.Background(),
-			eventChannel,
+			make(chan model.Event, 10),
 			providedContainerCall,
 			providedContainerCallSpec,
 		)

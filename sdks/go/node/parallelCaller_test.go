@@ -46,6 +46,7 @@ var _ = Context("parallelCaller", func() {
 				/* act */
 				_, actualErr := objectUnderTest.Call(
 					context.Background(),
+					make(chan model.Event, 10),
 					"callID",
 					map[string]*model.Value{},
 					"rootCallID",
@@ -56,6 +57,7 @@ var _ = Context("parallelCaller", func() {
 							Container: &model.ContainerCallSpec{},
 						},
 					},
+					"",
 				)
 
 				/* assert */
@@ -75,6 +77,7 @@ var _ = Context("parallelCaller", func() {
 			if err != nil {
 				panic(err)
 			}
+			providedCallID := "callID"
 			providedOpRef := "providedOpRef"
 			providedParentID := "providedParentID"
 			providedRootID := "providedRootID"
@@ -82,6 +85,7 @@ var _ = Context("parallelCaller", func() {
 			input1Key := "input1"
 			childOp1Path := filepath.Join(childOpRef, "op1")
 			childOp2Path := filepath.Join(childOpRef, "op2")
+			eventChannel := make(chan model.Event, 10)
 
 			ctx := context.Background()
 
@@ -90,9 +94,9 @@ var _ = Context("parallelCaller", func() {
 				ctx context.Context,
 				eventChannel chan model.Event,
 				req *model.ContainerCall,
-				rootCallID string,
 				stdOut io.WriteCloser,
 				stdErr io.WriteCloser,
+				privileged bool,
 			) (*int64, error) {
 
 				stdErr.Close()
@@ -110,6 +114,7 @@ var _ = Context("parallelCaller", func() {
 				caller: newCaller(
 					newContainerCaller(
 						fakeContainerRuntime,
+						false,
 					),
 					dbDir,
 				),
@@ -118,7 +123,8 @@ var _ = Context("parallelCaller", func() {
 			/* act */
 			_, actualErr := objectUnderTest.Call(
 				ctx,
-				providedParentID,
+				eventChannel,
+				providedCallID,
 				providedInboundScope,
 				providedRootID,
 				providedOpRef,
@@ -140,6 +146,7 @@ var _ = Context("parallelCaller", func() {
 						},
 					},
 				},
+				"",
 			)
 
 			/* assert */
@@ -177,7 +184,7 @@ var _ = Context("parallelCaller", func() {
 								ParentID: &providedParentID,
 								RootID:   providedRootID,
 							},
-							Ref: providedOpRef,
+							OpRef: providedOpRef,
 						},
 						{
 							Call: model.Call{
@@ -191,7 +198,7 @@ var _ = Context("parallelCaller", func() {
 								ParentID: &providedParentID,
 								RootID:   providedRootID,
 							},
-							Ref: providedOpRef,
+							OpRef: providedOpRef,
 						},
 					},
 				),

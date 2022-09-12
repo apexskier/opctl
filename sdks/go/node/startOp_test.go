@@ -29,6 +29,7 @@ var _ = Context("core", func() {
 				/* act */
 				_, actualErr := objectUnderTest.StartOp(
 					providedCtx,
+					make(chan model.Event, 10),
 					providedStartOpReq,
 				)
 
@@ -97,6 +98,7 @@ var _ = Context("core", func() {
 					/* act */
 					objectUnderTest.StartOp(
 						providedCtx,
+						make(chan model.Event, 10),
 						providedReq,
 					)
 
@@ -104,12 +106,14 @@ var _ = Context("core", func() {
 					// Call happens in go routine; wait 500ms to allow it to occur
 					time.Sleep(time.Millisecond * 500)
 					_,
+						_,
 						actualOpID,
 						actualScope,
 						actualCallSpec,
 						actualOpPath,
 						_,
-						actualRootID := fakeCaller.CallArgsForCall(0)
+						actualRootID,
+						_ := fakeCaller.CallArgsForCall(0)
 
 					Expect(actualOpID).To(HaveLen(32))
 					Expect(actualScope).To(Equal(providedReq.Args))

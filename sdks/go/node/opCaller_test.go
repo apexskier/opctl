@@ -69,21 +69,23 @@ var _ = Context("opCaller", func() {
 			/* act */
 			objectUnderTest.Call(
 				providedCtx,
+				make(chan model.Event, 10),
 				providedOpCall,
-				map[string]*model.Value{},
-				nil,
 				providedRootCallID,
-				&model.OpCallSpec{},
+				nil,
+				"",
 			)
 
 			/* assert */
 			actualCtx,
+				_,
 				actualChildCallID,
 				actualChildCallScope,
 				actualChildCallSpec,
 				actualOpPath,
 				actualParentCallID,
-				actualRootCallID := fakeCaller.CallArgsForCall(0)
+				actualRootCallID,
+				_ := fakeCaller.CallArgsForCall(0)
 
 			Expect(actualCtx).To(Not(BeNil()))
 			Expect(actualChildCallID).To(Equal(providedOpCall.ChildCallID))
@@ -137,11 +139,11 @@ var _ = Context("opCaller", func() {
 			/* act */
 			actualOutputs, actualErr := objectUnderTest.Call(
 				context.Background(),
+				make(chan model.Event, 10),
 				providedOpCall,
-				map[string]*model.Value{},
-				nil,
-				"rootCallID",
+				"",
 				providedOpCallSpec,
+				"",
 			)
 
 			/* assert */
