@@ -18,11 +18,11 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-          working-directory: website
+        working-directory: website
 
       - name: Build website
         run: yarn build
-          working-directory: website
+        working-directory: website
 
       - name: Setup Pages
         uses: actions/configure-pages@v2
