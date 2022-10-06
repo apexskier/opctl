@@ -7,7 +7,7 @@ A call is an object that defines a single call within an ops call graph. Opctl s
 
 The leaves of a call graph are [containers](container/index.md) that run programs to do work. Each node in the call graph will end once all child containers exit successfully or a single container exits with a failure, which will cause still running containers to be killed.
 
-Containers and call graph nodes communicate with each other by producing and emitting [data](../index.md) or by reading and writing shared [files](../types/file.md) and [directories](../types/dir.md) (which are passed by reference).
+Containers and call graph nodes communicate with each other by producing and emitting [data](../index.md) or by reading and writing shared [files](../../types/file.md) and [directories](../../types/dir.md) (which are passed by reference).
 
 ## Basic propreties
 
@@ -37,7 +37,7 @@ A parallel call is an array of [calls](index.md) that are executed concurrently 
 
 ### `parallelLoop`
 
-A [parallel loop call](parallel-loop) defines a call executed multiple times in parallel.
+A [parallel loop call](parallel-loop.md) defines a call executed multiple times in parallel.
 
 ### `serial`
 
@@ -45,7 +45,7 @@ A serial call is an array of [calls](index.md) that are executed serially, one a
 
 ### `serialLoop`
 
-A [serial loop call](serial-loop) defines a call executed multiple times repeatedly.
+A [serial loop call](serial-loop.md) defines a call executed multiple times repeatedly.
 
 ## Logical properties
 

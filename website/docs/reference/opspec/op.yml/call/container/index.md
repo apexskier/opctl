@@ -15,7 +15,7 @@ A container [image](image.md) to run.
 
 ### `cmd`
 
-The binary to run and it's arguments, as an array of [strings](../../../types/string). This will override the images' default command, if defined. Strings will be interpreted by opctl with variable reference replacements applied.
+The binary to run and it's arguments, as an array of [strings](../../../types/string.md). This will override the images' default command, if defined. Strings will be interpreted by opctl with variable reference replacements applied.
 
 The first string in the command can be the name binary available in the container's `PATH`, an absolute path to the binary file, or a relative path to the binary file from the [working directory](#workdir) of the container.
 
@@ -78,7 +78,7 @@ ports:
 
 ### `sockets`
 
-An object mapping sockets to mount within the container. Each key is an absolute path within the container. Values are [sockets](../../../types/socket.md) or [variable references](../../variable-reference) to a socket to mount.
+An object mapping sockets to mount within the container. Each key is an absolute path within the container. Values are [sockets](../../../types/socket.md) or [variable references](../../variable-reference.md) to a socket to mount.
 
 ### `workDir`
 

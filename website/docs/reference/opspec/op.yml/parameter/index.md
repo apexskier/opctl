@@ -9,7 +9,7 @@ A parameter is an object describing a value passed into or out of an op through 
 
 ### `description`
 
-A human friendly description of the parameter, written as a [markdown string](markdown.md).
+A human friendly description of the parameter, written as a [markdown string](../markdown.md).
 
 ### `{type}`
 

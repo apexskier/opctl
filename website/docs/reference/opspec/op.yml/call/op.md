@@ -26,7 +26,7 @@ A [pull credentials](../pull-creds.md) object containing credentials used to pul
 
 ### `inputs`
 
-Inputs is an object that defines values passed from the current op into the external one, similar to passing named parameters to a function in modern programming languages. Each key is one of the [defined inputs](../index#inputs) of the op being called. Key values define the in-scope value passed to the input and can take a few forms:
+Inputs is an object that defines values passed from the current op into the external one, similar to passing named parameters to a function in modern programming languages. Each key is one of the [defined inputs](../index.md#inputs) of the op being called. Key values define the in-scope value passed to the input and can take a few forms:
 
 |value|meaning|
 |--|--|
@@ -38,7 +38,7 @@ Inputs defined by the external op that do not have a `default` are required, and
 
 ### `outputs`
 
-Outputs is an object that defines values "returned" by the external op. Each key is one of the [defined outputs](../index#outputs) of the op being called. Key values define the variable the output's value will be stored in.
+Outputs is an object that defines values "returned" by the external op. Each key is one of the [defined outputs](../index.md#outputs) of the op being called. Key values define the variable the output's value will be stored in.
 
 |value|meaning|
 |--|--|
