@@ -3,14 +3,12 @@ package opspec
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pkg/errors"
 )
 
 var _ = Context("Validate", func() {
@@ -24,7 +22,7 @@ var _ = Context("Validate", func() {
 						scenariosOpFilePath := filepath.Join(path, "scenarios.yml")
 						if _, err := os.Stat(scenariosOpFilePath); err == nil {
 							/* arrange */
-							scenariosOpFileBytes, err := ioutil.ReadFile(scenariosOpFilePath)
+							scenariosOpFileBytes, err := os.ReadFile(scenariosOpFilePath)
 							if err != nil {
 								panic(err)
 							}
@@ -37,7 +35,7 @@ var _ = Context("Validate", func() {
 
 							description := fmt.Sprintf("scenario '%v'", path)
 							if err := yaml.Unmarshal(scenariosOpFileBytes, &scenarioOpFile); err != nil {
-								panic(errors.Wrap(err, "error unmarshalling "+description))
+								panic(fmt.Errorf("error unmarshalling %s: %w", description, err))
 							}
 
 							for _, scenario := range scenarioOpFile {

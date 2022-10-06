@@ -2,12 +2,10 @@ package coerce
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
-	"io/ioutil"
-
 	"github.com/opctl/opctl/sdks/go/model"
-	"github.com/pkg/errors"
 )
 
 // isStringTruthy ensures value isn't:
@@ -37,11 +35,11 @@ func ToBoolean(
 	case value.Boolean != nil:
 		return value, nil
 	case value.Dir != nil:
-		return nil, errors.Wrap(errIncompatibleTypes, "unable to coerce dir to boolean")
+		return nil, fmt.Errorf("unable to coerce dir to boolean: %w", errIncompatibleTypes)
 	case value.File != nil:
-		fileBytes, err := ioutil.ReadFile(*value.File)
+		fileBytes, err := os.ReadFile(*value.File)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to coerce file to boolean")
+			return nil, fmt.Errorf("unable to coerce file to boolean: %w", err)
 		}
 
 		booleanValue := isStringTruthy(string(fileBytes))

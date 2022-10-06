@@ -3,14 +3,14 @@ package opspec
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	dataFakes "github.com/opctl/opctl/sdks/go/data/fakes"
 	"github.com/opctl/opctl/sdks/go/data/fs"
 	"github.com/opctl/opctl/sdks/go/model"
-	modelFakes "github.com/opctl/opctl/sdks/go/model/fakes"
 )
 
 var _ = Context("Install", func() {
@@ -18,7 +18,7 @@ var _ = Context("Install", func() {
 
 	It("should call handle.ListDescendants w/ expected args", func() {
 		/* arrange */
-		fakeHandle := new(modelFakes.FakeDataHandle)
+		fakeHandle := new(dataFakes.FakeDataHandle)
 
 		/* act */
 		Install(providedCtx, "", fakeHandle)
@@ -31,7 +31,7 @@ var _ = Context("Install", func() {
 			/* arrange */
 			expectedError := errors.New("dummyError")
 
-			fakeHandle := new(modelFakes.FakeDataHandle)
+			fakeHandle := new(dataFakes.FakeDataHandle)
 			fakeHandle.ListDescendantsReturns(nil, expectedError)
 
 			/* act */
@@ -44,10 +44,10 @@ var _ = Context("Install", func() {
 	Context("handle.ListDescendants doesn't err", func() {
 		It("should call handle.GetContent w/ expected args", func() {
 			/* arrange */
-			fakeHandle := new(modelFakes.FakeDataHandle)
+			fakeHandle := new(dataFakes.FakeDataHandle)
 			contentsList := []*model.DirEntry{
 				{
-					Path: "dirEntry1Path",
+					Path: "dirEntry1PathGetContents",
 				},
 			}
 
@@ -56,21 +56,21 @@ var _ = Context("Install", func() {
 				nil,
 			)
 
-			dataDir, err := ioutil.TempDir("", "")
+			dataDir, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}
 
 			// error to trigger immediate return
-			fakeHandle.GetContentReturns(nil, errors.New("dummyError"))
+			fakeHandle.GetContentReturns(nil, expectedErr)
 
 			/* act */
-			Install(providedCtx, dataDir, fakeHandle)
+			err = Install(providedCtx, dataDir, fakeHandle)
 
 			/* assert */
 			actualContext,
 				actualPath := fakeHandle.GetContentArgsForCall(0)
-
+			Expect(err).To(MatchError(expectedErr))
 			Expect(actualContext).To(Equal(providedCtx))
 			Expect(actualPath).To(Equal(contentsList[0].Path))
 		})
@@ -79,7 +79,7 @@ var _ = Context("Install", func() {
 				/* arrange */
 				expectedError := errors.New("dummyError")
 
-				fakeHandle := new(modelFakes.FakeDataHandle)
+				fakeHandle := new(dataFakes.FakeDataHandle)
 				fakeHandle.ListDescendantsReturns([]*model.DirEntry{{}}, expectedError)
 
 				fakeHandle.GetContentReturns(nil, expectedError)
@@ -99,18 +99,18 @@ var _ = Context("Install", func() {
 							/* arrange */
 							fsDataSource := fs.New("")
 							ref := "testdata/testop"
-							handle, err := fsDataSource.TryResolve(providedCtx, ref)
+							handle, err := fsDataSource.Resolve(providedCtx, ref)
 							if err != nil {
 								panic(err)
 							}
 
-							expectedContent, err := ioutil.ReadFile(filepath.Join(ref, "op.yml"))
+							expectedContent, err := os.ReadFile(filepath.Join(ref, "op.yml"))
 							if err != nil {
 								panic(err)
 							}
 
 							// create tmpfile to use as dst
-							tmpDir, err := ioutil.TempDir("", "")
+							tmpDir, err := os.MkdirTemp("", "")
 							if err != nil {
 								panic(err)
 							}
@@ -119,7 +119,7 @@ var _ = Context("Install", func() {
 							Install(providedCtx, tmpDir, handle)
 
 							/* assert */
-							actualContent, err := ioutil.ReadFile(filepath.Join(tmpDir, "op.yml"))
+							actualContent, err := os.ReadFile(filepath.Join(tmpDir, "op.yml"))
 							if err != nil {
 								panic(err)
 							}

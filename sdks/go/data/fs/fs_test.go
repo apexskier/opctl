@@ -2,7 +2,6 @@ package fs
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -11,7 +10,7 @@ import (
 )
 
 var _ = Context("_fs", func() {
-	Context("TryResolve", func() {
+	Context("Resolve", func() {
 		Context("dataRef is absolute path", func() {
 			Context("doesnt exist", func() {
 				It("should return err", func() {
@@ -19,7 +18,7 @@ var _ = Context("_fs", func() {
 					objectUnderTest := _fs{}
 
 					/* act */
-					actualHandle, actualError := objectUnderTest.TryResolve(
+					actualHandle, actualError := objectUnderTest.Resolve(
 						context.Background(),
 						"/doesnt-exist",
 					)
@@ -32,7 +31,7 @@ var _ = Context("_fs", func() {
 			Context("exists", func() {
 				It("should return expected result", func() {
 					/* arrange */
-					file, err := ioutil.TempFile("", "")
+					file, err := os.CreateTemp("", "")
 					if err != nil {
 						panic(err)
 					}
@@ -42,7 +41,7 @@ var _ = Context("_fs", func() {
 					objectUnderTest := _fs{}
 
 					/* act */
-					actualHandle, actualError := objectUnderTest.TryResolve(
+					actualHandle, actualError := objectUnderTest.Resolve(
 						context.Background(),
 						file.Name(),
 					)
@@ -60,7 +59,7 @@ var _ = Context("_fs", func() {
 					objectUnderTest := _fs{}
 
 					/* act */
-					actualHandle, actualError := objectUnderTest.TryResolve(
+					actualHandle, actualError := objectUnderTest.Resolve(
 						context.Background(),
 						"doesnt-exist",
 					)
@@ -90,7 +89,7 @@ var _ = Context("_fs", func() {
 					}
 
 					/* act */
-					actualHandle, actualError := objectUnderTest.TryResolve(
+					actualHandle, actualError := objectUnderTest.Resolve(
 						context.Background(),
 						providedDataRef,
 					)

@@ -23,6 +23,10 @@ Each parameter declares it's type with one of the following property keys:
 - [`object`](object.md)
 - [`socket`](socket.md)
 - [`string`](string.md)
+ 
+### `isSecret`
+
+A boolean indicating if the value of the parameter is secret. This will cause it to be hidden in UIs. 
 
 ## Example
 

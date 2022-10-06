@@ -2,7 +2,7 @@ package dirs
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	. "github.com/onsi/ginkgo"
@@ -15,7 +15,7 @@ var _ = Context("Interpret", func() {
 		It("should return expected error", func() {
 			/* arrange */
 			identifier := "identifier"
-			dataDir, err := ioutil.TempDir("", "")
+			dataDir, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}
@@ -39,16 +39,16 @@ var _ = Context("Interpret", func() {
 		})
 	})
 	Context("dir.Interpret doesn't err", func() {
-		Context("value.Dir not prefixed by dataCachePath", func() {
+		Context("value.Dir not prefixed by gitOpsDir", func() {
 			It("should return expected results", func() {
 				/* arrange */
 				identifier := "identifier"
 
-				dataDir, err := ioutil.TempDir("", "")
+				dataDir, err := os.MkdirTemp("", "")
 				if err != nil {
 					panic(err)
 				}
-				dirPath, err := ioutil.TempDir("", "")
+				dirPath, err := os.MkdirTemp("", "")
 				if err != nil {
 					panic(err)
 				}
@@ -76,18 +76,18 @@ var _ = Context("Interpret", func() {
 
 			})
 		})
-		Context("value.Dir prefixed by dataCachePath", func() {
+		Context("value.Dir prefixed by gitOpsDir", func() {
 			Context("dircopier.OS errs", func() {
 				It("should return expected result", func() {
 					/* arrange */
 					identifier := "identifier"
 					containerPath := "/something"
-					dirValue, err := ioutil.TempDir("", "")
+					dirValue, err := os.MkdirTemp("", "")
 					if err != nil {
 						panic(err)
 					}
 
-					scratchDirPath, err := ioutil.TempDir("", "")
+					scratchDirPath, err := os.MkdirTemp("", "")
 					if err != nil {
 						panic(err)
 					}

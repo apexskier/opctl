@@ -142,4 +142,3 @@ run:
     - container:
         image: { ref: alpine }
         cmd: [echo, $(variable)]
-```

@@ -6,10 +6,18 @@ inputs:
       constraints: { minLength: 1 }
       description: password for docker registry
       isSecret: true
+  dockerSocket:
+    socket:
+      description: docker socket to use as container runtime
   dockerUsername:
     string:
       constraints: { minLength: 1 }
-      description: username for docker registry
+      description: username for docker registry  
+  gitBranch:
+    string:
+      constraints: { minLength: 1 }
+      description: git branch the coverage should be associated with
+      default: main
   github:
     object:
       constraints:
@@ -23,11 +31,9 @@ inputs:
             type: string
         required: [accessToken, username]
       description: configuration required to interact w/ github
-  gitBranch:
-    string:
-      constraints: { minLength: 1 }
-      description: git branch the coverage should be associated with
-      default: master
+  HOME:
+    dir:
+      description: Home directory of caller; used to access go modules
   version:
     string:
       constraints: { format: semver }
@@ -36,8 +42,10 @@ run:
   serial:
     - op:
         ref: ../build
-        inputs: 
+        inputs:
+          dockerSocket:
           gitBranch:
+          HOME:
           version:
     - parallel:
         - op:

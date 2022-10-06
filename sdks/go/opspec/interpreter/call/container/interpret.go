@@ -1,9 +1,6 @@
 package container
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container/cmd"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container/dirs"
@@ -12,6 +9,7 @@ import (
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container/image"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/call/container/sockets"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/str"
+	"os"
 )
 
 // Interpret a container
@@ -20,7 +18,8 @@ func Interpret(
 	containerCallSpec *model.ContainerCallSpec,
 	containerID string,
 	opPath string,
-	dataDirPath string,
+	gitOpsDir string,
+	scratchDirPath string,
 ) (*model.ContainerCall, error) {
 
 	containerCall := &model.ContainerCall{
@@ -36,17 +35,6 @@ func Interpret(
 		Ports:       containerCallSpec.Ports,
 	}
 
-	// construct dcg container path
-	scratchDirPath := filepath.Join(
-		dataDirPath,
-		"dcg",
-		containerID,
-		"fs",
-	)
-	if err := os.MkdirAll(scratchDirPath, 0700); err != nil {
-		return nil, err
-	}
-
 	// interpret cmd
 	var err error
 	containerCall.Cmd, err = cmd.Interpret(
@@ -57,14 +45,17 @@ func Interpret(
 		return nil, err
 	}
 
-	dataCachePath := filepath.Join(dataDirPath, "ops")
+	// construct dcg container path
+	if err := os.MkdirAll(scratchDirPath, 0700); err != nil {
+		return nil, err
+	}
 
 	// interpret dirs
 	containerCall.Dirs, err = dirs.Interpret(
 		scope,
 		containerCallSpec.Dirs,
 		scratchDirPath,
-		dataCachePath,
+		gitOpsDir,
 	)
 	if err != nil {
 		return nil, err
@@ -84,7 +75,7 @@ func Interpret(
 		scope,
 		containerCallSpec.Files,
 		scratchDirPath,
-		dataCachePath,
+		gitOpsDir,
 	)
 	if err != nil {
 		return nil, err

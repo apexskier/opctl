@@ -7,8 +7,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	dataFakes "github.com/opctl/opctl/sdks/go/data/fakes"
 	"github.com/opctl/opctl/sdks/go/model"
-	modelFakes "github.com/opctl/opctl/sdks/go/model/fakes"
 	"github.com/opctl/opctl/sdks/go/opspec/opfile"
 )
 
@@ -17,7 +17,7 @@ var _ = Context("List", func() {
 		/* arrange */
 		providedCtx := context.Background()
 
-		providedDirHandle := new(modelFakes.FakeDataHandle)
+		providedDirHandle := new(dataFakes.FakeDataHandle)
 		// err to trigger immediate return
 		providedDirHandle.ListDescendantsReturns(nil, errors.New("dummyError"))
 
@@ -35,7 +35,7 @@ var _ = Context("List", func() {
 	Context("dirHandle.ListDescendants errs", func() {
 		It("should return expected result", func() {
 			/* arrange */
-			providedDirHandle := new(modelFakes.FakeDataHandle)
+			providedDirHandle := new(dataFakes.FakeDataHandle)
 			listDescendantsErr := errors.New("listDescendantsErr")
 			providedDirHandle.ListDescendantsReturns(nil, listDescendantsErr)
 
@@ -56,7 +56,7 @@ var _ = Context("List", func() {
 					/* arrange */
 					providedCtx := context.Background()
 
-					providedDirHandle := new(modelFakes.FakeDataHandle)
+					providedDirHandle := new(dataFakes.FakeDataHandle)
 					item := model.DirEntry{
 						Path: opfile.FileName,
 					}
@@ -82,7 +82,7 @@ var _ = Context("List", func() {
 				Context("dirHandle.GetContent errs", func() {
 					It("should return expected result", func() {
 						/* arrange */
-						providedDirHandle := new(modelFakes.FakeDataHandle)
+						providedDirHandle := new(dataFakes.FakeDataHandle)
 
 						expectedRef := "expectedRef"
 						providedDirHandle.RefReturns(expectedRef)

@@ -2,17 +2,11 @@ package dataresolver
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
 	"github.com/opctl/opctl/sdks/go/data"
 	"github.com/opctl/opctl/sdks/go/data/fs"
-	dataNode "github.com/opctl/opctl/sdks/go/data/node"
-	"github.com/opctl/opctl/sdks/go/model"
-	"github.com/opctl/opctl/sdks/go/node"
+	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
 // DataResolver resolves packages
@@ -20,111 +14,36 @@ type DataResolver interface {
 	Resolve(
 		ctx context.Context,
 		dataRef string,
-		pullCreds *model.Creds,
-	) (model.DataHandle, error)
+	) (data.DataHandle, error)
 }
 
-func New(
-	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
-	node node.Node,
-) DataResolver {
+func New(dataProvider data.DataProvider, basePath string) DataResolver {
 	return _dataResolver{
-		cliParamSatisfier: cliParamSatisfier,
-		node:              node,
+		dataProvider: dataProvider,
+		basePath:     basePath,
 	}
 }
 
 type _dataResolver struct {
-	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier
-	node              node.Node
+	dataProvider data.DataProvider
+	basePath     string
 }
 
 func (dtr _dataResolver) Resolve(
 	ctx context.Context,
 	dataRef string,
-	pullCreds *model.Creds,
-) (model.DataHandle, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
+) (data.DataHandle, error) {
 	fsProvider := fs.New(
-		filepath.Join(cwd, ".opspec"),
-		cwd,
+		filepath.Join(dtr.basePath, opspec.DotOpspecDirName),
+		dtr.basePath,
 	)
 
-	domain := strings.Split(dataRef, "/")[0]
+	opDirHandle, err := data.Resolve(
+		ctx,
+		dataRef,
+		fsProvider,
+		dtr.dataProvider,
+	)
 
-	passwordDescription := fmt.Sprintf("Password for %s.", domain)
-	if domain == "github.com" {
-		// customize github.com password description...
-		passwordDescription = "Personal access token for github.com with 'Repo' permissions."
-	}
-
-	credsPromptInputs := map[string]*model.Param{
-		usernameInputName: {
-			String: &model.StringParam{
-				Description: fmt.Sprintf("Username for %s.", domain),
-				Constraints: map[string]interface{}{
-					"MinLength": 1,
-				},
-			},
-		},
-		passwordInputName: {
-			String: &model.StringParam{
-				Description: passwordDescription,
-				Constraints: map[string]interface{}{
-					"MinLength": 1,
-				},
-				IsSecret: true,
-			},
-		},
-	}
-
-	reattemptedAuth := false
-
-	for {
-		opDirHandle, err := data.Resolve(
-			ctx,
-			dataRef,
-			fsProvider,
-			dataNode.New(
-				dtr.node,
-				pullCreds,
-			),
-		)
-
-		if err == nil {
-			return opDirHandle, nil
-		}
-
-		if model.IsAuthError(err) && !reattemptedAuth {
-			// auth errors can be fixed by supplying correct creds so don't give up; prompt
-			cliPromptInputSrc := dtr.cliParamSatisfier.NewCliPromptInputSrc(credsPromptInputs)
-
-			argMap, err := dtr.cliParamSatisfier.Satisfy(
-				cliparamsatisfier.NewInputSourcer(cliPromptInputSrc),
-				credsPromptInputs,
-			)
-			if err != nil {
-				return nil, err
-			}
-
-			// save providedArgs & re-attempt
-			pullCreds = &model.Creds{
-				Username: *(argMap[usernameInputName].String),
-				Password: *(argMap[passwordInputName].String),
-			}
-			reattemptedAuth = true
-			continue
-		}
-
-		return nil, err
-	}
+	return opDirHandle, err
 }
-
-const (
-	usernameInputName = "username"
-	passwordInputName = "password"
-)

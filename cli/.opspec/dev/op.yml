@@ -11,8 +11,10 @@ run:
   serial:
     - op:
         ref: ../compile
+        inputs:
+          HOME:
     - container:
-        image: { ref: 'golang:1.15' }
+        image: { ref: 'golang:1.18' }
         cmd:
           - go
           - run
@@ -21,12 +23,12 @@ run:
           - --headless=true
           - --api-version=2
           - exec
-          - ./opctl-linux-amd64
+          - ./cli/opctl-linux-amd64
           - run
           - github.com/opspec-pkgs/uuid.v4.generate#1.1.0
         dirs:
           /src: $(../../..)
-          /go/pkg: $(HOME/pkg)
+          /go/pkg: $(HOME/go/pkg)
         ports:
           # debug port for delve
           40000: 40000

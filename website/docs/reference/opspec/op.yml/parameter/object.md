@@ -4,7 +4,7 @@ title: Object parameter
 
 An object defining a [number](../../types/number.md) parameter.
 
-## Properties
+## Additional Properties
 
 ### `constraints`
 
@@ -13,7 +13,3 @@ A [JSON Schema v4 object](https://tools.ietf.org/html/draft-wright-json-schema-0
 ### `default`
 
 A literal object initialization used as the default value of the variable created by the parameter.
-
-### `isSecret`
-
-A boolean indicating if the value of the parameter is secret. This will cause it to be hidden in UI's. 

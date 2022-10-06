@@ -1,6 +1,7 @@
 package git
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 
@@ -27,14 +28,14 @@ var _ = Context("handle", func() {
 			}
 
 			/* act */
-			_, actualErr := objectUnderTest.GetContent(nil, providedContentPath)
+			_, actualErr := objectUnderTest.GetContent(context.Background(), nil, "callID", providedContentPath)
 
 			/* assert */
 			Expect(actualErr).To(BeNil())
 		})
 	})
 	Context("ListDescendants", func() {
-		Context("ioutil.ReadDir errors", func() {
+		Context("os.ReadDir errors", func() {
 			It("should be returned", func() {
 
 				/* arrange */
@@ -45,14 +46,14 @@ var _ = Context("handle", func() {
 				}
 
 				/* act */
-				_, actualError := objectUnderTest.ListDescendants(nil)
+				_, actualError := objectUnderTest.ListDescendants(context.Background(), nil, "callID")
 
 				/* assert */
 				Expect(actualError.Error()).To(Equal("open doesnt-exist: no such file or directory"))
 
 			})
 		})
-		Context("ioutil.ReadDir doesn't error", func() {
+		Context("os.ReadDir doesn't error", func() {
 			It("should return expected contentList", func() {
 				/* arrange */
 				rootOpPath := filepath.Join(wd, "../testdata/listDescendants")
@@ -90,7 +91,7 @@ var _ = Context("handle", func() {
 				}
 
 				/* act */
-				actualContents, err := objectUnderTest.ListDescendants(nil)
+				actualContents, err := objectUnderTest.ListDescendants(context.Background(), nil, "callID")
 				if err != nil {
 					panic(err)
 				}

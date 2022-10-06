@@ -9,7 +9,6 @@ import (
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/dir"
-	"github.com/pkg/errors"
 )
 
 // Interpret container dirs
@@ -17,7 +16,7 @@ func Interpret(
 	scope map[string]*model.Value,
 	containerCallSpecDirs map[string]interface{},
 	scratchDirPath string,
-	dataCachePath string,
+	gitOpsDir string,
 ) (map[string]string, error) {
 	containerCallDirs := map[string]string{}
 dirLoop:
@@ -35,15 +34,11 @@ dirLoop:
 			true,
 		)
 		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf(
-				"unable to bind directory %v to %v",
-				callSpecContainerDirPath,
-				dirExpression,
-			))
+			return nil, fmt.Errorf("unable to bind directory %v to %v: %w", callSpecContainerDirPath, dirExpression, err)
 		}
 
-		if *dirValue.Dir != "" && !strings.HasPrefix(*dirValue.Dir, dataCachePath) {
-			// bound to non dataCachePath
+		if *dirValue.Dir != "" && !strings.HasPrefix(*dirValue.Dir, gitOpsDir) {
+			// bound to non gitOpsDir
 			containerCallDirs[callSpecContainerDirPath] = *dirValue.Dir
 			continue dirLoop
 		}
@@ -56,11 +51,7 @@ dirLoop:
 			*dirValue.Dir,
 			containerCallDirs[callSpecContainerDirPath],
 		); err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf(
-				"unable to bind %v to %v",
-				callSpecContainerDirPath,
-				dirExpression,
-			))
+			return nil, fmt.Errorf("unable to bind %v to %v: %w", callSpecContainerDirPath, dirExpression, err)
 		}
 
 	}

@@ -2,10 +2,8 @@ package file
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/reference"
-	"github.com/pkg/errors"
 
 	"github.com/opctl/opctl/sdks/go/data/coerce"
 	"github.com/opctl/opctl/sdks/go/model"
@@ -29,11 +27,11 @@ func Interpret(
 ) (*model.Value, error) {
 	expressionAsString, expressionIsString := expression.(string)
 
-	if expressionIsString && regexp.MustCompile("^\\$\\(.+\\)$").MatchString(expressionAsString) {
+	if expressionIsString && reference.ReferenceRegexp.MatchString(expressionAsString) {
 		var opts *model.ReferenceOpts
 		if createIfNotExist {
 			opts = &model.ReferenceOpts{
-				Type:       "File",
+				Type:       model.ReferenceTypeFile,
 				ScratchDir: scratchDir,
 			}
 		}
@@ -44,7 +42,7 @@ func Interpret(
 			opts,
 		)
 		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("unable to interpret %+v to file", expression))
+			return nil, fmt.Errorf("unable to interpret %+v to file: %w", expression, err)
 		}
 		return coerce.ToFile(value, scratchDir)
 	}
@@ -54,7 +52,7 @@ func Interpret(
 		scope,
 	)
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("unable to interpret %+v to file", expression))
+		return nil, fmt.Errorf("unable to interpret %+v to file: %w", expression, err)
 	}
 
 	return coerce.ToFile(&value, scratchDir)

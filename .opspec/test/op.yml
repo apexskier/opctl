@@ -1,15 +1,9 @@
 name: test
 description: runs all tests
 inputs:
-  compile:
-    boolean:
-      description: build the cli binary before running tests that use it
-      default: true
-  gitBranch:
-    string:
-      constraints: { minLength: 1 }
-      description: git branch the coverage should be associated with
-      default: main
+  dockerSocket:
+    socket:
+      description: docker socket to use as container runtime
   HOME:
     dir:
       description: Home directory of caller; used to access go modules
@@ -20,74 +14,32 @@ inputs:
         format: semver
 run:
   parallel:
-    # cli system opspec tests
     - serial:
-        - if:
-          - eq: [$(compile), true]
-          op:
-            ref: ../../cli/.opspec/compile
+        - op:
+            ref: ../../cli/.opspec/test/unit
             inputs:
+              dockerSocket:
               HOME:
-              version:
         - op:
-            ref: ../../cli/.opspec/test/system/opspec
-    # webapp tests
+            ref: ../../cli/.opspec/test/system
+    # opspec tests
     - op:
-        ref: ../../webapp/.opspec/test
-    # js SDK tests
+        ref: ../../opspec/opfile/.opspec/test
+    # go SDK tests
     - op:
-        ref: ../../sdks/js/.opspec/test
-    # react SDK tests
-    - op:
-        ref: ../../sdks/react/.opspec/test
-    # api validation
-    - op:
-        ref: ../../api/.opspec/test
-    # go unit tests with coverage reporting (includes CLI and Go SDK)
-    - serial:
-        - container:
-            cmd:
-              - sh
-              - -ce
-              - |
-                echo "unit testing code"
-                go test -coverprofile=coverprofile ./...
-
-                echo "stripping generated code"
-                sed '/fake/d' -i coverprofile
-                sed '/bindata/d' -i coverprofile
-
-                cat coverprofile > /coverprofile
-            files:
-              /coverprofile: $(coverprofile)
-            dirs:
-              /src: $(../..)
-              /go/pkg: $(HOME/pkg)
-            envVars:
-              GOFLAGS: -tags=containers_image_openpgp
-            image: { ref: "golang:1.15" }
-            workDir: /src
-        - op:
-            ref: github.com/opspec-pkgs/git.resolve-commit#1.0.2
-            inputs: { dotGitDir: $(../../.git) }
-            outputs: { commit: $(gitCommit) }
-        - op:
-            ref: github.com/opspec-pkgs/codecov.upload#1.1.0
-            inputs:
-              gitBranch:
-              gitCommit:
-              token: b432a3b8-8220-4c1d-bcee-db76e68d0128
-              report: $(coverprofile)
+        ref: ../../sdks/go/.opspec/test
+        inputs:
+          HOME:
     # check go fmt has been run
     - container:
         cmd:
           - sh
           - -ce
           - |
-            test -z "\$(gofmt -l . | tee /tmp/output)" || (echo "Fix formatting issues with 'opctl run format'" && cat /tmp/output && exit 1)
+            test -z "\$(gofmt -d -l ./cli ./sdks/go | tee /tmp/output)" || (echo "Fix formatting issues with 'opctl run format'" && cat /tmp/output && exit 1)
         dirs:
           /src: $(../..)
         envVars:
           GOFLAGS: -tags=containers_image_openpgp
-        image: { ref: "golang:1.15" }
+        image: { ref: "golang:1.18" }
         workDir: /src

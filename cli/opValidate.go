@@ -15,14 +15,10 @@ func opValidate(
 	opDirHandle, err := dataResolver.Resolve(
 		ctx,
 		opRef,
-		nil,
 	)
 	if err != nil {
 		return err
 	}
 
-	return opspec.Validate(
-		ctx,
-		*opDirHandle.Path(),
-	)
+	return opspec.Validate(*opDirHandle.Path())
 }

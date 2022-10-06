@@ -6,14 +6,12 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'apexskier',
   projectName: 'opctl',
+  trailingSlash: false,
   themeConfig: {
     algolia: {
+      appId: 'E19H3NL09D',
       apiKey: '247689f43002ed0c3902fbd034630a7a',
       indexName: 'opctl'
-    },
-    disableDarkMode: true,
-    googleAnalytics: {
-      trackingID: 'UA-94109316-1',
     },
     navbar: {
       title: 'Opctl',
@@ -21,8 +19,13 @@ module.exports = {
         alt: 'opctl Logo',
         src: 'img/logo.svg',
       },
-      links: [
+      items: [
         { to: 'docs/introduction', label: 'Docs', position: 'left' },
+        {
+          href: 'https://github.com/orgs/opspec-pkgs/repositories',
+          label: 'Packages',
+          position: 'left',
+        },
         {
           href: 'https://join.slack.com/t/opctl/shared_invite/zt-51zodvjn-Ul_UXfkhqYLWZPQTvNPp5w',
           label: 'Slack',
@@ -74,12 +77,15 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
-          editUrl: "https://github.com/opctl/opctl/edit/master/website/",
+          editUrl: "https://github.com/opctl/opctl/edit/main/website/",
           sidebarPath: require.resolve('./sidebars.js'),
           // Equivalent to `enableUpdateBy`.
           showLastUpdateAuthor: true,
           // Equivalent to `enableUpdateTime`.
           showLastUpdateTime: true,
+        },
+        googleAnalytics: {
+          trackingID: 'UA-94109316-1',
         }
       },
     ],

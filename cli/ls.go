@@ -1,52 +1,41 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
+	"sort"
 	"strings"
 	"text/tabwriter"
 
-	"github.com/opctl/opctl/cli/internal/cliparamsatisfier"
+	"github.com/opctl/opctl/cli/internal/clioutput"
 	"github.com/opctl/opctl/cli/internal/dataresolver"
-	"github.com/opctl/opctl/cli/internal/nodeprovider"
 	"github.com/opctl/opctl/sdks/go/opspec"
 )
 
 // ls implements "ls" command
 func ls(
 	ctx context.Context,
-	cliParamSatisfier cliparamsatisfier.CLIParamSatisfier,
-	nodeProvider nodeprovider.NodeProvider,
+	opFormatter clioutput.OpFormatter,
+	dataResolver dataresolver.DataResolver,
 	dirRef string,
 ) error {
-	node, err := nodeProvider.CreateNodeIfNotExists(ctx)
-	if err != nil {
-		return err
-	}
+	tw := new(tabwriter.Writer)
+	defer tw.Flush()
+	tw.Init(os.Stdout, 0, 8, 1, '\t', 0)
 
-	dataResolver := dataresolver.New(
-		cliParamSatisfier,
-		node,
-	)
-
-	_tabWriter := new(tabwriter.Writer)
-	defer _tabWriter.Flush()
-	_tabWriter.Init(os.Stdout, 0, 8, 1, '\t', 0)
-
-	fmt.Fprintln(_tabWriter, "REF\tDESCRIPTION")
+	fmt.Fprintln(tw, "REF\tDESCRIPTION")
 
 	dirHandle, err := dataResolver.Resolve(
 		ctx,
 		dirRef,
-		nil,
 	)
 	if err != nil {
 		return err
 	}
 
-	opsByPath, err := opspec.List(
+	opsByRef, erroringOpsByRef, err := opspec.List(
 		ctx,
 		dirHandle,
 	)
@@ -54,25 +43,51 @@ func ls(
 		return err
 	}
 
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
+	type SortableRef struct {
+		ref          string
+		formattedRef string
 	}
 
-	for path, op := range opsByPath {
-		opRef := filepath.Join(dirHandle.Ref(), path)
-		if filepath.IsAbs(opRef) {
-			// make absolute paths relative
-			relOpRef, err := filepath.Rel(cwd, opRef)
-			if err != nil {
-				return err
-			}
-
-			opRef = strings.TrimPrefix(relOpRef, ".opspec/")
+	// ensure runnable ops are sorted, otherwise order will change
+	sortableOps := make([]SortableRef, 0, len(opsByRef))
+	for ref := range opsByRef {
+		sortableOps = append(sortableOps, SortableRef{
+			ref:          ref,
+			formattedRef: opFormatter.FormatOpRef(ref),
+		})
+	}
+	sort.Slice(sortableOps, func(i, j int) bool {
+		return strings.Compare(sortableOps[i].ref, sortableOps[j].ref) < 0
+	})
+	for _, op := range sortableOps {
+		opDescription := opsByRef[op.ref].Description
+		scanner := bufio.NewScanner(strings.NewReader(opDescription))
+		scanner.Scan()
+		// first line of description, add the op ref
+		fmt.Fprintf(tw, "%v\t%v", op.formattedRef, scanner.Text())
+		for scanner.Scan() {
+			// subsequent lines, don't add the op ref but let the description span multiple lines
+			fmt.Fprintf(tw, "\n\t%v", scanner.Text())
 		}
+		fmt.Fprintln(tw)
+	}
 
-		fmt.Fprintf(_tabWriter, "%v\t%v", opRef, op.Description)
-		fmt.Fprintln(_tabWriter)
+	if len(erroringOpsByRef) > 0 {
+		sortableErroringOpPaths := make([]SortableRef, 0, len(erroringOpsByRef))
+		for ref := range erroringOpsByRef {
+			sortableErroringOpPaths = append(sortableErroringOpPaths, SortableRef{
+				ref:          ref,
+				formattedRef: opFormatter.FormatOpRef(ref),
+			})
+		}
+		sort.Slice(sortableErroringOpPaths, func(i, j int) bool {
+			return strings.Compare(sortableErroringOpPaths[i].ref, sortableErroringOpPaths[j].ref) < 0
+		})
+		fmt.Fprintln(tw)
+		fmt.Fprintln(tw, "INVALID OPS")
+		for _, op := range sortableErroringOpPaths {
+			fmt.Fprintln(tw, op.formattedRef)
+		}
 	}
 
 	return nil

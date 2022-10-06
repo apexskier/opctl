@@ -3,6 +3,7 @@ package cliparamsatisfier
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 
@@ -21,11 +22,15 @@ var _ = Context("parameterSatisfier", func() {
 	if err != nil {
 		panic(err)
 	}
+
+	cliOutput, err := clioutput.New(clicolorer.New(), clioutput.SimpleOpFormatter{}, io.Discard, io.Discard)
+	Expect(err).To(BeNil())
+
 	Context("New", func() {
 		It("should return truthy result", func() {
 			/* arrange/act */
 			actual := New(
-				clioutput.New(clicolorer.New(), os.Stderr, os.Stdout),
+				cliOutput,
 			)
 
 			/* assert */
@@ -37,9 +42,9 @@ var _ = Context("parameterSatisfier", func() {
 			/* arrange */
 			providedInputSourcer := new(FakeInputSourcer)
 			providedInputSourcer.SourceReturns(nil, true)
-			providedInputs := map[string]*model.Param{
-				"input1": {String: &model.StringParam{}},
-				"input2": {String: &model.StringParam{}},
+			providedInputs := map[string]*model.ParamSpec{
+				"input1": {String: &model.StringParamSpec{}},
+				"input2": {String: &model.StringParamSpec{}},
 			}
 
 			expectedInputNames := map[string]struct{}{
@@ -48,7 +53,7 @@ var _ = Context("parameterSatisfier", func() {
 			}
 
 			objectUnderTest := _CLIParamSatisfier{
-				cliOutput: clioutput.New(clicolorer.New(), os.Stderr, os.Stdout),
+				cliOutput: cliOutput,
 			}
 
 			/* act */
@@ -72,8 +77,8 @@ var _ = Context("parameterSatisfier", func() {
 					providedInputSourcer := new(FakeInputSourcer)
 
 					input1Name := "input1Name"
-					providedInputs := map[string]*model.Param{
-						input1Name: {Array: &model.ArrayParam{}},
+					providedInputs := map[string]*model.ParamSpec{
+						input1Name: {Array: &model.ArrayParamSpec{}},
 					}
 
 					expectedOutputs := map[string]*model.Value{
@@ -91,7 +96,7 @@ var _ = Context("parameterSatisfier", func() {
 					providedInputSourcer.SourceReturns(&valueString, true)
 
 					objectUnderTest := _CLIParamSatisfier{
-						cliOutput: clioutput.New(clicolorer.New(), os.Stderr, os.Stdout),
+						cliOutput: cliOutput,
 					}
 
 					/* act */
@@ -110,8 +115,8 @@ var _ = Context("parameterSatisfier", func() {
 					providedInputSourcer := new(FakeInputSourcer)
 					inputIdentifier := "inputIdentifier"
 
-					providedInputs := map[string]*model.Param{
-						inputIdentifier: {Boolean: &model.BooleanParam{}},
+					providedInputs := map[string]*model.ParamSpec{
+						inputIdentifier: {Boolean: &model.BooleanParamSpec{}},
 					}
 
 					valueBool := true
@@ -123,7 +128,7 @@ var _ = Context("parameterSatisfier", func() {
 					}
 
 					objectUnderTest := _CLIParamSatisfier{
-						cliOutput: clioutput.New(clicolorer.New(), os.Stderr, os.Stdout),
+						cliOutput: cliOutput,
 					}
 
 					/* act */
@@ -142,8 +147,8 @@ var _ = Context("parameterSatisfier", func() {
 					providedInputSourcer := new(FakeInputSourcer)
 					inputIdentifier := "inputIdentifier"
 
-					providedInputs := map[string]*model.Param{
-						inputIdentifier: {Dir: &model.DirParam{}},
+					providedInputs := map[string]*model.ParamSpec{
+						inputIdentifier: {Dir: &model.DirParamSpec{}},
 					}
 
 					valueDir := wd
@@ -159,7 +164,7 @@ var _ = Context("parameterSatisfier", func() {
 					}
 
 					objectUnderTest := _CLIParamSatisfier{
-						cliOutput: clioutput.New(clicolorer.New(), os.Stderr, os.Stdout),
+						cliOutput: cliOutput,
 					}
 
 					/* act */
@@ -178,8 +183,8 @@ var _ = Context("parameterSatisfier", func() {
 					providedInputSourcer := new(FakeInputSourcer)
 					inputIdentifier := "inputIdentifier"
 
-					providedInputs := map[string]*model.Param{
-						inputIdentifier: {File: &model.FileParam{}},
+					providedInputs := map[string]*model.ParamSpec{
+						inputIdentifier: {File: &model.FileParamSpec{}},
 					}
 
 					valueFile := filepath.Join(wd, "inputSourcer.go")
@@ -195,7 +200,7 @@ var _ = Context("parameterSatisfier", func() {
 					}
 
 					objectUnderTest := _CLIParamSatisfier{
-						cliOutput: clioutput.New(clicolorer.New(), os.Stderr, os.Stdout),
+						cliOutput: cliOutput,
 					}
 
 					/* act */
@@ -214,8 +219,8 @@ var _ = Context("parameterSatisfier", func() {
 					providedInputSourcer := new(FakeInputSourcer)
 					inputIdentifier := "inputIdentifier"
 
-					providedInputs := map[string]*model.Param{
-						inputIdentifier: {Number: &model.NumberParam{}},
+					providedInputs := map[string]*model.ParamSpec{
+						inputIdentifier: {Number: &model.NumberParamSpec{}},
 					}
 
 					valueNumber := 1.1
@@ -227,7 +232,7 @@ var _ = Context("parameterSatisfier", func() {
 					}
 
 					objectUnderTest := _CLIParamSatisfier{
-						cliOutput: clioutput.New(clicolorer.New(), os.Stderr, os.Stdout),
+						cliOutput: cliOutput,
 					}
 
 					/* act */
@@ -247,8 +252,8 @@ var _ = Context("parameterSatisfier", func() {
 					providedInputSourcer := new(FakeInputSourcer)
 
 					input1Name := "input1Name"
-					providedInputs := map[string]*model.Param{
-						input1Name: {Object: &model.ObjectParam{}},
+					providedInputs := map[string]*model.ParamSpec{
+						input1Name: {Object: &model.ObjectParamSpec{}},
 					}
 
 					expectedOutputs := map[string]*model.Value{
@@ -266,7 +271,7 @@ var _ = Context("parameterSatisfier", func() {
 					providedInputSourcer.SourceReturns(&valueString, true)
 
 					objectUnderTest := _CLIParamSatisfier{
-						cliOutput: clioutput.New(clicolorer.New(), os.Stderr, os.Stdout),
+						cliOutput: cliOutput,
 					}
 
 					/* act */

@@ -7,9 +7,9 @@ title: opctl run
 opctl run [OPTIONS] OP_REF
 ```
 
-Start and wait on an op.
+Start and wait for an op to exit.
 
-> if a node isn't running, one will be automatically created
+> if a node isn't running, one will be started automatically
 
 ## Arguments
 
@@ -23,6 +23,9 @@ Explicitly pass args to op in format `-a NAME1=VALUE1 -a NAME2=VALUE2`
 
 ### `--arg-file` *default: `.opspec/args.yml`*
 Read in a file of args in yml format
+
+### `--no-progress` *default: `false`*
+Disable live call graph for the op
 
 ## Global Options
 see [global options](global-options.md)

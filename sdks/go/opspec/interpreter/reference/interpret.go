@@ -4,16 +4,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
-	"github.com/opctl/opctl/sdks/go/internal/uniquestring"
-	"github.com/opctl/opctl/sdks/go/opspec/interpreter/reference/direntry"
-	"github.com/opctl/opctl/sdks/go/opspec/interpreter/reference/identifier/unbracketed"
-
 	"github.com/opctl/opctl/sdks/go/data/coerce"
-
+	"github.com/opctl/opctl/sdks/go/internal/uniquestring"
 	"github.com/opctl/opctl/sdks/go/model"
+	"github.com/opctl/opctl/sdks/go/opspec/interpreter/reference/direntry"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/reference/identifier/bracketed"
+	"github.com/opctl/opctl/sdks/go/opspec/interpreter/reference/identifier/unbracketed"
 )
 
 const (
@@ -23,6 +22,8 @@ const (
 	RefStart  = string(operator) + string(refOpener)
 	RefEnd    = string(refCloser)
 )
+
+var ReferenceRegexp = regexp.MustCompile(`^` + regexp.QuoteMeta(RefStart) + `.+` + regexp.QuoteMeta(RefEnd) + `$`)
 
 // Interpret a ref of the form:
 // /p1.ext
@@ -147,24 +148,21 @@ func getRootValue(
 	}
 
 	// scope ref
-	var identifier string
-	var refRemainder string
-	identifier, refRemainder = unbracketed.Parse(ref)
+	identifier, refRemainder := unbracketed.Parse(ref)
 
 	if value, ok := scope[identifier]; ok {
 		return value, refRemainder, nil
 	}
 
 	if opts != nil {
-
 		uuid, _ := uniquestring.Construct()
 		fsPath := filepath.Join(opts.ScratchDir, uuid)
 
 		switch opts.Type {
-		case "Dir":
+		case model.ReferenceTypeDir:
 			os.MkdirAll(fsPath, 0700)
 			return &model.Value{Dir: &fsPath}, "", nil
-		case "File":
+		case model.ReferenceTypeFile:
 			os.MkdirAll(filepath.Dir(fsPath), 0700)
 			os.Create(fsPath)
 			return &model.Value{File: &fsPath}, "", nil
@@ -207,7 +205,7 @@ func rInterpret(
 
 		return rInterpret(ref, data, opts)
 	case '/':
-		var createType *string
+		var createType *model.ReferenceType
 		if opts != nil {
 			createType = &opts.Type
 		}

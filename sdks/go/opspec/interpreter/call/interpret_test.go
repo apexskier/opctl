@@ -2,7 +2,6 @@ package call
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -19,7 +18,7 @@ var _ = Context("Interpret", func() {
 			It("should return expected result", func() {
 				/* arrange */
 				predicateSpec := []*model.PredicateSpec{{}}
-				dataDir, err := ioutil.TempDir("", "")
+				dataDir, err := os.MkdirTemp("", "")
 				if err != nil {
 					panic(err)
 				}
@@ -39,7 +38,7 @@ var _ = Context("Interpret", func() {
 				)
 
 				/* assert */
-				Expect(actualError).To(MatchError("unable to interpret predicate: predicate was unexpected type &{Eq:<nil> Exists:<nil> Ne:<nil> NotExists:<nil>}"))
+				Expect(actualError).To(MatchError("unable to interpret predicate: predicate was unexpected type &{Eq:<nil> Exists:<nil> LT:<nil> LTE:<nil> GT:<nil> GTE:<nil> NE:<nil> NotExists:<nil>}"))
 			})
 		})
 	})
@@ -52,7 +51,7 @@ var _ = Context("Interpret", func() {
 			providedParentIDValue := "providedParentID"
 			providedParentID := &providedParentIDValue
 			providedRootCallID := "providedRootCallID"
-			providedDataDirPath, err := ioutil.TempDir("", "")
+			providedDataDirPath, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}
@@ -109,7 +108,7 @@ var _ = Context("Interpret", func() {
 			providedParentIDValue := "providedParentID"
 			providedParentID := &providedParentIDValue
 			providedRootCallID := "providedRootCallID"
-			providedDataDirPath, err := ioutil.TempDir("", "")
+			providedDataDirPath, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}
@@ -174,7 +173,7 @@ var _ = Context("Interpret", func() {
 			providedParentIDValue := "providedParentID"
 			providedParentID := &providedParentIDValue
 			providedRootCallID := "providedRootCallID"
-			providedDataDirPath, err := ioutil.TempDir("", "")
+			providedDataDirPath, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}
@@ -217,7 +216,7 @@ var _ = Context("Interpret", func() {
 			providedParentIDValue := "providedParentID"
 			providedParentID := &providedParentIDValue
 			providedRootCallID := "providedRootCallID"
-			providedDataDirPath, err := ioutil.TempDir("", "")
+			providedDataDirPath, err := os.MkdirTemp("", "")
 			if err != nil {
 				panic(err)
 			}

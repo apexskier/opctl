@@ -3,13 +3,13 @@ package clioutput
 import (
 	"fmt"
 	"io"
-	"time"
+	"strings"
 
 	"github.com/opctl/opctl/cli/internal/clicolorer"
 	"github.com/opctl/opctl/sdks/go/model"
 )
 
-//CliOutput allows mocking/faking output
+// CliOutput allows mocking/faking output
 type CliOutput interface {
 	// silently disables coloring
 	DisableColor()
@@ -27,208 +27,227 @@ type CliOutput interface {
 	// @TODO: not generic
 	Event(event *model.Event)
 
-	// outputs an info msg
-	Info(s string)
-
 	// outputs a success msg
 	Success(s string)
 }
 
 func New(
 	cliColorer clicolorer.CliColorer,
+	opFormatter OpFormatter,
 	errWriter io.Writer,
 	stdWriter io.Writer,
-) CliOutput {
+) (CliOutput, error) {
 	return _cliOutput{
-		cliColorer: cliColorer,
-		errWriter:  errWriter,
-		stdWriter:  stdWriter,
-	}
+		cliColorer:  cliColorer,
+		opFormatter: opFormatter,
+		errWriter:   errWriter,
+		stdWriter:   stdWriter,
+	}, nil
 }
 
 type _cliOutput struct {
-	cliColorer clicolorer.CliColorer
-	errWriter  io.Writer
-	stdWriter  io.Writer
+	cliColorer  clicolorer.CliColorer
+	opFormatter OpFormatter
+	errWriter   io.Writer
+	stdWriter   io.Writer
 }
 
-func (this _cliOutput) DisableColor() {
-	this.cliColorer.DisableColor()
+func (clio _cliOutput) DisableColor() {
+	clio.cliColorer.DisableColor()
 }
 
-func (this _cliOutput) Attention(s string) {
+func (clio _cliOutput) Attention(s string) {
 	io.WriteString(
-		this.stdWriter,
+		clio.stdWriter,
 		fmt.Sprintln(
-			this.cliColorer.Attention(s),
+			clio.cliColorer.Attention(s),
 		),
 	)
 }
 
-func (this _cliOutput) Warning(s string) {
+func (clio _cliOutput) Warning(s string) {
 	io.WriteString(
-		this.stdWriter,
+		clio.stdWriter,
 		fmt.Sprintln(
-			this.cliColorer.Error(s),
+			clio.cliColorer.Error(s),
 		),
 	)
 }
 
-func (this _cliOutput) Error(s string) {
+func (clio _cliOutput) Error(s string) {
 	io.WriteString(
-		this.errWriter,
+		clio.errWriter,
 		fmt.Sprintln(
-			this.cliColorer.Error(s),
+			clio.cliColorer.Error(s),
 		),
 	)
 }
 
-func (this _cliOutput) Event(event *model.Event) {
+func (clio _cliOutput) Event(event *model.Event) {
 	switch {
 	case event.CallEnded != nil &&
-		event.CallEnded.Call.Op == nil &&
-		event.CallEnded.Call.Container == nil &&
-		event.CallEnded.Error != nil:
-		this.error(event)
-
-	case event.CallEnded != nil &&
 		event.CallEnded.Call.Container != nil:
-		this.containerExited(event)
+		clio.containerExited(event)
 
 	case event.CallStarted != nil &&
 		event.CallStarted.Call.Container != nil:
-		this.containerStarted(event)
+		clio.containerStarted(event)
 
 	case event.ContainerStdErrWrittenTo != nil:
-		this.containerStdErrWrittenTo(event)
+		clio.containerStdErrWrittenTo(event.ContainerStdErrWrittenTo)
 
 	case event.ContainerStdOutWrittenTo != nil:
-		this.containerStdOutWrittenTo(event)
+		clio.containerStdOutWrittenTo(event.ContainerStdOutWrittenTo)
 
 	case event.CallEnded != nil &&
 		event.CallEnded.Call.Op != nil:
-		this.opEnded(event)
+		clio.opEnded(event)
 
-	case event.CallStarted != nil &&
-		event.CallStarted.Call.Op != nil:
-		this.opStarted(event)
+	case event.CallStarted != nil && event.CallStarted.Call.Op != nil:
+		clio.opStarted(event.CallStarted)
 	}
 }
 
-func (this _cliOutput) error(event *model.Event) {
-	this.Error(
-		fmt.Sprintf(
-			"Error='%v' Id='%v' OpRef='%v' Timestamp='%v'\n",
-			event.CallEnded.Error.Message,
-			event.CallEnded.Call.ID,
-			event.CallEnded.Ref,
-			event.Timestamp.Format(time.RFC3339),
-		),
-	)
-}
-
-func (this _cliOutput) containerExited(event *model.Event) {
-	err := ""
-	if event.CallEnded.Error != nil {
-		err = fmt.Sprintf(" Error='%v'", event.CallEnded.Error.Message)
+func (clio _cliOutput) containerExited(event *model.Event) {
+	var color func(s string) string
+	var writer io.Writer
+	var message string
+	switch event.CallEnded.Outcome {
+	case model.OpOutcomeSucceeded:
+		message = "exited"
+		color = clio.cliColorer.Success
+		writer = clio.stdWriter
+	case model.OpOutcomeKilled:
+		message = "killed"
+		color = clio.cliColorer.Info
+		writer = clio.stdWriter
+	default:
+		message = "crashed"
+		color = clio.cliColorer.Error
+		writer = clio.errWriter
 	}
 
-	imageRef := ""
 	if event.CallEnded.Call.Container.Image.Ref != nil {
-		imageRef = fmt.Sprintf(" ImageRef='%v'", *event.CallEnded.Call.Container.Image.Ref)
+		message = fmt.Sprintf("%s ", *event.CallEnded.Call.Container.Image.Ref) + message
+	} else {
+		message += "unknown container " + message
 	}
-
-	message := fmt.Sprintf(
-		"ContainerExited Id='%v'%v Outcome='%v'%v Timestamp='%v'\n",
-		event.CallEnded.Call.ID,
-		imageRef,
-		event.CallEnded.Outcome,
-		err,
-		event.Timestamp.Format(time.RFC3339),
-	)
-	switch event.CallEnded.Outcome {
-	case model.OpOutcomeSucceeded:
-		this.Success(message)
-	case model.OpOutcomeKilled:
-		this.Info(message)
-	default:
-		this.Error(message)
-	}
-}
-
-func (this _cliOutput) containerStarted(event *model.Event) {
-	imageRef := ""
-	if event.CallStarted.Call.Container.Image.Ref != nil {
-		imageRef = fmt.Sprintf(" ImageRef='%v'", *event.CallStarted.Call.Container.Image.Ref)
-	}
-
-	this.Info(
-		fmt.Sprintf(
-			"ContainerStarted Id='%v' OpRef='%v'%v Timestamp='%v'\n",
-			event.CallStarted.Call.ID,
-			event.CallStarted.Ref,
-			imageRef,
-			event.Timestamp.Format(time.RFC3339),
-		),
-	)
-}
-
-func (this _cliOutput) containerStdErrWrittenTo(event *model.Event) {
-	io.WriteString(this.errWriter, string(event.ContainerStdErrWrittenTo.Data))
-}
-
-func (this _cliOutput) containerStdOutWrittenTo(event *model.Event) {
-	io.WriteString(this.stdWriter, string(event.ContainerStdOutWrittenTo.Data))
-}
-
-func (this _cliOutput) opEnded(event *model.Event) {
-	err := ""
+	message = color(message)
 	if event.CallEnded.Error != nil {
-		err = fmt.Sprintf(" Error='%v'", event.CallEnded.Error.Message)
+		message += color(":") + " " + event.CallEnded.Error.Message
 	}
-	message := fmt.Sprintf(
-		"OpEnded Id='%v' OpRef='%v' Outcome='%v'%v Timestamp='%v'\n",
-		event.CallEnded.Call.ID,
-		event.CallEnded.Call.Op.OpPath,
-		event.CallEnded.Outcome,
-		err,
-		event.Timestamp.Format(time.RFC3339),
+
+	io.WriteString(
+		writer,
+		fmt.Sprintf(
+			"%s%s\n",
+			clio.outputPrefix(event.CallEnded),
+			message,
+		),
 	)
+}
+
+func (clio _cliOutput) containerStarted(event *model.Event) {
+	message := "started "
+	if event.CallStarted.Call.Container.Image.Ref != nil {
+		message += *event.CallStarted.Call.Container.Image.Ref
+	} else {
+		message += "unknown container"
+	}
+
+	io.WriteString(
+		clio.stdWriter,
+		fmt.Sprintf(
+			"%s%s\n",
+			clio.outputPrefix(event.CallStarted),
+			clio.cliColorer.Info(message),
+		),
+	)
+}
+
+func (clio _cliOutput) outputPrefix(event model.OpEvent) string {
+	parts := []string{
+		fmt.Sprintf("%.8s", fmt.Sprintf("%-8s", event.Id())),
+	}
+	opRef := clio.opFormatter.FormatOpRef(event.Ref())
+	if opRef != "" {
+		parts = append(parts, opRef)
+	}
+	return clio.cliColorer.Muted("["+strings.Join(parts, " ")+"]") + " "
+}
+
+func (clio _cliOutput) containerStdErrWrittenTo(event *model.ContainerStdErrWrittenTo) {
+	io.WriteString(
+		clio.errWriter,
+		fmt.Sprintf(
+			"%s%s",
+			clio.outputPrefix(event),
+			event.Data,
+		),
+	)
+}
+
+func (clio _cliOutput) containerStdOutWrittenTo(event *model.ContainerStdOutWrittenTo) {
+	io.WriteString(
+		clio.stdWriter,
+		fmt.Sprintf(
+			"%s%s",
+			clio.outputPrefix(event),
+			event.Data,
+		),
+	)
+}
+
+func (clio _cliOutput) opEnded(event *model.Event) {
+	var color func(s string) string
+	var writer io.Writer
+	var message string
 	switch event.CallEnded.Outcome {
 	case model.OpOutcomeSucceeded:
-		this.Success(message)
+		message = "succeeded"
+		color = clio.cliColorer.Success
+		writer = clio.stdWriter
 	case model.OpOutcomeKilled:
-		this.Info(message)
+		message = "killed"
+		color = clio.cliColorer.Info
+		writer = clio.stdWriter
 	default:
-		this.Error(message)
+		message = "failed"
+		color = clio.cliColorer.Error
+		writer = clio.errWriter
 	}
-}
 
-func (this _cliOutput) opStarted(event *model.Event) {
-	this.Info(
+	message = color(fmt.Sprintf("op %s", message))
+	if event.CallEnded.Error != nil {
+		message += color(":") + " " + event.CallEnded.Error.Message
+	}
+
+	io.WriteString(
+		writer,
 		fmt.Sprintf(
-			"OpStarted Id='%v' OpRef='%v' Timestamp='%v'\n",
-			event.CallStarted.Call.ID,
-			event.CallStarted.Call.Op.OpPath,
-			event.Timestamp.Format(time.RFC3339),
+			"%s%s\n",
+			clio.outputPrefix(event.CallEnded),
+			message,
 		),
 	)
 }
 
-func (this _cliOutput) Info(s string) {
+func (clio _cliOutput) opStarted(event *model.CallStarted) {
 	io.WriteString(
-		this.stdWriter,
-		fmt.Sprintln(
-			this.cliColorer.Info(s),
+		clio.stdWriter,
+		fmt.Sprintf(
+			"%s%s\n",
+			clio.outputPrefix(event),
+			clio.cliColorer.Info("started op"),
 		),
 	)
 }
 
-func (this _cliOutput) Success(s string) {
+func (clio _cliOutput) Success(s string) {
 	io.WriteString(
-		this.stdWriter,
+		clio.stdWriter,
 		fmt.Sprintln(
-			this.cliColorer.Success(s),
+			clio.cliColorer.Success(s),
 		),
 	)
 }

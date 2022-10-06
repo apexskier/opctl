@@ -2,17 +2,16 @@ package git
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
-	"github.com/opctl/opctl/sdks/go/model"
+	"github.com/opctl/opctl/sdks/go/data"
 )
 
 func newHandle(
 	path string,
 	dataRef string,
-) model.DataHandle {
+) data.DataHandle {
 	return handle{
 		path:    path,
 		dataRef: dataRef,
@@ -29,7 +28,7 @@ func (gh handle) GetContent(
 	ctx context.Context,
 	contentPath string,
 ) (
-	model.ReadSeekCloser,
+	data.ReadSeekCloser,
 	error,
 ) {
 	return os.Open(filepath.Join(gh.path, contentPath))
@@ -38,7 +37,7 @@ func (gh handle) GetContent(
 func (gh handle) ListDescendants(
 	ctx context.Context,
 ) (
-	[]*model.DirEntry,
+	[]*data.DirEntry,
 	error,
 ) {
 	return gh.rListDescendants(gh.path)
@@ -48,19 +47,19 @@ func (gh handle) ListDescendants(
 func (gh handle) rListDescendants(
 	path string,
 ) (
-	[]*model.DirEntry,
+	[]*data.DirEntry,
 	error,
 ) {
-	childFileInfos, err := ioutil.ReadDir(path)
+	childDirEntries, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
 
-	var contents []*model.DirEntry
-	for _, contentFileInfo := range childFileInfos {
-		absContentPath := filepath.Join(path, contentFileInfo.Name())
+	var contents []*data.DirEntry
+	for _, childDirEntry := range childDirEntries {
+		absContentPath := filepath.Join(path, childDirEntry.Name())
 
-		if contentFileInfo.IsDir() {
+		if childDirEntry.IsDir() {
 			// recurse into child dirs
 			childContents, err := gh.rListDescendants(absContentPath)
 			if err != nil {
@@ -74,12 +73,17 @@ func (gh handle) rListDescendants(
 			return nil, err
 		}
 
+		childFileInfo, err := childDirEntry.Info()
+		if err != nil {
+			return nil, err
+		}
+
 		contents = append(
 			contents,
-			&model.DirEntry{
-				Mode: contentFileInfo.Mode(),
+			&data.DirEntry{
+				Mode: childFileInfo.Mode(),
 				Path: filepath.Join(string(os.PathSeparator), relContentPath),
-				Size: contentFileInfo.Size(),
+				Size: childFileInfo.Size(),
 			},
 		)
 

@@ -1,6 +1,8 @@
 package opfile
 
 import (
+	"encoding/json"
+
 	"github.com/ghodss/yaml"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -12,27 +14,27 @@ var _ = Context("Unmarshal", func() {
 		It("should return the expected error", func() {
 			/* arrange */
 			/* act */
-			_, actualError := Unmarshal([]byte("&"))
+			_, actualError := Unmarshal("opRef", []byte("&"))
 
 			/* assert */
-			Expect(actualError).To(MatchError("\n-\n  Error(s):\n    - error converting YAML to JSON: yaml: did not find expected alphabetic or numeric character\n-"))
+			Expect(actualError).To(MatchError("opspec syntax error:\nopRef\n- error converting YAML to JSON: yaml: did not find expected alphabetic or numeric character"))
 		})
 	})
 	Context("Validator.Validate doesn't return errors", func() {
 
-		XIt("should return expected opFile", func() {
+		It("should return expected opFile", func() {
 
 			/* arrange */
 			paramDefault := "dummyDefault"
-			dummyParams := map[string]*model.Param{
+			dummyParams := map[string]*model.ParamSpec{
 				"dummyName": {
-					String: &model.StringParam{
+					String: &model.StringParamSpec{
 						Constraints: map[string]interface{}{
-							"MinLength": 0,
-							"MaxLength": 1000,
-							"Pattern":   "dummyPattern",
-							"Format":    "dummyFormat",
-							"Enum":      []interface{}{"dummyEnumItem1"},
+							"minLength": 0,
+							"maxLength": 1000,
+							"pattern":   "dummyPattern",
+							"format":    "date-time",
+							"enum":      []interface{}{"dummyEnumItem1"},
 						},
 						Default:     &paramDefault,
 						Description: "dummyDescription",
@@ -41,29 +43,38 @@ var _ = Context("Unmarshal", func() {
 				},
 			}
 
-			expectedOpFile := &model.OpSpec{
+			expectedOpFile := model.OpSpec{
 				Description: "dummyDescription",
 				Inputs:      dummyParams,
-				Name:        "dummyName",
 				Outputs:     dummyParams,
 				Run: &model.CallSpec{
 					Op: &model.OpCallSpec{
 						Ref: "dummyOpRef",
 					},
 				},
-				Version: "dummyVersion",
 			}
-			providedBytes, err := yaml.Marshal(expectedOpFile)
+			providedBytes, err := yaml.Marshal(&expectedOpFile)
 			if err != nil {
 				panic(err.Error())
 			}
 
 			/* act */
-			actualOpFile, _ := Unmarshal(providedBytes)
+			actualOpFile, actualErr := Unmarshal(providedBytes)
 
 			/* assert */
-			Expect(*actualOpFile).To(Equal(*expectedOpFile))
+			Expect(actualErr).To(BeNil())
 
+			// compare as JSON; otherwise we encounter pointer inequalities
+			actualBytes, err := json.Marshal(actualOpFile)
+			if err != nil {
+				panic(err)
+			}
+
+			expectedBytes, err := json.Marshal(expectedOpFile)
+			if err != nil {
+				panic(err)
+			}
+			Expect(string(actualBytes)).To(Equal(string(expectedBytes)))
 		})
 	})
 })

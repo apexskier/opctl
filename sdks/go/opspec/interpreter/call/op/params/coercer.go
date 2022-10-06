@@ -8,10 +8,10 @@ import (
 	"github.com/opctl/opctl/sdks/go/model"
 )
 
-//Coerce args to satisfy params
+// Coerce args to satisfy params
 func Coerce(
 	values map[string]*model.Value,
-	params map[string]*model.Param,
+	params map[string]*model.ParamSpec,
 	opScratchDir string,
 ) (
 	map[string]*model.Value,
@@ -35,7 +35,7 @@ paramLoop:
 		case paramValue.Boolean != nil:
 			coercedValues[paramName], err = coerce.ToBoolean(value)
 		case paramValue.Dir != nil:
-			coercedValues[paramName] = value
+			coercedValues[paramName], err = coerce.ToDir(value, opScratchDir)
 		case paramValue.File != nil:
 			coercedValues[paramName], err = coerce.ToFile(value, opScratchDir)
 		case paramValue.String != nil:
@@ -59,18 +59,11 @@ paramLoop:
 
 	if len(paramErrMap) > 0 {
 		// return error w/ fancy formatted msg
-		messageBuffer := bytes.NewBufferString("")
+		messageBuffer := bytes.NewBufferString("validation error(s):\n")
 		for outputName, err := range paramErrMap {
-			messageBuffer.WriteString(fmt.Sprintf(`
-    	- %v: %v`, outputName, err))
+			messageBuffer.WriteString(fmt.Sprintf("\n- %v: %v", outputName, err))
 		}
-		messageBuffer.WriteString(`
-`)
-		return coercedValues, fmt.Errorf(`
--
-  validation error(s):
-%v
--`, messageBuffer.String())
+		return coercedValues, fmt.Errorf(messageBuffer.String())
 	}
 
 	return coercedValues, nil

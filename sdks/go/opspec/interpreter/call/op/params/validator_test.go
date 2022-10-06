@@ -11,14 +11,14 @@ var _ = Context("Validate", func() {
 		/* arrange */
 
 		providedValues := map[string]*model.Value{
-			"expectedName1": &model.Value{
+			"expectedName1": {
 				String: new(string),
 			},
 		}
 
-		providedParams := map[string]*model.Param{
-			"expectedName1": &model.Param{
-				String: &model.StringParam{
+		providedParams := map[string]*model.ParamSpec{
+			"expectedName1": {
+				String: &model.StringParamSpec{
 					Constraints: map[string]interface{}{
 						"minLength": 10,
 					},
@@ -33,6 +33,6 @@ var _ = Context("Validate", func() {
 		)
 
 		/* assert */
-		Expect(actualErr).To(MatchError("\n-\n  validation error(s):\n\n    - expectedName1: String length must be greater than or equal to 10\n\n-"))
+		Expect(actualErr).To(MatchError("validation error(s):\n- expectedName1: String length must be greater than or equal to 10"))
 	})
 })

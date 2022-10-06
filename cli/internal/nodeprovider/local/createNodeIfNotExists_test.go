@@ -2,25 +2,36 @@ package local
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Context("CreateNodeIfNotExists", func() {
 	It("shouldn't panic", func() {
 		/* arrange */
-		dataDir, err := ioutil.TempDir("", "")
+		dataDir, err := os.MkdirTemp("", "")
 		if err != nil {
 			panic(err)
 		}
-		nodeProvider := New(NodeCreateOpts{
-			DataDir: dataDir,
+
+		nodeProvider, err := New(NodeConfig{
+			ContainerRuntime: "docker",
+			DataDir:          dataDir,
+			ListenAddress:    "localhost:42224",
 		})
+		if err != nil {
+			panic(err)
+		}
 
 		/* act */
-		nodeProvider.CreateNodeIfNotExists(
+		actualNode, actualErr := nodeProvider.CreateNodeIfNotExists(
 			context.Background(),
 		)
+
+		/* assert */
+		Expect(actualErr).To(BeNil())
+		Expect(actualNode).NotTo(BeNil())
 	})
 })

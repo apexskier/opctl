@@ -14,9 +14,10 @@ run:
     cmd:
       - go
       - fmt
-      - $(path)
+      - "./sdks/go/..."
+      - "./cli/..."
     dirs:
       /src: $(../..)
-      /go/pkg: $(HOME/pkg)
-    image: { ref: 'golang:1.15' }
+      /go/pkg: $(HOME/go/pkg)
+    image: { ref: 'golang:1.18' }
     workDir: /src

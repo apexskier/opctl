@@ -1,3 +1,102 @@
+# Branch notes
+
+## purpose
+
+This branch (mini-opctl) is an exploration into fixing some of my main concerns
+with opctl.
+
+### reliability/complexity
+
+I find opctl quite unreliable. The major issues are issues connecting to port
+42224 and opctl not properly cleaning up after itself, resulting in docker
+containers hanging around. The core architecture of opctl starts up a persistent
+webserver on 42224 that actually manages running the core business logic of
+opctl. The CLI then interacts with that webserver using http api calls and a
+websocket connection to pipe output back to the user.
+
+Since opctl's primary value to me is a reusable "op" runner, this webserver
+feels very unnecessary. It doesn't maintain much internal state, and the state
+it does maintain doesn't allow me to query and interact with running ops. The 
+network interactions are what I suspect are the primary causes of reliability 
+issues.
+
+Because of this, I've entirely removed this webserver component of opctl in
+favor of the CLI directly running core logic. This allows me to pass a
+cancellable context through the entire call chain, and directly respond to
+returned errors.
+
+Opctl also uses a custom publisher/subscriber event bus internally, which
+becomes pretty unnecessary once the centralized API is gone. I've replaced this
+with a standard go channel that the events can be passed back through.
+
+### security
+
+Simplifying opctl in this way has major security advantages. The unauthenticated
+HTTP interface is gone. Streaming events with their associated data over a
+websocket connection is gone. Long term disk event storage is gone. Any internal
+state doesn't need to be written to disk.
+
+Now, someone on my local network can't read any file from my computer opctl has
+access to over the HTTP api. Opctl doesn't store sensitive data used by my ops
+in plain text, and doesn't store my GitHub credentials in plain text.
+
+Opctl also runs all docker containers in privileged mode, which has higher risk.
+This disables that by default, which prevents docker in docker ops without using
+the `--privileged` flag.
+
+### credentials
+
+Credentials for git and docker use standard credential helper mechanisms,
+allowing for graceful re-authentication and more standardized methods of storage.
+
+### line count
+
+This project is _huge_ and can be difficult to work in. This ~removes checked-in
+vendored code,~ the web UI for opctl, the JS sdk, and the react SDK.
+
+The project also has many layers of abstraction, that I feel could be reduced
+to make changes easier. I also think the code could be refactored to be more
+idiomatic to the go language.
+
+### usability
+
+For complex ops, opctl makes it difficult to understand what's going on. I hope
+to improve the output of the CLI tool to allow me to identify what produces
+what output.
+
+## features
+
+This is a list of smaller features from this branch that I'd like to attempt to
+incrementally migrate into the main branch, decoupled from the larger architecture
+changes.
+
+- Better CLI output (better = more readable, understandable, and transformable)
+  - Label where output comes from (involves piping more context in events)
+  - Clean up formatting (remove extraneous newlines, remove unnecessary formatting separators)
+- Better error propagation and cleanup behavior
+  - Ensure parallel call goroutines are waited on
+  - Return and handle errors within the "Call" call stack
+  - Ensure container cleanup won't happen with a cancelled context
+- Move `ListDescendants` and `GetData` implementation to sdk core, instead of the api client
+- Emit CallStarted events for skipped conditional branches [#859](https://github.com/opctl/opctl/pull/859)
+- Remove custom pubsub in favor of plain channels
+- Display op outputs after running
+
+## back to main
+
+Long term, if the current "remote node" architecture is maintained, I'd like to
+make it an opt-in feature to avoid needing a persistent process for day-to-day
+local only use. This could be done by making the ApiClient and Core objects use
+the same interface, which would also probably improve understandability of the
+codebase, and would force better error propagation.
+
+If the project focuses on a CLI runner model like this branch uses, we can still
+support a persistent UI server by streaming events from the CLI to that server,
+instead of the current model of round-tripping everything.
+
+---
+
+
 [![Build](https://github.com/opctl/opctl/workflows/Build/badge.svg?branch=main)](https://github.com/opctl/opctl/actions?query=workflow%3ABuild+branch%3Amain)
 [![Go Report Card](https://goreportcard.com/badge/github.com/opctl/opctl)](https://goreportcard.com/report/github.com/opctl/opctl)
 [![Coverage](https://codecov.io/gh/opctl/opctl/branch/master/graph/badge.svg)](https://codecov.io/gh/opctl/opctl)

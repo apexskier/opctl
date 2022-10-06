@@ -2,14 +2,12 @@ package value
 
 import (
 	"fmt"
-	"io/ioutil"
-	"regexp"
+	"os"
 
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/opctl/opctl/sdks/go/opspec"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/interpolater"
 	"github.com/opctl/opctl/sdks/go/opspec/interpreter/reference"
-	"github.com/pkg/errors"
 )
 
 // Interpret an expression to a value
@@ -46,13 +44,13 @@ func Interpret(
 				scope,
 			)
 			if err != nil {
-				return model.Value{}, errors.Wrap(err, fmt.Sprintf("unable to interpret '%v: %v' as object initializer property", propertyKeyExpression, propertyValueExpression))
+				return model.Value{}, fmt.Errorf("unable to interpret '%v: %v' as object initializer property: %w", propertyKeyExpression, propertyValueExpression, err)
 			}
 
 			if propertyValue.File != nil {
-				fileBytes, err := ioutil.ReadFile(*propertyValue.File)
+				fileBytes, err := os.ReadFile(*propertyValue.File)
 				if err != nil {
-					return model.Value{}, errors.Wrap(err, fmt.Sprintf("unable to interpret '%v: %v' as object initializer property", propertyKeyExpression, propertyValueExpression))
+					return model.Value{}, fmt.Errorf("unable to interpret '%v: %v' as object initializer property: %w", propertyKeyExpression, propertyValueExpression, err)
 				}
 
 				value[propertyKey] = string(fileBytes)
@@ -81,13 +79,13 @@ func Interpret(
 				scope,
 			)
 			if err != nil {
-				return model.Value{}, errors.Wrap(err, fmt.Sprintf("unable to interpret '%+v' as array initializer item", itemExpression))
+				return model.Value{}, fmt.Errorf("unable to interpret '%+v' as array initializer item: %w", itemExpression, err)
 			}
 			value = append(value, itemValue)
 		}
 		return model.Value{Array: &value}, nil
 	case string:
-		if regexp.MustCompile("^\\$\\(.+\\)$").MatchString(typedValueExpression) {
+		if reference.ReferenceRegexp.MatchString(typedValueExpression) {
 			// attempt to process as a reference since its reference like.
 			// @TODO: make more exact. reference.Interpret can err for reasons beyond not being a reference.
 			value, err := reference.Interpret(

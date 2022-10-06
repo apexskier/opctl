@@ -11,7 +11,7 @@ import (
 // Validate validates values for/against params
 func Validate(
 	values map[string]*model.Value,
-	params map[string]*model.Param,
+	params map[string]*model.ParamSpec,
 ) error {
 
 	paramErrMap := map[string][]error{}
@@ -24,20 +24,17 @@ func Validate(
 
 	if len(paramErrMap) > 0 {
 		// return error w/ fancy formatted msg
-		messageBuffer := bytes.NewBufferString("")
+		messageBuffer := bytes.NewBufferString("validation error")
+		if len(paramErrMap) != 1 {
+			messageBuffer.WriteString("s")
+		}
+		messageBuffer.WriteString(":")
 		for paramName, errs := range paramErrMap {
 			for _, err := range errs {
-				messageBuffer.WriteString(fmt.Sprintf(`
-    - %v: %v`, paramName, err.Error()))
+				messageBuffer.WriteString(fmt.Sprintf("\n- %v: %v", paramName, err.Error()))
 			}
 		}
-		messageBuffer.WriteString(`
-`)
-		return fmt.Errorf(`
--
-  validation error(s):
-%v
--`, messageBuffer.String())
+		return fmt.Errorf(messageBuffer.String())
 	}
 
 	return nil

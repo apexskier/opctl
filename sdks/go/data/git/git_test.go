@@ -2,7 +2,6 @@ package git
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -13,81 +12,61 @@ import (
 )
 
 var _ = Context("_git", func() {
-	Context("TryResolve", func() {
-		Context("localFSProvider.TryResolve errors", func() {
-			It("should return err", func() {
-				/* arrange */
-				dataDir, err := ioutil.TempDir("", "")
+	Context("Resolve", func() {
+		Context("repo exists but completion marker doesn't", func() {
+			Context("invalid git ref", func() {
+
+			})
+			It("should return error", func() {
+				wd, err := os.Getwd()
 				if err != nil {
 					panic(err)
 				}
-				objectUnderTest := New(dataDir, nil)
+				opRef := filepath.Join(wd, "../testdata/testop")
+
+				objectUnderTest := New(filepath.Dir(opRef))
 
 				/* act */
-				_, actualError := objectUnderTest.TryResolve(
+				actualHandle, actualErr := objectUnderTest.Resolve(
 					context.Background(),
-					"/not/exists",
+					opRef,
 				)
 
 				/* assert */
-				Expect(actualError).To(MatchError("invalid git ref: missing version"))
+				Expect(actualErr).To(MatchError("invalid git ref: missing version"))
+				Expect(actualHandle).To(BeNil())
 			})
-		})
-		Context("localFSProvider.TryResolve doesn't err", func() {
-			Context("localFSProvider.TryResolve returns handle", func() {
-				It("should return handle", func() {
-					wd, err := os.Getwd()
+			Context("clone errors", func() {
+				It("should return err", func() {
+					dataDir, err := os.MkdirTemp("", "")
 					if err != nil {
 						panic(err)
 					}
-					opRef := filepath.Join(wd, "../testdata/testop")
-
-					objectUnderTest := New(filepath.Dir(opRef), nil)
+					objectUnderTest := New(dataDir)
 
 					/* act */
-					actualHandle, actualErr := objectUnderTest.TryResolve(
+					_, actualErr := objectUnderTest.Resolve(
 						context.Background(),
-						opRef,
+						"not/exists",
 					)
 
 					/* assert */
-					Expect(actualErr).To(BeNil())
-					Expect(actualHandle.Ref()).To(Equal(opRef))
+					Expect(actualErr).To(MatchError("invalid git ref: missing version"))
 				})
-			})
-			Context("FSProvider.TryResolve doesn't return a handle", func() {
-				Context("puller.Pull errors", func() {
-					It("should return err", func() {
-						dataDir, err := ioutil.TempDir("", "")
-						if err != nil {
-							panic(err)
-						}
-						objectUnderTest := New(dataDir, nil)
-
-						/* act */
-						_, actualErr := objectUnderTest.TryResolve(
-							context.Background(),
-							"not/exists",
-						)
-
-						/* assert */
-						Expect(actualErr).To(MatchError("invalid git ref: missing version"))
-					})
-				})
-				Context("puller.Pull doesn't error", func() {
+				Context("Clone doesn't error", func() {
 					It("should return expected result", func() {
 						/* arrange */
 						// some public repo that's relatively small
 						providedRef := "github.com/opspec-pkgs/_.op.create#3.3.1"
-						basePath, err := ioutil.TempDir("", "")
+						basePath, err := os.MkdirTemp("", "")
 						if err != nil {
 							panic(err)
 						}
-						objectUnderTest := New(basePath, nil)
+						objectUnderTest := New(basePath)
 						expectedHandle := newHandle(filepath.Join(basePath, providedRef), providedRef)
 
 						/* act */
-						actualHandle, actualError := objectUnderTest.TryResolve(
+						actualHandle, actualError := objectUnderTest.Resolve(
 							context.Background(),
 							providedRef,
 						)
@@ -105,12 +84,12 @@ var _ = Context("_git", func() {
 				// some public repo that's relatively small
 				providedRef := "github.com/opspec-pkgs/_.op.create#3.3.1"
 
-				basePath, err := ioutil.TempDir("", "")
+				basePath, err := os.MkdirTemp("", "")
 				if err != nil {
 					panic(err)
 				}
 
-				objectUnderTest := New(basePath, nil)
+				objectUnderTest := New(basePath)
 
 				expectedResult := newHandle(filepath.Join(basePath, providedRef), providedRef)
 
@@ -127,7 +106,7 @@ var _ = Context("_git", func() {
 				var wg sync.WaitGroup
 				wg.Add(1)
 				go func() {
-					actualResult1, actualErr1 = objectUnderTest.TryResolve(
+					actualResult1, actualErr1 = objectUnderTest.Resolve(
 						context.Background(),
 						providedRef,
 					)
@@ -136,7 +115,7 @@ var _ = Context("_git", func() {
 
 				wg.Add(1)
 				go func() {
-					actualResult2, actualErr2 = objectUnderTest.TryResolve(
+					actualResult2, actualErr2 = objectUnderTest.Resolve(
 						context.Background(),
 						providedRef,
 					)
@@ -159,12 +138,12 @@ var _ = Context("_git", func() {
 				providedRef1 := "github.com/opspec-pkgs/_.op.create#3.3.1"
 				providedRef2 := "github.com/opspec-pkgs/_.op.create#3.0.0"
 
-				basePath, err := ioutil.TempDir("", "")
+				basePath, err := os.MkdirTemp("", "")
 				if err != nil {
 					panic(err)
 				}
 
-				objectUnderTest := New(basePath, nil)
+				objectUnderTest := New(basePath)
 
 				expectedResult1 := newHandle(filepath.Join(basePath, providedRef1), providedRef1)
 				expectedResult2 := newHandle(filepath.Join(basePath, providedRef2), providedRef2)
@@ -182,7 +161,7 @@ var _ = Context("_git", func() {
 				var wg sync.WaitGroup
 				wg.Add(1)
 				go func() {
-					actualResult1, actualErr1 = objectUnderTest.TryResolve(
+					actualResult1, actualErr1 = objectUnderTest.Resolve(
 						context.Background(),
 						providedRef1,
 					)
@@ -191,7 +170,7 @@ var _ = Context("_git", func() {
 
 				wg.Add(1)
 				go func() {
-					actualResult2, actualErr2 = objectUnderTest.TryResolve(
+					actualResult2, actualErr2 = objectUnderTest.Resolve(
 						context.Background(),
 						providedRef2,
 					)

@@ -1,25 +1,30 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	"github.com/opctl/opctl/cli/internal/clicolorer"
-	"github.com/opctl/opctl/cli/internal/clioutput"
 )
 
 func main() {
-	cliOutput := clioutput.New(clicolorer.New(), os.Stderr, os.Stdout)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	cli, err := newCli(ctx)
+	if err != nil {
+		clicolorer.New().Error(fmt.Sprintf("failed to start up: %v", err.Error()))
+		os.Exit(1)
+	}
+
 	defer func() {
 		if panicArg := recover(); panicArg != nil {
-			cliOutput.Error(fmt.Sprint(panicArg))
-			os.Exit(1)
+			clicolorer.New().Error(fmt.Sprintf("panic: %v", panicArg))
+			fmt.Printf("%s\n%s\n", panicArg, debug.Stack())
 		}
 	}()
 
-	newCli(
-		cliOutput,
-	).
-		Run(os.Args)
-
+	_ = cli.Run(os.Args)
 }
