@@ -108,7 +108,7 @@ instead of the current model of round-tripping everything.
 
 # Documentation
 
-see [website](https://opctl.io)
+see [website](https://apexskier.github.io/opctl/)
 
 # Used By
 
