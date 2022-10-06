@@ -15,7 +15,7 @@ An op (operation) is defined with an opspec (operation specification), a yaml fi
 
 ## CLI
 
-The opctl CLI runs your ops locally. See [reference docs](reference/cli.md) for full details.
+The opctl CLI runs your ops locally. See [reference docs](reference/cli/index.md) for full details.
 
 ![Example opctl CLI output](/img/cli-output.png)
 

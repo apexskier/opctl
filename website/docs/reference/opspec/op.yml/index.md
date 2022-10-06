@@ -3,7 +3,9 @@ sidebar_label: Overview
 title: op.yml
 ---
 
-The `op.yml` file is a [YAML 1.2](https://yaml.org/spec/1.2/spec.html) file conforming to the `opspec` [JSON schema](https://github.com/opctl/opctl/blob/main/opspec/opfile/jsonschema.json). It defines an operation's metadata, inputs, outputs, and call graph.
+The `op.yml` file is a [YAML 1.2](https://yaml.org/spec/1.2/spec.html) file. It defines an operation's metadata, inputs, outputs, and call graph.
+
+The `op.yml` file must conform to the `opspec` [JSON schema](https://github.com/opctl/opctl/blob/main/opspec/opfile/jsonschema.json). Opctl will interpret your `op.yml` dynamically and may produce runtime errors for additional reason such as invalid variables or variable coercion.
 
 ## Properties
 
@@ -28,6 +30,7 @@ An object defining output values produced by the op. The key of each property is
 ## Example
 
 ```yaml
+name: example
 description: |
   This is an example op.yml file that returns the input as the output
 inputs:

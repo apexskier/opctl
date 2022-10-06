@@ -3,29 +3,36 @@ sidebar_label: Overview
 title: Parameters
 ---
 
-A parameter describes a value passed into or out of an op through it's inputs or outputs.
+A parameter is an object describing a value passed into or out of an op through it's inputs or outputs. Each parameter must have a single [type property](#type-properties) that declares it's type.
 
-A parameter is an object with a single key declaring its type.
-
-- [array](array.md)
-- [boolean](boolean.md)
-- [dir](dir.md)
-- [file](file.md)
-- [number](number.md)
-- [object](object.md)
-- [socket](socket.md)
-- [string](string.md)
-
-The value of each type of key is a further object. All types have a few properties in common:
-
-## Common properties
-
-### `default`
-
-A literal value of the type of the parameter used as the default value of the variable created by the parameter.
+## Properties
 
 ### `description`
 
-_required_
+A human friendly description of the parameter, written as a [markdown string](../markdown.md).
 
-A human friendly description of the parameter, written as a [markdown string](markdown.md).
+### `{type}`
+
+Each parameter declares it's type with one of the following property keys:
+
+- [`array`](array.md)
+- [`boolean`](boolean.md)
+- [`dir`](dir.md)
+- [`file`](file.md)
+- [`number`](number.md)
+- [`object`](object.md)
+- [`socket`](socket.md)
+- [`string`](string.md)
+ 
+### `isSecret`
+
+A boolean indicating if the value of the parameter is secret. This will cause it to be hidden in UIs. 
+
+## Example
+
+```yaml
+inputs:
+  parameterName:
+    description: An example parameter of type array
+    array: {}
+```

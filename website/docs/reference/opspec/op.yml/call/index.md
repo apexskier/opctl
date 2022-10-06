@@ -7,7 +7,17 @@ A call is an object that defines a single call within an ops call graph. Opctl s
 
 The leaves of a call graph are [containers](container/index.md) that run programs to do work. Each node in the call graph will end once all child containers exit successfully or a single container exits with a failure, which will cause still running containers to be killed.
 
-Containers and call graph nodes communicate with each other by producing and emitting [data](../index.md) or by reading and writing shared [files](../types/file.md) and [directories](../types/dir.md) (which are passed by reference).
+Containers and call graph nodes communicate with each other by producing and emitting [data](../index.md) or by reading and writing shared [files](../../types/file.md) and [directories](../../types/dir.md) (which are passed by reference).
+
+## Basic propreties
+
+### `description`
+
+A human friendly description of the parameter, written as a [markdown string](../markdown.md).
+
+### `name`
+
+The name is an [identifier](../identifier.md) used to identify the call in a UI and used for [`needs`](#needs) logic in sibling calls.
 
 ## Types of calls properties
 
@@ -27,7 +37,7 @@ A parallel call is an array of [calls](index.md) that are executed concurrently 
 
 ### `parallelLoop`
 
-A [parallel loop call](parallel-loop) defines a call executed multiple times in parallel.
+A [parallel loop call](parallel-loop.md) defines a call executed multiple times in parallel.
 
 ### `serial`
 
@@ -35,7 +45,7 @@ A serial call is an array of [calls](index.md) that are executed serially, one a
 
 ### `serialLoop`
 
-A [serial loop call](serial-loop) defines a call executed multiple times repeatedly.
+A [serial loop call](serial-loop.md) defines a call executed multiple times repeatedly.
 
 ## Logical properties
 
@@ -51,13 +61,9 @@ if:
   - exists: $(value)
 ```
 
-### `name`
-
-The name is an [identifier](../identifier.md) used to identify the call in a UI and used for [`needs`](#needs) logic in sibling calls.
-
 ### `needs`
 
-`needs` allows introducing dependencies between [parallel](#parallel) calls. The value of this property is an array of sibling name [identifiers](../identifier.md). When all calls that need a given name complete, the named call will be killed.
+`needs` allows introducing dependencies between [parallel](#parallel) calls. The value of this property is an array of sibling [names](#name). When all calls that need a given name end, the named call will be killed.
 
 Needs cannot be used in parents, children, or cousin calls (they must be within the same `parallel` call). Opctl will ignore needs that don't satisfy this limitation.
 

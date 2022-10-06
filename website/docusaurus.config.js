@@ -4,8 +4,8 @@ module.exports = {
   url: 'https://opctl.io',
   baseUrl: '/',
   favicon: 'img/favicon.ico',
-  organizationName: 'opctl', // Usually your GitHub org/user name.
-  projectName: 'opctl', // Usually your repo name.
+  organizationName: 'apexskier',
+  projectName: 'opctl',
   trailingSlash: false,
   themeConfig: {
     algolia: {
@@ -13,9 +13,6 @@ module.exports = {
       apiKey: '247689f43002ed0c3902fbd034630a7a',
       indexName: 'opctl'
     },
-    colorMode: {
-      disableSwitch: true
-    }, 
     navbar: {
       title: 'Opctl',
       logo: {
