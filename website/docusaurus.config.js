@@ -2,7 +2,7 @@ module.exports = {
   title: 'Opctl',
   tagline: 'Automate operating your project using containers as building blocks.',
   url: 'https://opctl.io',
-  baseUrl: '/',
+  baseUrl: '/opctl',
   favicon: 'img/favicon.ico',
   organizationName: 'apexskier',
   projectName: 'opctl',
