@@ -104,7 +104,7 @@ func (plpr _parallelLoopCaller) Call(
 		childCallIndexByID[childCallID] = childCallIndex
 
 		wg.Add(1)
-		go func() {
+		go func(childCallID string, childCallScope map[string]*model.Value) {
 			defer wg.Done()
 			outputs, err := plpr.caller.Call(
 				parallelLoopCtx,
@@ -126,7 +126,7 @@ func (plpr _parallelLoopCaller) Call(
 				Err:     err,
 				Outputs: outputs,
 			}
-		}()
+		}(childCallID, childCallScope)
 
 		childCallIndex++
 	}

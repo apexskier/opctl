@@ -97,7 +97,7 @@ func (pc _parallelCaller) Call(
 		}
 
 		wg.Add(1)
-		go func(childCall *model.CallSpec) {
+		go func(childCtx context.Context, childCallID string, childCall *model.CallSpec) {
 			defer wg.Done()
 			outputs, err := pc.caller.Call(
 				childCtx,
@@ -119,7 +119,7 @@ func (pc _parallelCaller) Call(
 				Err:     err,
 				Outputs: outputs,
 			}
-		}(childCall)
+		}(childCtx, childCallID, childCall)
 	}
 
 	outboundScope := inboundScope
