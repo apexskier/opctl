@@ -53,7 +53,6 @@ func (cr runContainer) stopAndCleanup(
 	err := cr.dockerClient.ContainerStop(ctx, container, &stopTimeout)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to stop container: %v", err)
-		return nil
 	}
 
 	// now delete the container post-termination
@@ -67,7 +66,6 @@ func (cr runContainer) stopAndCleanup(
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to delete container: %v", err)
-		return nil
 	}
 
 	return nil
@@ -140,7 +138,7 @@ func (cr runContainer) RunContainer(
 	containerName := strings.Join(nameParts, "_")
 
 	// create container
-	containerCreatedResponse, createErr := cr.dockerClient.ContainerCreate(
+	containerCreatedResponse, err := cr.dockerClient.ContainerCreate(
 		ctx,
 		constructContainerConfig(
 			req.Cmd,
@@ -163,24 +161,18 @@ func (cr runContainer) RunContainer(
 		containerName,
 	)
 
+	if err != nil {
+		if imageErr == nil {
+			return nil, err
+		}
+		// if imageErr occurred prior; combine errors
+		return nil, errors.New(strings.Join([]string{imageErr.Error(), err.Error()}, ", "))
+	}
+
 	defer func() {
 		newCtx := context.Background() // always use a fresh context, to clean up after cancellation
 		cr.stopAndCleanup(newCtx, containerCreatedResponse.ID)
 	}()
-
-	if createErr != nil {
-		select {
-		case <-ctx.Done():
-			// we got killed;
-			return nil, nil
-		default:
-			if imageErr == nil {
-				return nil, createErr
-			}
-			// if imageErr occurred prior; combine errors
-			return nil, errors.New(strings.Join([]string{imageErr.Error(), createErr.Error()}, ", "))
-		}
-	}
 
 	// start container
 	if err := cr.dockerClient.ContainerStart(
