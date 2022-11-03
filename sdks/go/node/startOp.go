@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -57,7 +58,9 @@ func (this core) StartOp(
 
 	scratchPath := filepath.Join(this.dataDirPath, "scratch", callID)
 	defer func() {
-		err = os.RemoveAll(scratchPath)
+		if err := os.RemoveAll(scratchPath); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "failed to clear scratch path: %v/n", err)
+		}
 	}()
 
 	return this.caller.Call(
