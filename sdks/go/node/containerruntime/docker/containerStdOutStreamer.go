@@ -25,7 +25,6 @@ func (ctp _containerStdOutStreamer) Stream(
 	containerName string,
 	dst io.Writer,
 ) error {
-
 	src, err := ctp.dockerClient.ContainerLogs(
 		ctx,
 		containerName,

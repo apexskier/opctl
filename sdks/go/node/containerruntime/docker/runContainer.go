@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -183,30 +182,22 @@ func (cr runContainer) RunContainer(
 		return nil, err
 	}
 
-	var waitGroup sync.WaitGroup
-	errChan := make(chan error, 3)
-	waitGroup.Add(2)
+	errChan := make(chan error, 2)
 
 	go func() {
-		if err := cr.containerStdErrStreamer.Stream(
+		errChan <- cr.containerStdErrStreamer.Stream(
 			ctx,
 			containerName,
 			stderr,
-		); err != nil {
-			errChan <- err
-		}
-		waitGroup.Done()
+		)
 	}()
 
 	go func() {
-		if err := cr.containerStdOutStreamer.Stream(
+		errChan <- cr.containerStdOutStreamer.Stream(
 			ctx,
 			containerName,
 			stdout,
-		); err != nil {
-			errChan <- err
-		}
-		waitGroup.Done()
+		)
 	}()
 
 	var exitCode int64
@@ -219,15 +210,14 @@ func (cr runContainer) RunContainer(
 	case waitOk := <-waitOkChan:
 		exitCode = waitOk.StatusCode
 	case waitErr := <-waitErrChan:
-		err = fmt.Errorf("error waiting on container: %w", waitErr)
+		return nil, fmt.Errorf("error waiting on container: %w", waitErr)
 	}
 
-	// ensure stdout, and stderr all read before returning
-	waitGroup.Wait()
-
-	if err != nil && len(errChan) > 0 {
-		// non-destructively set err
-		err = <-errChan
+	if err := <-errChan; err != nil {
+		return &exitCode, err
 	}
-	return &exitCode, err
+	if err := <-errChan; err != nil {
+		return &exitCode, err
+	}
+	return &exitCode, nil
 }
