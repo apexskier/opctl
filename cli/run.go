@@ -185,7 +185,7 @@ func run(
 				displayGraph()
 				cancel()
 			} else {
-				return nil, &RunError{
+				return nil, RunError{
 					ExitCode: 130,
 					message:  "force terminated with ctl-c",
 				}
@@ -209,12 +209,12 @@ func run(
 			if results.err != nil {
 				if errors.Is(results.err, context.Canceled) {
 					if aSigIntWasReceivedAlready {
-						return nil, &RunError{
+						return nil, RunError{
 							ExitCode: 130,
 							message:  "gracefully terminated with ctl-c",
 						}
 					} else {
-						return nil, &RunError{
+						return nil, RunError{
 							ExitCode: 1,
 							message:  "unexpectedly cancelled",
 						}
@@ -224,7 +224,7 @@ func run(
 				}
 			}
 			if aSigIntWasReceivedAlready {
-				return nil, &RunError{
+				return nil, RunError{
 					ExitCode: 130,
 					message:  "gracefully terminated with ctl-c",
 				}

@@ -14,20 +14,21 @@ inputs:
         format: semver
 run:
   parallel:
+    # CLI tests
     - serial:
         - op:
-            ref: ../../cli/.opspec/test/unit
+            ref: $(../../cli/.opspec/test/unit)
             inputs:
               dockerSocket:
               HOME:
         - op:
-            ref: ../../cli/.opspec/test/system
+            ref: $(../../cli/.opspec/test/e2e)
     # opspec tests
     - op:
-        ref: ../../opspec/opfile/.opspec/test
+        ref: $(../../opspec/opfile/.opspec/test)
     # go SDK tests
     - op:
-        ref: ../../sdks/go/.opspec/test
+        ref: $(../../sdks/go/.opspec/test)
         inputs:
           HOME:
     # check go fmt has been run
@@ -41,5 +42,5 @@ run:
           /src: $(../..)
         envVars:
           GOFLAGS: -tags=containers_image_openpgp
-        image: { ref: "golang:1.18" }
+        image: { ref: "golang:1.20" }
         workDir: /src

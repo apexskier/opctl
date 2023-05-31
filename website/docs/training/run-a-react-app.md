@@ -23,10 +23,10 @@ run:
   parallel:
     - op:
         # reference run-a-go-service dev op
-        ref: ../../../run-a-go-service/.opspec/dev
+        ref: $(../../../run-a-go-service/.opspec/dev)
     - container:
         image:
-          ref: 'node:16-alpine'
+          ref: 'node:20-alpine'
         cmd:
           - sh
           - -ce

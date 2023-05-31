@@ -66,7 +66,7 @@ func newCli(
 			if msg != "" {
 				cliOutput.Error(msg)
 			}
-			if re, ok := err.(*RunError); ok {
+			if re, ok := err.(RunError); ok {
 				mow.Exit(re.ExitCode)
 			} else {
 				mow.Exit(1)

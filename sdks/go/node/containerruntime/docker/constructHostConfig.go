@@ -14,14 +14,27 @@ func constructHostConfig(
 	containerCallSockets map[string]string,
 	portBindings nat.PortMap,
 	privileged bool,
+	isGpuSupported bool,
 ) *container.HostConfig {
 	hostConfig := &container.HostConfig{
+		AutoRemove:   true,
 		PortBindings: portBindings,
 		// support docker in docker
 		// @TODO: reconsider; can we avoid this?
 		// see for similar discussion: https://github.com/kubernetes/kubernetes/issues/391
 		Privileged: privileged,
 	}
+	if isGpuSupported {
+		hostConfig.Resources = container.Resources{
+			DeviceRequests: []container.DeviceRequest{
+				{
+					Capabilities: [][]string{{"gpu"}},
+					Count:        -1,
+				},
+			},
+		}
+	}
+
 	for containerFilePath, hostFilePath := range containerCallFiles {
 		hostConfig.Mounts = append(
 			hostConfig.Mounts,

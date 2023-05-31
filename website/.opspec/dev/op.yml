@@ -3,10 +3,10 @@ name: dev
 run:
   serial:
     - op:
-        ref: ../init
+        ref: $(../init)
     - container:
         cmd: [ yarn, start ]
-        image: { ref: 'node:16-alpine' }
+        image: { ref: 'node:20-alpine' }
         dirs:
           /src: $(../../..)
         ports:

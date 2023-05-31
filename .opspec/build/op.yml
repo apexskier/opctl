@@ -20,12 +20,12 @@ inputs:
 run:
   serial:
     - op:
-        ref: ../../cli/.opspec/compile
+        ref: $(../../cli/.opspec/compile)
         inputs:
           HOME:
           version:
     - op:
-        ref: ../test
+        ref: $(../test)
         inputs:
           dockerSocket:
           HOME:

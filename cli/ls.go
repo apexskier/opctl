@@ -60,8 +60,13 @@ func ls(
 		return strings.Compare(sortableOps[i].ref, sortableOps[j].ref) < 0
 	})
 	for _, op := range sortableOps {
-		opDescription := opsByRef[op.ref].Description
-		scanner := bufio.NewScanner(strings.NewReader(opDescription))
+		description := opsByRef[op.ref].Description
+
+		if strings.TrimSpace(description) == "" {
+			description = "-"
+		}
+
+		scanner := bufio.NewScanner(strings.NewReader(description))
 		scanner.Scan()
 		// first line of description, add the op ref
 		fmt.Fprintf(tw, "%v\t%v", op.formattedRef, scanner.Text())

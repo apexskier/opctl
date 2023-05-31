@@ -4,8 +4,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var _ = Context("constructHostConfig", func() {
@@ -35,6 +33,7 @@ var _ = Context("constructHostConfig", func() {
 		privileged := false
 
 		expectedHostConfig := &container.HostConfig{
+			AutoRemove: true,
 			Mounts: []mount.Mount{
 				{
 					Type:        mount.TypeBind,
@@ -73,6 +72,14 @@ var _ = Context("constructHostConfig", func() {
 			},
 			PortBindings: providedPortBindings,
 			Privileged:   privileged,
+			Resources: container.Resources{
+				DeviceRequests: []container.DeviceRequest{
+					{
+						Capabilities: [][]string{{"gpu"}},
+						Count:        -1,
+					},
+				},
+			},
 		}
 
 		/* act */
@@ -82,6 +89,7 @@ var _ = Context("constructHostConfig", func() {
 			providedContainerSockets,
 			providedPortBindings,
 			privileged,
+			true,
 		)
 
 		/* assert */

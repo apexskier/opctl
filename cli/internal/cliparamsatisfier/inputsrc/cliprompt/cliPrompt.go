@@ -2,11 +2,13 @@ package cliprompt
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/opctl/opctl/cli/internal/clioutput"
 	"github.com/opctl/opctl/cli/internal/cliparamsatisfier/inputsrc"
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/peterh/liner"
+	"golang.org/x/term"
 )
 
 func New(
@@ -34,6 +36,10 @@ func (this cliPromptInputSrc) ReadString(
 			description string
 			prompt      string
 		)
+
+		if !term.IsTerminal(int(os.Stdout.Fd())) {
+			return nil, false
+		}
 
 		switch {
 		case param.Array != nil:

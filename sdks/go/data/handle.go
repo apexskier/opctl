@@ -13,6 +13,7 @@ type ReadSeekCloser interface {
 
 // DataHandle is a provider agnostic interface for interacting w/ data
 // @TODO: merge Value and DataHandle
+//
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -generate
 //counterfeiter:generate -o fakes/dataHandle.go . DataHandle
 type DataHandle interface {
