@@ -7,10 +7,10 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	dockerClientPkg "github.com/docker/docker/client"
+	"github.com/docker/docker/errdefs"
 	"github.com/opctl/opctl/sdks/go/model"
 	"github.com/pkg/errors"
 	"io"
-	"os"
 	"strings"
 )
 
@@ -47,7 +47,11 @@ func (cr runContainer) stopAndCleanup(
 		Timeout: &stopTimeout,
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to stop container: %v", err)
+		if errdefs.IsNotFound(err) {
+			// container doesn't exist, so already gone
+			return nil
+		}
+		return errors.Wrap(err, "unable to stop container")
 	}
 
 	// now delete the container post-termination
@@ -60,7 +64,11 @@ func (cr runContainer) stopAndCleanup(
 		},
 	)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to delete container: %v", err)
+		if errdefs.IsNotFound(err) {
+			// container doesn't exist, so already gone
+			return nil
+		}
+		return errors.Wrap(err, "unable to delete container")
 	}
 
 	return nil
