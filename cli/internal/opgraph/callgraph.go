@@ -133,7 +133,9 @@ func (n callGraphNode) String(loader LoadingSpinner, opFormatter clioutput.OpFor
 				desc += highlighted.Sprint(*call.Container.Name)
 			}
 		} else {
-			desc += *call.Container.Image.Ref
+			if call.Container.Image.Ref != nil {
+				desc += *call.Container.Image.Ref
+			}
 		}
 	} else if call.Op != nil {
 		opName := opFormatter.FormatOpRef(call.Op.OpPath)
