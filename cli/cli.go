@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,7 +17,6 @@ import (
 	"github.com/opctl/opctl/sdks/go/node"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime/docker"
-	"github.com/opctl/opctl/sdks/go/node/containerruntime/k8s"
 	"github.com/opctl/opctl/sdks/go/node/containerruntime/qemu"
 	"github.com/opctl/opctl/sdks/go/opspec"
 	"golang.org/x/term"
@@ -133,7 +133,7 @@ func newCli(
 	// these are shared utility functions to lazy-dereference global flags
 	getContainerRuntime := func() (containerruntime.ContainerRuntime, error) {
 		if *containerRuntime == "k8s" {
-			return k8s.New()
+			return nil, errors.New("k8s is not supported")
 		}
 		if *containerRuntime == "qemu" {
 			return qemu.New(ctx, *networkName, *dockerConfigPath, false)
