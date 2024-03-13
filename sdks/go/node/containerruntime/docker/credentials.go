@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"github.com/docker/docker/api/types/registry"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -31,7 +32,9 @@ func getAuthFromConfig(configPath, imageRef string) (string, error) {
 	} else if err != nil {
 		return "", errors.Wrap(err, "failed to open docker config file")
 	} else {
-		dockerConfig.LoadFromReader(configFile)
+		if err := dockerConfig.LoadFromReader(configFile); err != nil {
+			return "", errors.Wrap(err, "failed to load docker config")
+		}
 	}
 
 	parsedImageRef, err := reference.ParseNormalizedNamed(imageRef)
@@ -53,5 +56,8 @@ func getAuthFromConfig(configPath, imageRef string) (string, error) {
 		}
 	}
 
-	return constructRegistryAuth(authConfig.Username, authConfig.Password)
+	return registry.EncodeAuthConfig(registry.AuthConfig{
+		Username: authConfig.Username,
+		Password: authConfig.Password,
+	})
 }

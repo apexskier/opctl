@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/docker/docker/api/types/registry"
 	"io"
 	"strings"
 	"time"
@@ -49,10 +50,10 @@ func pullImage(
 		imagePullCreds.Username != "" &&
 		imagePullCreds.Password != "" {
 		var err error
-		imagePullOptions.RegistryAuth, err = constructRegistryAuth(
-			imagePullCreds.Username,
-			imagePullCreds.Password,
-		)
+		imagePullOptions.RegistryAuth, err = registry.EncodeAuthConfig(registry.AuthConfig{
+			Username: imagePullCreds.Username,
+			Password: imagePullCreds.Password,
+		})
 		if err != nil {
 			return err
 		}

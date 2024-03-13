@@ -7,7 +7,7 @@ require (
 	github.com/appdataspec/sdk-golang v0.0.0-20170917062448-0c0ade7a92f7
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/containers/image/v5 v5.17.0
-	github.com/docker/cli v20.10.11+incompatible
+	github.com/docker/cli v25.0.4+incompatible
 	github.com/docker/distribution v2.8.2+incompatible
 	github.com/docker/docker v25.0.4+incompatible
 	github.com/docker/go-connections v0.4.0
