@@ -46,7 +46,12 @@ run:
               - -ce
               - |
                 apk add -U curl
-                curl -Os https://uploader.codecov.io/latest/alpine/codecov
+              
+                if [[ `uname -m` == "aarch64" ]]; then
+                  curl -Os https://uploader.codecov.io/latest/aarch64/codecov
+                else
+                  curl -Os https://uploader.codecov.io/latest/alpine/codecov
+                fi
 
                 chmod +x codecov
                 ./codecov
