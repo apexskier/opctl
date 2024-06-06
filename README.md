@@ -5,7 +5,8 @@
 This branch (mini-opctl) is an exploration into fixing some of my main concerns
 with opctl, which is a broadly used tool for local development at Remitly.
 
-I'm archiving this repository as I'm leaving Remitly.
+I'm archiving this repository as I'm leaving Remitly and will not need to use
+opctl any more.
 
 ### reliability/complexity
 
