@@ -3,7 +3,7 @@
 ## purpose
 
 This branch (mini-opctl) is an exploration into fixing some of my main concerns
-with opctl.
+with opctl, which is a broadly used tool for local development at Remitly.
 
 ### reliability/complexity
 
